@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/..'))
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
 
-class SampleBase(object):
+class Base(object):
     def __init__(self, *args, **kwargs):
         self.parser = argparse.ArgumentParser()
 
@@ -40,7 +40,7 @@ class SampleBase(object):
         options = RGBMatrixOptions()
 
         if self.args.led_gpio_mapping != None:
-          options.hardware_mapping = self.args.led_gpio_mapping
+            options.hardware_mapping = self.args.led_gpio_mapping
         options.rows = self.args.led_rows
         options.cols = self.args.led_cols
         options.chain_length = self.args.led_chain
@@ -53,18 +53,18 @@ class SampleBase(object):
         options.led_rgb_sequence = self.args.led_rgb_sequence
         options.pixel_mapper_config = self.args.led_pixel_mapper
         if self.args.led_show_refresh:
-          options.show_refresh_rate = 1
+            options.show_refresh_rate = 1
 
         if self.args.led_slowdown_gpio != None:
             options.gpio_slowdown = self.args.led_slowdown_gpio
         if self.args.led_no_hardware_pulse:
-          options.disable_hardware_pulsing = True
+            options.disable_hardware_pulsing = True
 
         self.matrix = RGBMatrix(options = options)
 
         try:
             # Start loop
-            print("Press CTRL-C to stop sample")
+            print("Press CTRL-C to stop animation")
             self.run()
         except KeyboardInterrupt:
             print("Exiting\n")

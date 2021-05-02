@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-from samplebase import SampleBase
+from base import Base
 import math
 
 
-class RotatingBlockGenerator(SampleBase):
+class RotatingBlockGenerator(Base):
     def __init__(self, *args, **kwargs):
         super(RotatingBlockGenerator, self).__init__(*args, **kwargs)
 
