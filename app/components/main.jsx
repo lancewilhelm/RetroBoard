@@ -1,14 +1,17 @@
 import { Button } from 'react-bootstrap';
 import styles from '../styles/Main.module.css';
+import { localIP } from './config';
 
+//! You must set your local IP address below so that the
 export default function Main() {
-    function sendCommand(command) {
-        const url_base = 'http://localhost:5000/api/';
+    async function sendCommand(command) {
+        const url_base = 'http://' + localIP + ':5000/api/';
 
-        const res = fetch(url_base + command, {
+        const res = await fetch(url_base + command, {
             method: 'GET',
         });
-        return;
+        console.log(res);
+        return res;
     }
 
     return (
