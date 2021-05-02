@@ -10,7 +10,6 @@ export default function Main() {
         const res = await fetch(url_base + command, {
             method: 'GET',
         });
-        console.log(res);
         return res;
     }
 
