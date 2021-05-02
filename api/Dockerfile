@@ -1,7 +1,7 @@
-FROM python:3.7-alpine
+FROM python:3.7
 
 WORKDIR /app
-ADD . /app
-RUN pip3 install -r requirements.txt
+ADD . .
+RUN pip install -r requirements.txt
 EXPOSE 5000
 CMD [ "./main.py" ]
