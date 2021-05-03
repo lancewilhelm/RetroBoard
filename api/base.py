@@ -6,7 +6,6 @@ import os
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/..'))
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
-
 class Base(object):
     def __init__(self, *args, **kwargs):
         self.parser = argparse.ArgumentParser()

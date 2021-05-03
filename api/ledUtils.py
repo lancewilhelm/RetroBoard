@@ -2,7 +2,6 @@
 from base import Base
 import math
 
-
 class RotatingBlockGenerator(Base):
     def __init__(self, *args, **kwargs):
         super(RotatingBlockGenerator, self).__init__(*args, **kwargs)
@@ -52,9 +51,3 @@ class RotatingBlockGenerator(Base):
                         offset_canvas.SetPixel(rot_x + cent_x, rot_y + cent_y, 0, 0, 0)
 
             offset_canvas = self.matrix.SwapOnVSync(offset_canvas)
-
-# Main function
-if __name__ == "__main__":
-    rotating_block_generator = RotatingBlockGenerator()
-    if (not rotating_block_generator.process()):
-        rotating_block_generator.print_help()
