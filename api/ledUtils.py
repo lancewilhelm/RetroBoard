@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from base import Base
 import math
 
@@ -19,7 +19,8 @@ class RotatingBlockGenerator(Base):
             return 255
         return 255 * (val - lo) / (hi - lo)
 
-    def run(self):
+    def run(self, user_args):
+        print('In run function')
         cent_x = self.matrix.width / 2
         cent_y = self.matrix.height / 2
 
@@ -51,3 +52,12 @@ class RotatingBlockGenerator(Base):
                         offset_canvas.SetPixel(rot_x + cent_x, rot_y + cent_y, 0, 0, 0)
 
             offset_canvas = self.matrix.SwapOnVSync(offset_canvas)
+
+            if rotation == 0:
+                return
+
+# For debugging purposes
+if __name__ == '__main__':
+    rotating_block_generator = RotatingBlockGenerator()
+    if (not rotating_block_generator.process()):
+        rotating_block_generator.print_help()  
