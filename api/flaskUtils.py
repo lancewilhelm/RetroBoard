@@ -20,7 +20,6 @@ def runRotate():
     rotating_block_generator = RotatingBlockGenerator()
 
     # If the process does not already exists, run it and then display help
-    if (not rotating_block_generator.process()):
-        rotating_block_generator.print_help()
-        
-    return 'rotating block started'
+    if (not rotating_block_generator.process()):    
+        return 'rotating block started'
+    

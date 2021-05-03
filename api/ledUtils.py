@@ -19,7 +19,7 @@ class RotatingBlockGenerator(Base):
             return 255
         return 255 * (val - lo) / (hi - lo)
 
-    def run(self):
+    def run(self, user_args):
         cent_x = self.matrix.width / 2
         cent_y = self.matrix.height / 2
 
@@ -36,7 +36,6 @@ class RotatingBlockGenerator(Base):
         offset_canvas = self.matrix.CreateFrameCanvas()
 
         while True:
-            print('Rotating...')
             rotation += 1
             rotation %= 360
 

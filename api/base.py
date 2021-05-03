@@ -33,7 +33,7 @@ class Base(object):
     def run(self):
         print("Running")
 
-    def process(self):
+    def process(self, user_args):
         self.args = self.parser.parse_args()
 
         options = RGBMatrixOptions()
@@ -63,10 +63,8 @@ class Base(object):
 
         try:
             # Start loop
-            print("Press CTRL-C to stop animation")
-            self.run()
-        except KeyboardInterrupt:
-            print("Exiting\n")
-            sys.exit(0)
+            self.run(user_args)
+        except:
+            print("Error starting block rotation\n")
 
         return True
