@@ -6,8 +6,6 @@ A web application and library for controlling RGB LED matrices with a raspberry 
 
 Inspired by the Tidbyt kickstarter
 
----
-
 ## Setup
 
 This is meant to be built on a Raspberry Pi. Currently the only RPi tested has been a 3B+.
@@ -35,12 +33,12 @@ from the root of the respository. This should build both the `app` and `api` doc
 
 Both the `app` and `api` directories have their own `Dockerfile` which allows them to be built and ran separately if needed. **This also opens up the possibility to host the webapp on a separate device for development purposes**. Here some examples of how to build and run each container:
 
-#### API
+- API
 
 `docker build -t magic-color-board-api .`
 `docker run --privileged -p 5000:5000 -d magic-color-board-api`
 
-#### App
+- App
 
 `docker build -t magic-color-board-app .`
 `docker run -p 3000:3000 -d magic-color-board-app`
@@ -48,8 +46,6 @@ Both the `app` and `api` directories have their own `Dockerfile` which allows th
 ### Last Resort
 
 You can install the necessary packages and items on your RPI/device to run `app` and `api` manually. The setup files needed for this should all be in the [`setup.sh`](setup.sh) file.
-
----
 
 ## Structure
 
@@ -59,9 +55,7 @@ The webapp is a React app built on the Next.js framework. React was chosen as it
 
 ### API
 
-The API was built simply from Flask. While this may not be the most robust for any serious applications, it provides a python basis for the API which allow for easy integration into the LED driver library. Also, the original author has a bit of experience in Python and Flask, so you are gonna have to deal with it for now...The app can be run with the command `sudo ./main.py` from the [`api`](api/) provided one has installed all the necessary dependencies. 
-
----
+The API was built simply from Flask. While this may not be the most robust for any serious applications, it provides a python basis for the API which allow for easy integration into the LED driver library. Also, the original author has a bit of experience in Python and Flask, so you are gonna have to deal with it for now...The app can be run with the command `sudo ./main.py` from the [`api`](api/) provided one has installed all the necessary dependencies.
 
 ## Future
 
