@@ -25,5 +25,5 @@ def runRotate():
     else:
         print('block rotation succeeded')
     
-    return
+    return 'block rotating done'
     
