@@ -20,6 +20,7 @@ class RotatingBlockGenerator(Base):
         return 255 * (val - lo) / (hi - lo)
 
     def run(self, user_args):
+        print('In run function')
         cent_x = self.matrix.width / 2
         cent_y = self.matrix.height / 2
 
