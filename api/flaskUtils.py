@@ -20,10 +20,10 @@ def runRotate():
     rotating_block_generator = RotatingBlockGenerator()
 
     # If the process does not already exists, run it and then display help
-    if (not rotating_block_generator.process({})):   
-        print('block rotation failed') 
+    if (rotating_block_generator.process({})):  
+        print('block rotation succeeded') 
     else:
-        print('block rotation succeeded')
+        print('block rotation failed') 
     
     return 'block rotating done'
     
