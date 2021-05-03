@@ -1,0 +1,16 @@
+version: '3'
+services: 
+    api:
+        build: ./api
+        ports:
+            - 5000:5000
+        networks:
+            - network
+    webapp:
+        build: ./app
+        ports:
+            - 3000:3000
+        networks:
+            - network
+networks:
+    network: {}
