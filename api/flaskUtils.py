@@ -26,4 +26,7 @@ def runRotate():
         print('block rotation failed') 
     
     return 'block rotating done'
-    
+
+@api.route('/api/clock', methods=['GET'])
+def runClock():
+    return 'clock done'

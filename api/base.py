@@ -8,6 +8,7 @@ from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
 class Base(object):
     def __init__(self, *args, **kwargs):
+        print('In base init')
         self.parser = argparse.ArgumentParser()
 
         self.parser.add_argument("-r", "--led-rows", action="store", help="Display rows. 16 for 16x32, 32 for 32x32. Default: 32", default=32, type=int)
@@ -30,8 +31,8 @@ class Base(object):
     def usleep(self, value):
         time.sleep(value / 1000000.0)
 
-    def run(self):
-        print("Running")
+    # def run(self):
+    #     print("Running")
 
     def process(self, user_args):
         self.args = self.parser.parse_args()

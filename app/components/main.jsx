@@ -16,10 +16,18 @@ export default function Main() {
     return (
         <div className={styles.container}>
             <Button
+                className={styles.button}
                 variant='outline-dark'
                 onClick={() => sendCommand('rotate')}
             >
                 Rotating Square
+            </Button>
+            <Button
+            className={styles.button}
+                variant='outline-dark'
+                onClick={() => sendCommand('clock')}
+            >
+                Clock
             </Button>
         </div>
     );

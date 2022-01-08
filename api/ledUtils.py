@@ -4,7 +4,8 @@ import math
 
 class RotatingBlockGenerator(Base):
     def __init__(self, *args, **kwargs):
-        super(RotatingBlockGenerator, self).__init__(*args, **kwargs)
+        print('In Block init')
+        super().__init__(*args, **kwargs)
 
     def rotate(self, x, y, angle):
         return {
