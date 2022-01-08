@@ -2,11 +2,11 @@ from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 
 # Import the LED Utility functions and items necessary for driving the matrix
-from ledUtils import RotatingBlockGenerator
+from ledUtils import RotatingBlockGenerator, RunText
 
 # Create the flask object
 api = Flask(__name__)
-CORS(api)       # CORS BS that we likley don't need to worry about
+CORS(api)       # CORS BS that we likely don't need to worry about
 
 # Render index.html from templates if the user navigates to /
 @api.route('/', methods=['GET'])
@@ -18,7 +18,7 @@ def index():
 def runRotate():
     # Create the object
     rotating_block_generator = RotatingBlockGenerator()
-
+    
     # If the process does not already exists, run it and then display help
     if (rotating_block_generator.process({})):  
         print('block rotation succeeded') 
@@ -29,4 +29,14 @@ def runRotate():
 
 @api.route('/api/clock', methods=['GET'])
 def runClock():
+    # Create the object
+    run_text = RunText()
+    
+    print('between class init and running')
+
+    if (run_text.process({})):
+        print('run text succeeded')
+    else:
+        print('run text failed')
+
     return 'clock done'
