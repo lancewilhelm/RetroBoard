@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from base import Base
-from rgbmatrix import RGBMatrix, RGBMatrixOptions, graphic
+from rgbmatrix import RGBMatrix, RGBMatrixOptions, graphics
 import math
 
 class RotatingBlockGenerator(Base):
