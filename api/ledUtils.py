@@ -83,6 +83,6 @@ class RunText(Base):
 
 # For debugging purposes
 if __name__ == '__main__':
-    rotating_block_generator = RotatingBlockGenerator()
+    rotating_block_generator = RunText()
     if (not rotating_block_generator.process()):
         rotating_block_generator.print_help()  
