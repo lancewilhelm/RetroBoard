@@ -35,13 +35,13 @@ class RotatingBlockGenerator(Base):
         min_display = cent_x - display_square / 2
         max_display = cent_x + display_square / 2
 
-        deg_to_rad = 2 * 3.14159265 / 360
+        deg_to_rad = 2 * math.pi/ 360
         rotation = 0
         offset_canvas = self.matrix.CreateFrameCanvas()
 
         while True:
             rotation += 1
-            rotation %= 360
+            rotation %= 180
 
             for x in range(int(min_rotate), int(max_rotate)):
                 for y in range(int(min_rotate), int(max_rotate)):
