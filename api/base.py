@@ -65,7 +65,8 @@ class Base(object):
         try:
             # Start loop
             self.run(user_args)
-        except:
-            print("Error starting block rotation\n")
+        except Exception as e:
+            print("Error starting animation\n")
+            print(e)
 
         return True
