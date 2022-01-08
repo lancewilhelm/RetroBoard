@@ -83,6 +83,12 @@ class RunText(Base):
 
 # For debugging purposes
 if __name__ == '__main__':
-    rotating_block_generator = RotatingBlockGenerator()
-    if (not rotating_block_generator.process()):
-        rotating_block_generator.print_help()  
+    # Create the object
+    run_text = RunText()
+    
+    print('between class init and running')
+
+    if (run_text.process({})):
+        print('run text succeeded')
+    else:
+        print('run text failed')
