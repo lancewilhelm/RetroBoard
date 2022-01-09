@@ -91,7 +91,7 @@ class SimplePixel(Base):
     @classmethod
     async def create(cls, *args, **kwargs):
         self = SimplePixel()
-        super().__init__(*args, **kwargs)
+        super(SimplePixel, self).__init__(*args, **kwargs)
         for i in range(5):
             print('made class for simple pixel')
             asyncio.sleep(1)
