@@ -1,4 +1,4 @@
-from api.ledUtils import *
+from ledUtils import *
 from quart import Quart, render_template, request, jsonify
 from quart_cors import cors
 import asyncio
