@@ -93,7 +93,7 @@ class SimplePixel(Base):
         for i in range(5):
             print(i)
             asyncio.sleep(1)
-    
+
 # For debugging purposes
 if __name__ == '__main__':
     # Create the object
