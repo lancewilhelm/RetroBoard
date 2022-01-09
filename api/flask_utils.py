@@ -1,6 +1,10 @@
 from ledTasks import *
 from flask import Flask, render_template, request, jsonify
-from flask_cors import cors
+from flask_cors import CORS
+
+# Create the quart object
+api = Quart(__name__)
+cors(api)       # CORS BS that we likely don't need to worry about'
 
 # Render index.html from templates if the user navigates to /
 @main.route('/', methods=['GET'])
