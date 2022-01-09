@@ -42,7 +42,7 @@ async def runClock():
         print("Error starting animation\n")
         print(e)
 
-@api.route('/api/pixel, methods=['GET'])
+@api.route('/api/pixel', methods=['GET'])
 async def pixel():
     # Create the object
     simple_pixel = await SimplePixel.create()
