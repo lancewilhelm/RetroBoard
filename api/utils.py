@@ -71,7 +71,7 @@ async def pixel():
         print(e)
     return 'pixel done'
 
-@celery_app.Task
+@celery_app.Task()
 def test():
     for i in range(5):
         print(i)
