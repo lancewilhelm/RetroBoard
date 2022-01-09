@@ -58,8 +58,8 @@ class RotatingBlockGenerator(Base):
                 return
 
 class RunText(Base):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    async def __init__(self, *args, **kwargs):
+        await super().__init__(*args, **kwargs)
         self.parser.add_argument("-t", "--text", help="The text to scroll on the RGB LED panel", default="Hello world!")
 
     def run(self, usr_args):
@@ -85,17 +85,14 @@ class RunText(Base):
             offscreen_canvas = self.matrix.SwapOnVSync(offscreen_canvas)
 
 class SimplePixel(Base):
-    @classmethod
-    async def create(cls, *args, **kwargs):
-        self = SimplePixel()
-        super(SimplePixel, self).__init__(*args, **kwargs)
-        for i in range(5):
-            print('made class for simple pixel')
-            asyncio.sleep(1)
-        return self
+    async def __init__(self, *args, **kwargs):
+        await super().__init__(*args, **kwargs)
 
     async def run(self, usr_args):
         offset_canvas = self.matrix.CreateFrameCanvas()
+        for i in range(5):
+            print(i)
+            asyncio.sleep(1)
     
 # For debugging purposes
 if __name__ == '__main__':

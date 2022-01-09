@@ -49,7 +49,7 @@ async def pixel():
     
     # Try running the block rotation
     try:
-        print('done')
+        simple_pixel.run({})
     except Exception as e:
         print("Error starting animation\n")
         print(e)
