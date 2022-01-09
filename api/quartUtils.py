@@ -1,3 +1,4 @@
+from api.ledUtils import *
 from quart import Quart, render_template, request, jsonify
 from quart_cors import cors
 import asyncio
@@ -12,8 +13,6 @@ cors(api)       # CORS BS that we likely don't need to worry about
 # Render index.html from templates if the user navigates to /
 @api.route('/', methods=['GET'])
 async def index():
-    loop = asyncio.get_event_loop()
-    loop.stop()
     return await render_template('index.html')
 
 # Rotating block demo api call
@@ -39,6 +38,18 @@ async def runClock():
     # Try running the block rotation
     try:
         run_text.run({})
+    except Exception as e:
+        print("Error starting animation\n")
+        print(e)
+
+@api.route('/api/pixel, methods=['GET'])
+async def pixel():
+    # Create the object
+    simple_pixel = await SimplePixel.create()
+    
+    # Try running the block rotation
+    try:
+        print('done')
     except Exception as e:
         print("Error starting animation\n")
         print(e)
