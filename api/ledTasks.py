@@ -89,9 +89,3 @@ class SimplePixel(Base):
 
     def run(self, usr_args):
         offset_canvas = self.matrix.CreateFrameCanvas()
-
-@celery_app.task()
-def test():
-    for i in range(5):
-        print(i)
-    return 'done'
