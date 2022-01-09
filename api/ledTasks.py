@@ -2,6 +2,7 @@
 from base import Base
 from rgbmatrix import RGBMatrix, RGBMatrixOptions, graphics
 import math
+import time
 
 class RotatingBlockGenerator(Base):
     def __init__(self, *args, **kwargs):
@@ -79,7 +80,7 @@ class RunText(Base):
             if (pos + len < 0):
                 pos = offscreen_canvas.width
 
-            asyncio.sleep(0.05)
+            time.sleep(0.05)
             offscreen_canvas = self.matrix.SwapOnVSync(offscreen_canvas)
 
 class SimplePixel(Base):
