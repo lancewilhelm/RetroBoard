@@ -5,7 +5,7 @@ import math
 
 class RotatingBlockGenerator(Base):
     def __init__(self, *args, **kwargs):
-        await super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def rotate(self, x, y, angle):
         return {
@@ -58,7 +58,7 @@ class RotatingBlockGenerator(Base):
 
 class RunText(Base):
     def __init__(self, *args, **kwargs):
-        await super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.parser.add_argument("-t", "--text", help="The text to scroll on the RGB LED panel", default="Hello world!")
 
     def run(self, usr_args):
@@ -85,11 +85,11 @@ class RunText(Base):
 
 class SimplePixel(Base):
     def __init__(self, *args, **kwargs):
-        await super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def run(self, usr_args):
         offset_canvas = self.matrix.CreateFrameCanvas()
-        
+
 
 # For debugging purposes
 if __name__ == '__main__':
