@@ -1,6 +1,6 @@
-from ledTasks import *
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
+import ledTasks
 
 # Create the quart object
 api = Flask(__name__)
@@ -15,7 +15,7 @@ async def index():
 @api.route('/api/rotate', methods=['GET'])
 async def runRotate():
     # Create the object
-    rotating_block_generator = RotatingBlockGenerator()
+    rotating_block_generator = ledTasks.RotatingBlockGenerator()
     
     # Try running the block rotation
     try:
@@ -42,23 +42,11 @@ async def runClock():
 
 @api.route('/api/pixel', methods=['GET'])
 async def pixel():
-    # Create the object
-    simple_pixel = SimplePixel()
-    tasks = asyncio.all_tasks()
-    print(tasks)    # Try running the block rotation
+    # Try running the block rotation
     try:
-        simple_pixel.run({})
+        task = ledTasks.test.delay()
+        task.wait()
     except Exception as e:
         print("Error starting animation\n")
         print(e)
     return 'pixel done'
-
-@api.route('/api/test1', methods=['GET'])
-async def test1():
-    asyncio.get_event_loop().create_task(test1_func())
-    return 'test1 done'
-
-@api.route('/api/test2', methods=['GET'])
-async def test2():
-    asyncio.get_event_loop().create_task(test2_func())
-    return 'test2 done'

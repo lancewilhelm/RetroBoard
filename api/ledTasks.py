@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
+import importlib
 from base import Base
 from rgbmatrix import RGBMatrix, RGBMatrixOptions, graphics
 import math
 import time
-
+from celery_utils import *
 class RotatingBlockGenerator(Base):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -66,7 +67,6 @@ class RunText(Base):
         font = graphics.Font()
         font.LoadFont("./fonts/6x10.bdf")
         font_height = font.height
-        print(font_height)
         textColor = graphics.Color(255, 255, 0)
         pos = offscreen_canvas.width
         my_text = 'GelGel Sux lolololol'
@@ -90,15 +90,8 @@ class SimplePixel(Base):
     def run(self, usr_args):
         offset_canvas = self.matrix.CreateFrameCanvas()
 
-
-# For debugging purposes
-if __name__ == '__main__':
-    # Create the object
-    run_text = RunText()
-    
-    print('between class init and running')
-
-    if (run_text.process({})):
-        print('run text succeeded')
-    else:
-        print('run text failed')
+@celery.Task
+def test():
+    for i in range(5):
+        print(i)
+        return 'done'

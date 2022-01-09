@@ -1,10 +1,13 @@
 from celery import Celery
+import celery
+from flask.helpers import make_response
+from flask_utils import api
 
 def make_celery(app):
     celery = Celery(
         app.import_name,
-        backend=app.config['CELERY_RESULT_BACKEND'],
-        broker=app.config['CELERY_BROKER_URL']
+        backend='rpc://',
+        broker='pyamqp://'
     )
     celery.conf.update(app.config)
 
@@ -15,3 +18,5 @@ def make_celery(app):
 
     celery.Task = ContextTask
     return celery
+
+celery = make_celery(api)
