@@ -4,7 +4,6 @@ from base import Base
 from rgbmatrix import RGBMatrix, RGBMatrixOptions, graphics
 import math
 import time
-from utils import api
 
 def make_celery(app):
     celery = Celery(
