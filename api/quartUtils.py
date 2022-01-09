@@ -45,7 +45,7 @@ async def runClock():
 @api.route('/api/pixel', methods=['GET'])
 async def pixel():
     # Create the object
-    simple_pixel = await SimplePixel.create()
+    simple_pixel = await SimplePixel()%
     
     # Try running the block rotation
     try:
