@@ -21,7 +21,7 @@ def make_celery(app):
             with app.app_context():
                 return self.run(*args, **kwargs)
 
-    celery.Task = ContextTask()
+    celery.Task = ContextTask
     return celery
 
 celery_app = make_celery(api)
