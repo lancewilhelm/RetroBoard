@@ -36,6 +36,20 @@ export default function Main() {
             >
                 Pixel
             </Button>
+            <Button
+            className={styles.button}
+                variant='outline-dark'
+                onClick={() => sendCommand('test 1')}
+            >
+                Test 1
+            </Button>
+            <Button
+            className={styles.button}
+                variant='outline-dark'
+                onClick={() => sendCommand('test 2')}
+            >
+                Test 2
+            </Button>
         </div>
     );
 }
