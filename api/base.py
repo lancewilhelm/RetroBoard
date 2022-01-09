@@ -6,7 +6,7 @@ import os
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/..'))
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 class Base(object):
-    def __init__(self, *args, **kwargs):
+    async def __init__(self, *args, **kwargs):
         print('In base init')
         self.parser = argparse.ArgumentParser()
 
@@ -18,7 +18,7 @@ class Base(object):
         self.parser.add_argument("-b", "--led-brightness", action="store", help="Sets brightness level. Default: 100. Range: 1..100", default=100, type=int)
         self.parser.add_argument("-m", "--led-gpio-mapping", help="Hardware Mapping: regular, adafruit-hat, adafruit-hat-pwm" , choices=['regular', 'adafruit-hat', 'adafruit-hat-pwm'], type=str)
         self.parser.add_argument("--led-scan-mode", action="store", help="Progressive or interlaced scan. 0 Progressive, 1 Interlaced (default)", default=1, choices=range(2), type=int)
-        self.parser.add_argument("--led-pwm-lsb-nanoseconds", action="store", help="Base time-unit for the on-time in the lowest significant bit in nanoseconds. Default: 130", default=130, type=int)
+        self.parser.add_argument("--led-pwm-lsb-nanoseconds", action="store", help="Base time-unit for the on-time in the lowest significant bit ßin nanoseconds. Default: 130", default=130, type=int)
         self.parser.add_argument("--led-show-refresh", action="store_true", help="Shows the current refresh rate of the LED panel")
         self.parser.add_argument("--led-slowdown-gpio", action="store", help="Slow down writing to GPIO. Range: 0..4. Default: 1", default=1, type=int)
         self.parser.add_argument("--led-no-hardware-pulse", action="store", help="Don't use hardware pin-pulse generation")
@@ -53,13 +53,3 @@ class Base(object):
             options.disable_hardware_pulsing = True
 
         self.matrix = RGBMatrix(options = options)
-
-    def process(self, user_args):
-        try:
-            # Start loop
-            self.run(user_args)
-        except Exception as e:
-            print("Error starting animation\n")
-            print(e)
-
-        return True
