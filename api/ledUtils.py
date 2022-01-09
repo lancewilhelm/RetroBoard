@@ -2,10 +2,9 @@
 from base import Base
 from rgbmatrix import RGBMatrix, RGBMatrixOptions, graphics
 import math
-import asyncio
 
 class RotatingBlockGenerator(Base):
-    async def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         await super().__init__(*args, **kwargs)
 
     def rotate(self, x, y, angle):
@@ -58,7 +57,7 @@ class RotatingBlockGenerator(Base):
                 return
 
 class RunText(Base):
-    async def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         await super().__init__(*args, **kwargs)
         self.parser.add_argument("-t", "--text", help="The text to scroll on the RGB LED panel", default="Hello world!")
 
@@ -85,14 +84,12 @@ class RunText(Base):
             offscreen_canvas = self.matrix.SwapOnVSync(offscreen_canvas)
 
 class SimplePixel(Base):
-    async def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         await super().__init__(*args, **kwargs)
 
     def run(self, usr_args):
         offset_canvas = self.matrix.CreateFrameCanvas()
-        for i in range(5):
-            print(i)
-            asyncio.sleep(1)
+        
 
 # For debugging purposes
 if __name__ == '__main__':
