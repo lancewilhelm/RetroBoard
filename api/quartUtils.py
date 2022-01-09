@@ -46,10 +46,10 @@ async def runClock():
 async def pixel():
     # Create the object
     simple_pixel = await SimplePixel()
-    
-    # Try running the block rotation
+    tasks = asyncio.all_tasks()
+    print(tasks)    # Try running the block rotation
     try:
-        api.add_background_task(simple_pixel.run({}))
+        simple_pixel.run({})
     except Exception as e:
         print("Error starting animation\n")
         print(e)

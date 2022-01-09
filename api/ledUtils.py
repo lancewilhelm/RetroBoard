@@ -88,7 +88,7 @@ class SimplePixel(Base):
     async def __init__(self, *args, **kwargs):
         await super().__init__(*args, **kwargs)
 
-    async def run(self, usr_args):
+    def run(self, usr_args):
         offset_canvas = self.matrix.CreateFrameCanvas()
         for i in range(5):
             print(i)
