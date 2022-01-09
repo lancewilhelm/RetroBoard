@@ -23,7 +23,7 @@ async def runRotate():
     rotating_block_generator = RotatingBlockGenerator()
     
     # If the process does not already exists, run it and then display help
-    rotating_block_generator.process({}) 
+    asyncio.create_task(rotating_block_generator.process({}))
     
     return 'block rotating done'
 
