@@ -3,6 +3,7 @@ from celery import Celery
 from dotenv import load_dotenv
 from quart import Quart, render_template, request, jsonify
 from quart_cors import cors
+from routes import *
 
 # Create the quart object
 api = Quart(__name__)
