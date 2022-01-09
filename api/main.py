@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from flask_utils import api
+from utils import api
 
 # Start the quart server if this file was called
 if __name__ == '__main__':

@@ -4,7 +4,7 @@ from base import Base
 from rgbmatrix import RGBMatrix, RGBMatrixOptions, graphics
 import math
 import time
-from celery_utils import *
+from utils import celery
 class RotatingBlockGenerator(Base):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
