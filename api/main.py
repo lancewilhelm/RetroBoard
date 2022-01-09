@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import api from flask_utils
+from flask_utils import api
 
 # Create the quart object
 api = Quart(__name__)
