@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import celery from Celery
+from celery import Celery
 from dotenv import load_dotenv
 from quart import Quart, render_template, request, jsonify
 from quart_cors import cors
