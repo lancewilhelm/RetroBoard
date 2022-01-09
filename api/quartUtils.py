@@ -1,6 +1,5 @@
 from quart import Quart, render_template, request, jsonify
 from quart_cors import cors
-import asyncio
 
 # Import the LED Utility functions and items necessary for driving the matrix
 from ledUtils import RotatingBlockGenerator, RunText
@@ -12,8 +11,6 @@ cors(api)       # CORS BS that we likely don't need to worry about
 # Render index.html from templates if the user navigates to /
 @api.route('/', methods=['GET'])
 async def index():
-    loop = asyncio.get_event_loop()
-    loop.close()
     return await render_template('index.html')
 
 # Rotating block demo api call
@@ -22,9 +19,13 @@ async def runRotate():
     # Create the object
     rotating_block_generator = RotatingBlockGenerator()
     
-    # If the process does not already exists, run it and then display help
-    rotating_block = asyncio.create_task(rotating_block_generator.process({}))
-    await rotating_block
+    # Try running the block rotation
+    try:
+        rotating_block_generator.run()
+    except Exception as e:
+        print("Error starting animation\n")
+        print(e)
+    
     return 'block rotating done'
 
 @api.route('/api/clock', methods=['GET'])

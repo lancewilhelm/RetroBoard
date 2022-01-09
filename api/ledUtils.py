@@ -87,6 +87,11 @@ class RunText(Base):
             asyncio.sleep(0.05)
             offscreen_canvas = self.matrix.SwapOnVSync(offscreen_canvas)
 
+class SimplePixel(Base):
+    async def _init(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        print('made class for simple pixel')
+
 # For debugging purposes
 if __name__ == '__main__':
     # Create the object
