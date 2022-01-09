@@ -6,7 +6,7 @@ wget https://nodejs.org/dist/v14.16.1/node-v14.16.1-linux-armv7l.tar.xz
 
 sudo apt-get install python3-pip
 sudo apt-get install rabbitmq-server
-sudo pip3 install quart quart-cors pillow celery python-dotenv sqlalchemy flower
+sudo pip3 install flask flask-cors pillow celery python-dotenv sqlalchemy flower
 sudo apt install libopenjp2-7
 
 sudo rabbitmq-server -detached

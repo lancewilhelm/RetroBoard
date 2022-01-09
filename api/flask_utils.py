@@ -1,14 +1,14 @@
 from ledTasks import *
-from quart import Quart, render_template, request, jsonify
-from api import api
+from flask import Flask, render_template, request, jsonify
+from flask_cors import cors
 
 # Render index.html from templates if the user navigates to /
-@api.route('/', methods=['GET'])
+@main.route('/', methods=['GET'])
 async def index():
     return await render_template('index.html')
 
 # Rotating block demo api call
-@api.route('/api/rotate', methods=['GET'])
+@main.route('/api/rotate', methods=['GET'])
 async def runRotate():
     # Create the object
     rotating_block_generator = RotatingBlockGenerator()
@@ -22,7 +22,7 @@ async def runRotate():
 
     return 'block rotation done'
 
-@api.route('/api/clock', methods=['GET'])
+@main.route('/api/clock', methods=['GET'])
 async def runClock():
     # Create the object
     run_text = RunText()
@@ -36,7 +36,7 @@ async def runClock():
 
     return 'clock done'
 
-@api.route('/api/pixel', methods=['GET'])
+@main.route('/api/pixel', methods=['GET'])
 async def pixel():
     # Create the object
     simple_pixel = SimplePixel()
@@ -49,12 +49,12 @@ async def pixel():
         print(e)
     return 'pixel done'
 
-@api.route('/api/test1', methods=['GET'])
+@main.route('/api/test1', methods=['GET'])
 async def test1():
     asyncio.get_event_loop().create_task(test1_func())
     return 'test1 done'
 
-@api.route('/api/test2', methods=['GET'])
+@main.route('/api/test2', methods=['GET'])
 async def test2():
     asyncio.get_event_loop().create_task(test2_func())
     return 'test2 done'

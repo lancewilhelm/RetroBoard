@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-from celery import Celery
-from dotenv import load_dotenv
-from quart import Quart, render_template, request, jsonify
-from quart_cors import cors
-import routes 
+import api from flask_utils
 
 # Create the quart object
 api = Quart(__name__)
