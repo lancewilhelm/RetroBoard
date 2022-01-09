@@ -38,6 +38,8 @@ async def runRotate():
         print("Error starting animation\n")
         print(e)
 
+    return 'block rotation done'
+
 @api.route('/api/clock', methods=['GET'])
 async def runClock():
     # Create the object
@@ -50,6 +52,8 @@ async def runClock():
         print("Error starting animation\n")
         print(e)
 
+    return 'clock done'
+
 @api.route('/api/pixel', methods=['GET'])
 async def pixel():
     # Create the object
@@ -61,12 +65,14 @@ async def pixel():
     except Exception as e:
         print("Error starting animation\n")
         print(e)
+    return 'pixel done'
 
 @api.route('/api/test1', methods=['GET'])
 async def test1():
     asyncio.get_event_loop().create_task(test1_func())
-
+    return 'test1 done'
 
 @api.route('/api/test2', methods=['GET'])
 async def test2():
     asyncio.get_event_loop().create_task(test2_func())
+    return 'test2 done'
