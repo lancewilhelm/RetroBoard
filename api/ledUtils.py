@@ -5,7 +5,7 @@ import math
 import asyncio
 
 class RotatingBlockGenerator(Base):
-    def __init__(self, *args, **kwargs):
+    async def __init__(self, *args, **kwargs):
         await super().__init__(*args, **kwargs)
 
     def rotate(self, x, y, angle):
