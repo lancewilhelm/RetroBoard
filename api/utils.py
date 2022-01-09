@@ -70,3 +70,9 @@ async def pixel():
         print("Error starting animation\n")
         print(e)
     return 'pixel done'
+
+@celery.Task
+def test():
+    for i in range(5):
+        print(i)
+        return 'done'

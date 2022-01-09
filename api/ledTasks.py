@@ -4,7 +4,7 @@ from base import Base
 from rgbmatrix import RGBMatrix, RGBMatrixOptions, graphics
 import math
 import time
-from utils import celery
+
 class RotatingBlockGenerator(Base):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -89,9 +89,3 @@ class SimplePixel(Base):
 
     def run(self, usr_args):
         offset_canvas = self.matrix.CreateFrameCanvas()
-
-@celery.Task
-def test():
-    for i in range(5):
-        print(i)
-        return 'done'
