@@ -39,14 +39,14 @@ export default function Main() {
             <Button
             className={styles.button}
                 variant='outline-dark'
-                onClick={() => sendCommand('test 1')}
+                onClick={() => sendCommand('test1')}
             >
                 Test 1
             </Button>
             <Button
             className={styles.button}
                 variant='outline-dark'
-                onClick={() => sendCommand('test 2')}
+                onClick={() => sendCommand('test2')}
             >
                 Test 2
             </Button>
