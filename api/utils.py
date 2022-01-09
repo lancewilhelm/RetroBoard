@@ -24,7 +24,7 @@ def make_celery(app):
     celery.Task = ContextTask
     return celery
 
-celery = make_celery(api)
+celery_app = make_celery(api)
 
 # Render index.html from templates if the user navigates to /
 @api.route('/', methods=['GET'])
@@ -71,7 +71,7 @@ async def pixel():
         print(e)
     return 'pixel done'
 
-@celery.Task
+@celery_app.Task
 def test():
     for i in range(5):
         print(i)
