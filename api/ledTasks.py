@@ -59,7 +59,6 @@ class RotatingBlockGenerator(Base):
 class RunText(Base):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.parser.add_argument("-t", "--text", help="The text to scroll on the RGB LED panel", default="Hello world!")
 
     def run(self, usr_args):
         offscreen_canvas = self.matrix.CreateFrameCanvas()
@@ -69,7 +68,7 @@ class RunText(Base):
         print(font_height)
         textColor = graphics.Color(255, 255, 0)
         pos = offscreen_canvas.width
-        my_text = self.args.text
+        my_text = 'GelGel Sux lolololol'
         cent_x = self.matrix.width / 2
         cent_y = self.matrix.height / 2
 
