@@ -12,7 +12,8 @@ cors(api)       # CORS BS that we likely don't need to worry about
 # Render index.html from templates if the user navigates to /
 @api.route('/', methods=['GET'])
 async def index():
-    print(asyncio.get_running_loop())
+    loop = asyncio.get_event_loop()
+    loop.close()
     return await render_template('index.html')
 
 # Rotating block demo api call
