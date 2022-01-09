@@ -20,10 +20,7 @@ async def runRotate():
     rotating_block_generator = RotatingBlockGenerator()
     
     # If the process does not already exists, run it and then display help
-    if (rotating_block_generator.process({})):  
-        print('block rotation succeeded') 
-    else:
-        print('block rotation failed') 
+    rotating_block_generator.process({}) 
     
     return 'block rotating done'
 
@@ -34,9 +31,6 @@ async def runClock():
     
     print('between class init and running')
 
-    if (run_text.process({})):
-        print('run text succeeded')
-    else:
-        print('run text failed')
+    run_text.process({})
 
     return 'clock done'
