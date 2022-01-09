@@ -64,15 +64,9 @@ async def runClock():
 async def pixel():
     # Try running the block rotation
     try:
-        task = test.delay()
+        task = ledTasks.test.delay()
         task.wait()
     except Exception as e:
         print("Error starting animation\n")
         print(e)
     return 'pixel done'
-
-@celery_app.task()
-def test():
-    for i in range(5):
-        print(i)
-    return 'done'
