@@ -8,24 +8,6 @@ from flask.helpers import make_response
 api = Flask(__name__)
 CORS(api)       # CORS BS that we likely don't need to worry about'
 
-def make_celery(app):
-    celery = Celery(
-        app.import_name,
-        backend='rpc://',
-        broker='pyamqp://'
-    )
-    celery.conf.update(app.config)
-
-    class ContextTask(celery.Task):
-        def __call__(self, *args, **kwargs):
-            with app.app_context():
-                return self.run(*args, **kwargs)
-
-    celery.Task = ContextTask
-    return celery
-
-celery_app = make_celery(api)
-
 # Render index.html from templates if the user navigates to /
 @api.route('/', methods=['GET'])
 async def index():

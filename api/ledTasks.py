@@ -4,7 +4,25 @@ from base import Base
 from rgbmatrix import RGBMatrix, RGBMatrixOptions, graphics
 import math
 import time
-from utils import celery_app
+from utils import api
+
+def make_celery(app):
+    celery = Celery(
+        app.import_name,
+        backend='rpc://',
+        broker='pyamqp://'
+    )
+    celery.conf.update(app.config)
+
+    class ContextTask(celery.Task):
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return self.run(*args, **kwargs)
+
+    celery.Task = ContextTask
+    return celery
+
+celery_app = make_celery(api)
 
 class RotatingBlockGenerator(Base):
     def __init__(self, *args, **kwargs):
