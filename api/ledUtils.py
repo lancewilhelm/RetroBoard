@@ -6,8 +6,7 @@ import asyncio
 
 class RotatingBlockGenerator(Base):
     def __init__(self, *args, **kwargs):
-        print('In Block init')
-        super().__init__(*args, **kwargs)
+        await super().__init__(*args, **kwargs)
 
     def rotate(self, x, y, angle):
         return {
@@ -23,7 +22,6 @@ class RotatingBlockGenerator(Base):
         return 255 * (val - lo) / (hi - lo)
 
     def run(self, user_args):
-        print('In run function')
         cent_x = self.matrix.width / 2
         cent_y = self.matrix.height / 2
 
@@ -65,7 +63,6 @@ class RunText(Base):
         self.parser.add_argument("-t", "--text", help="The text to scroll on the RGB LED panel", default="Hello world!")
 
     def run(self, usr_args):
-        print('running text')
         offscreen_canvas = self.matrix.CreateFrameCanvas()
         font = graphics.Font()
         font.LoadFont("./fonts/6x10.bdf")

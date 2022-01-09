@@ -19,7 +19,7 @@ async def index():
 @api.route('/api/rotate', methods=['GET'])
 async def runRotate():
     # Create the object
-    rotating_block_generator = await RotatingBlockGenerator()
+    rotating_block_generator = RotatingBlockGenerator()
     
     # Try running the block rotation
     try:
