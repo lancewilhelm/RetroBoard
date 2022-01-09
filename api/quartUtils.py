@@ -23,8 +23,8 @@ async def runRotate():
     rotating_block_generator = RotatingBlockGenerator()
     
     # If the process does not already exists, run it and then display help
-    asyncio.create_task(rotating_block_generator.process({}))
-    
+    rotating_block = asyncio.create_task(rotating_block_generator.process({}))
+    await rotating_block
     return 'block rotating done'
 
 @api.route('/api/clock', methods=['GET'])
