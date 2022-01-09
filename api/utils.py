@@ -75,4 +75,4 @@ async def pixel():
 def test():
     for i in range(5):
         print(i)
-        return 'done'
+    return 'done'
