@@ -25,6 +25,7 @@ def scale_col(val, lo, hi):
         return 255
     return 255 * (val - lo) / (hi - lo)
 
+@celery_app.task()
 def rotatingBlock():
     cent_x = board.matrix.width / 2
     cent_y = board.matrix.height / 2

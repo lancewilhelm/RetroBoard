@@ -15,7 +15,7 @@ def runRotate():
     
     # Try running the block rotation
     try:
-        ledTasks.rotatingBlock()
+        rotatingBlock = ledTasks.rotatingBlock.delay()
     # rotating_block_generator.run({})
     except Exception as e:
         print("Error starting animation\n")
