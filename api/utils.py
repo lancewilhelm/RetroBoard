@@ -1,8 +1,6 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask
 from flask_cors import CORS
-import ledTasks
 from celery import Celery
-from flask.helpers import make_response
 
 # Create the quart object
 api = Flask(__name__)
