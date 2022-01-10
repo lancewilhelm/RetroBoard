@@ -7,6 +7,7 @@ import time
 
 @celery_app.task()
 def pixel():
+    print('starting pixel function')
     offset_canvas = matrix.CreateFrameCanvas()
     cent_x = matrix.width / 2
     cent_y = matrix.height / 2 
