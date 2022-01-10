@@ -14,3 +14,4 @@ def pixel():
     offset_canvas.SetPixel(cent_x, cent_y, 255, 255, 255)
 
     offset_canvas = matrix.SwapOnVSync(offset_canvas)
+    print('done inside pixel function')
