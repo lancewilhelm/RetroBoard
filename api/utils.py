@@ -10,7 +10,8 @@ def make_celery(app):
     celery = Celery(
         app.import_name,
         backend='rpc://',
-        broker='pyamqp://'
+        broker='pyamqp://',
+        imports=('ledTasks',)
     )
     celery.conf.update(app.config)
 
