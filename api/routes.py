@@ -11,11 +11,12 @@ def index():
 @api.route('/api/rotate', methods=['GET'])
 def runRotate():
     # Create the object
-    rotating_block_generator = ledTasks.RotatingBlockGenerator()
+    # rotating_block_generator = ledTasks.RotatingBlockGenerator()
     
     # Try running the block rotation
     try:
-        rotating_block_generator.run({})
+
+        # rotating_block_generator.run({})
     except Exception as e:
         print("Error starting animation\n")
         print(e)
