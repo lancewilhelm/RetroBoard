@@ -19,6 +19,41 @@ def scale_col(val, lo, hi):
         return 255
     return 255 * (val - lo) / (hi - lo)
 
+def rotatingBlockGenerator():
+    cent_x = board.matrix.width / 2
+    cent_y = board.matrix.height / 2
+
+    rotate_square = min(board.matrix.width, board.matrix.height) * 1.41
+    min_rotate = cent_x - rotate_square / 2
+    max_rotate = cent_x + rotate_square / 2
+
+    display_square = min(board.matrix.width, board.matrix.height) * 0.7
+    min_display = cent_x - display_square / 2
+    max_display = cent_x + display_square / 2
+
+    deg_to_rad = 2 * math.pi/ 360
+    rotation = 0
+    offset_canvas = board.matrix.CreateFrameCanvas()
+
+    while True:
+        rotation += 1
+        rotation %= 180
+
+        for x in range(int(min_rotate), int(max_rotate)):
+            for y in range(int(min_rotate), int(max_rotate)):
+                ret = rotate(x - cent_x, y - cent_x, deg_to_rad * rotation)
+                rot_x = ret["new_x"]
+                rot_y = ret["new_y"]
+
+                if x >= min_display and x < max_display and y >= min_display and y < max_display:
+                    offset_canvas.SetPixel(rot_x + cent_x, rot_y + cent_y, scale_col(x, min_display, max_display), 255 - scale_col(y, min_display, max_display), scale_col(y, min_display, max_display))
+                else:
+                    offset_canvas.SetPixel(rot_x + cent_x, rot_y + cent_y, 0, 0, 0)
+
+        offset_canvas = board.matrix.SwapOnVSync(offset_canvas)
+
+        if rotation == 0:
+            return
 class RotatingBlockGenerator(Matrix):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
