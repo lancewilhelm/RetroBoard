@@ -5,27 +5,27 @@ import time
 from utils import celery_app, Matrix
 import time
 
-class Matrix(object):
-    def __init__(self, *args, **kwargs):
-        options = RGBMatrixOptions()
+# class Matrix(object):
+#     def __init__(self, *args, **kwargs):
+#         options = RGBMatrixOptions()
         
-        # Refer to the rpi-rgb-led-matrix python binding docs for the meanings of each option
-        options.hardware_mapping = 'adafruit-hat'
-        options.rows = 32
-        options.cols = 64
-        options.chain_length = 1
-        options.parallel = 1
-        options.row_address_type = 0
-        options.multiplexing = 0
-        options.pwm_bits = 11
-        options.brightness = 100
-        options.pwm_lsb_nanoseconds = 130
-        options.led_rgb_sequence = 'RGB'
-        options.pixel_mapper_config = ''
-        options.gpio_slowdown = 1
-        options.disable_hardware_pulsing = False
+#         # Refer to the rpi-rgb-led-matrix python binding docs for the meanings of each option
+#         options.hardware_mapping = 'adafruit-hat'
+#         options.rows = 32
+#         options.cols = 64
+#         options.chain_length = 1
+#         options.parallel = 1
+#         options.row_address_type = 0
+#         options.multiplexing = 0
+#         options.pwm_bits = 11
+#         options.brightness = 100
+#         options.pwm_lsb_nanoseconds = 130
+#         options.led_rgb_sequence = 'RGB'
+#         options.pixel_mapper_config = ''
+#         options.gpio_slowdown = 1
+#         options.disable_hardware_pulsing = False
 
-        self.matrix = RGBMatrix(options = options)
+#         self.matrix = RGBMatrix(options = options)
 
 # Utility functions
 def rotate(x, y, angle):
