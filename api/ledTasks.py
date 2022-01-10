@@ -2,7 +2,7 @@
 from rgbmatrix import RGBMatrix, RGBMatrixOptions, graphics
 import math
 import time
-from utils import celery_app, Matrix%
+from utils import celery_app, Matrix
 import time
 
 class Matrix(object):
