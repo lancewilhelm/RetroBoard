@@ -51,4 +51,4 @@ class Matrix(object):
 
         self.matrix = RGBMatrix(options = options)
 
-
+board = Matrix()

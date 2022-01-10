@@ -2,7 +2,7 @@
 from rgbmatrix import RGBMatrix, RGBMatrixOptions, graphics
 import math
 import time
-from utils import celery_app, Matrix
+from utils import celery_app, Matrix, board
 import time
 
 # Utility functions
@@ -86,6 +86,4 @@ class RunText(Matrix):
 
 @celery_app.task()
 def test():
-    for i in range(5):
-        print(i)
-    return 'done'
+    print(board.matrix.width)
