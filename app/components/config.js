@@ -1,3 +1,3 @@
-const localIP = '10.0.0.13';
+const localIP = '10.0.10.14';
 
 export { localIP };
