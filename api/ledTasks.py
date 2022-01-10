@@ -36,8 +36,8 @@ class Base(object):
         options = RGBMatrixOptions()
             
         options.hardware_mapping = 'adafruit-hat'
-        options.rows = self.args.led_rows
-        options.cols = self.args.led_cols
+        options.rows = 32
+        options.cols = 64
         options.chain_length = self.args.led_chain
         options.parallel = self.args.led_parallel
         options.row_address_type = self.args.led_row_addr_type
