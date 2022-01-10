@@ -59,13 +59,13 @@ class Base(object):
         self.matrix = RGBMatrix(options = options)
 
 # Utility functions
-def rotate(self, x, y, angle):
+def rotate(x, y, angle):
     return {
         "new_x": x * math.cos(angle) - y * math.sin(angle),
         "new_y": x * math.sin(angle) + y * math.cos(angle)
     }
 
-def scale_col(self, val, lo, hi):
+def scale_col(val, lo, hi):
     if val < lo:
         return 0
     if val > hi:
