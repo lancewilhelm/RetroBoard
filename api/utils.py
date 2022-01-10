@@ -8,47 +8,20 @@ from flask.helpers import make_response
 api = Flask(__name__)
 CORS(api)       # CORS BS that we likely don't need to worry about'
 
-# Render index.html from templates if the user navigates to /
-@api.route('/', methods=['GET'])
-async def index():
-    return await render_template('index.html')
+def make_celery(app):
+    celery = Celery(
+        app.import_name,
+        backend='rpc://',
+        broker='pyamqp://'
+    )
+    celery.conf.update(app.config)
 
-# Rotating block demo api call
-@api.route('/api/rotate', methods=['GET'])
-async def runRotate():
-    # Create the object
-    rotating_block_generator = ledTasks.RotatingBlockGenerator()
-    
-    # Try running the block rotation
-    try:
-        rotating_block_generator.run({})
-    except Exception as e:
-        print("Error starting animation\n")
-        print(e)
+    class ContextTask(celery.Task):
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return self.run(*args, **kwargs)
 
-    return 'block rotation done'
+    celery.Task = ContextTask
+    return celery
 
-@api.route('/api/clock', methods=['GET'])
-async def runClock():
-    # Create the object
-    run_text = RunText()
-    
-    # Try running the block rotation
-    try:
-        run_text.run({})
-    except Exception as e:
-        print("Error starting animation\n")
-        print(e)
-
-    return 'clock done'
-
-@api.route('/api/pixel', methods=['GET'])
-async def pixel():
-    # Try running the block rotation
-    try:
-        task = ledTasks.test.delay()
-        task.wait()
-    except Exception as e:
-        print("Error starting animation\n")
-        print(e)
-    return 'pixel done'
+celery_app = make_celery(api)
