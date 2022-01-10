@@ -50,5 +50,3 @@ class Matrix(object):
         options.disable_hardware_pulsing = False
 
         self.matrix = RGBMatrix(options = options)
-
-board = Matrix()
