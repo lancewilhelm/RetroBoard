@@ -1,7 +1,7 @@
 # Render index.html from templates if the user navigates to /
 from flask import render_template
 from utils import api
-import ledTasks
+from ledTasks import test
 
 @api.route('/', methods=['GET'])
 def index():
@@ -40,7 +40,7 @@ def runClock():
 def pixel():
     # Try running the block rotation
     try:
-        task = ledTasks.test.delay()
+        task = test.delay()
         task.wait()
     except Exception as e:
         print("Error starting animation\n")

@@ -1,7 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
 from celery import Celery
-import ledTasks
 
 # Create the quart object
 api = Flask(__name__)
