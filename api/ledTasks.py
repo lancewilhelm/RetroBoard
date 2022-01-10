@@ -71,6 +71,7 @@ def scale_col(self, val, lo, hi):
     if val > hi:
         return 255
     return 255 * (val - lo) / (hi - lo)
+
 class RotatingBlockGenerator(Base):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -97,12 +98,12 @@ class RotatingBlockGenerator(Base):
 
             for x in range(int(min_rotate), int(max_rotate)):
                 for y in range(int(min_rotate), int(max_rotate)):
-                    ret = self.rotate(x - cent_x, y - cent_x, deg_to_rad * rotation)
+                    ret = rotate(x - cent_x, y - cent_x, deg_to_rad * rotation)
                     rot_x = ret["new_x"]
                     rot_y = ret["new_y"]
 
                     if x >= min_display and x < max_display and y >= min_display and y < max_display:
-                        offset_canvas.SetPixel(rot_x + cent_x, rot_y + cent_y, self.scale_col(x, min_display, max_display), 255 - self.scale_col(y, min_display, max_display), self.scale_col(y, min_display, max_display))
+                        offset_canvas.SetPixel(rot_x + cent_x, rot_y + cent_y, scale_col(x, min_display, max_display), 255 - scale_col(y, min_display, max_display), scale_col(y, min_display, max_display))
                     else:
                         offset_canvas.SetPixel(rot_x + cent_x, rot_y + cent_y, 0, 0, 0)
 
