@@ -5,7 +5,11 @@ import time
 from utils import celery_app, Matrix
 import time
 
-board = Matrix()
+class Board(Matrix):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+board = Board()
 
 # Utility functions
 def rotate(x, y, angle):
