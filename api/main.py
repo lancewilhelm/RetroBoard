@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from utils import api
+import routes 
 
 # Start the quart server if this file was called
 if __name__ == '__main__':
