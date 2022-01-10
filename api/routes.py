@@ -11,3 +11,4 @@ def index_route():
 def pixel_route():
     print('trying pixel function')
     pixel = ledTasks.pixel.delay()
+    return 'OK'
