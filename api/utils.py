@@ -24,3 +24,4 @@ def make_celery(app):
     return celery
 
 celery_app = make_celery(api)
+

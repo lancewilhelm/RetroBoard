@@ -34,9 +34,8 @@ class Base(object):
         self.args = self.parser.parse_args()
 
         options = RGBMatrixOptions()
-
-        if self.args.led_gpio_mapping != None:
-            options.hardware_mapping = self.args.led_gpio_mapping
+            
+        options.hardware_mapping = 'adafruit-hat'
         options.rows = self.args.led_rows
         options.cols = self.args.led_cols
         options.chain_length = self.args.led_chain
@@ -136,13 +135,6 @@ class RunText(Base):
 
             time.sleep(0.05)
             offscreen_canvas = self.matrix.SwapOnVSync(offscreen_canvas)
-
-class SimplePixel(Base):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def run(self, usr_args):
-        offset_canvas = self.matrix.CreateFrameCanvas()
 
 @celery_app.task()
 def test():
