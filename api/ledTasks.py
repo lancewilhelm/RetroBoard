@@ -21,4 +21,4 @@ def pixel():
         time.sleep(0.05)
 
     matrix.Clear()
-    print('after vsync done inside pixel function')
+    print('animation complete inside of the function')
