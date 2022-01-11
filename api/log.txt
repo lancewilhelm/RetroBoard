@@ -1,0 +1,13 @@
+root - DEBUG - creating the api flask object
+root - DEBUG - setting up the led matrix options
+root - INFO - utils complete
+root - INFO - starting the flask server
+werkzeug - WARNING -  * Running on all addresses.
+   WARNING: This is a development server. Do not use it in a production deployment.
+werkzeug - INFO -  * Running on http://10.0.10.14:5000/ (Press CTRL+C to quit)
+werkzeug - INFO - 10.0.10.56 - - [11/Jan/2022 03:20:14] "[33mGET /api/pixel HTTP/1.1[0m" 404 -
+root - INFO - API request received for pixel
+root - DEBUG - starting mode thread
+root - DEBUG - starting pixel function
+werkzeug - INFO - 10.0.10.56 - - [11/Jan/2022 03:20:47] "GET /api/app HTTP/1.1" 200 -
+root - DEBUG - pixel function complete

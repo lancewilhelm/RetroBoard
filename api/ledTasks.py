@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 import time
-from utils import celery_app, matrix
+from utils import api, matrix
 import time
 from PIL import Image, ImageDraw
+import logging
 
 def pixel():
+    logging.debug('starting pixel function')
     # RGB example w/graphics prims.
     # Note, only "RGB" mode is supported currently.
     image = Image.new("RGB", (32, 32))  # Can be larger than matrix if wanted!!
@@ -21,4 +23,5 @@ def pixel():
         time.sleep(0.05)
 
     matrix.Clear()
-    print('animation complete inside of the function')
+    
+    logging.debug('pixel function complete')
