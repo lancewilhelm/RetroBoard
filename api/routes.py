@@ -18,12 +18,11 @@ def index_route():
 def pixel_route():
 	logging.info('API request received for {}'.format('pixel'))
 	if len(ledTasks.tasks) == 0:
-		t1 = ledTasks.RotatingBlock()
+		t1 = ledTasks.Clock()
 		ledTasks.tasks.append(t1)
 		try:
 			logging.debug('starting thread')
 			t1.run()
-			# ledTasks.test()
 		except Exception:
 			logging.exception('Exception occured in pixel route')
 			

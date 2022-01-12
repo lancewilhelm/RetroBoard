@@ -3,14 +3,26 @@ from flask_cors import CORS
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 import sys
 import os
-import logging 
+import logging
+import argparse 
+
+#-------------------------------------------------------------------------
+# Argparsing
+#-------------------------------------------------------------------------
+parser = argparse.ArgumentParser()
+parser.add_argument('-d', "--debug-mode", action="store", help="Determines what debug mode will be displayed on screen. [info (default), debug, warning, critical]", default="info", type=str)
+
+args = parser.parse_args()
 
 #-------------------------------------------------------------------------
 # Logging confuguration
 #-------------------------------------------------------------------------
 logging.basicConfig(level=logging.DEBUG, filename='log.txt', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
 console = logging.StreamHandler()
-console.setLevel(logging.INFO)
+if args.debug_mode == 'info':
+	console.setLevel(logging.INFO)
+elif args.debug_mode == 'debug':
+	console.setLevel(logging.DEBUG)
 logging.getLogger().addHandler(console)
 
 #-------------------------------------------------------------------------

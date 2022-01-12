@@ -41,6 +41,7 @@ class StoppableThread(threading.Thread):
 		self._stop_event = threading.Event()
 
 	def stop(self):
+		logging.debug('Stopping thread for {}'.format(self.__name__))
 		self._stop_event.set()
 
 	def stopped(self):
@@ -195,3 +196,62 @@ class SimpleSquare(StoppableThread):
 				offset_canvas.SetPixel(0, y, 0, 0, 255)
 				offset_canvas.SetPixel(offset_canvas.width - 1, y, 0, 255, 0)
 			offset_canvas = matrix.SwapOnVSync(offset_canvas)
+
+# Clock application
+class Clock(StoppableThread):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+
+	def run(self):
+		logging.debug('starting clock')
+
+		offscreen_canvas = matrix.CreateFrameCanvas()
+		font = graphics.Font()
+		font.LoadFont("./fonts/7x13.bdf")
+		textColor = graphics.Color(255, 255, 255)
+		cent_x = matrix.width / 2
+		cent_y = matrix.height / 2
+		timeStrPrev = ''
+
+		while True:
+			# Check to see if we have stopped
+			if self.stopped():
+				matrix.clear()
+				return
+
+			# Grab the latest time
+			t = time.localtime()
+			hours = t.tm_hour
+			mins = t.tm_min
+			secs = t.tm_sec
+
+			# Create the min string
+			if mins < 10:
+				minStr = '0' + str(mins)
+			else:
+				minStr = str(mins)
+
+			# Create the hour string
+			if hours < 10:
+				hourStr = '0' + str(hours)
+			else:
+				hourStr = str(hours)
+
+			# Create the time string either with a lit up colon or not
+			if secs % 2 == 1:
+				# Even seconds, concatenate the strings with a colon in the middle
+				timeStr = hourStr + '_' + minStr
+			else:
+				# Odd seconds, concatenate the strings with a semicolon(blank) in the middle
+				timeStr = hourStr + ':' + minStr
+			
+			if timeStr != timeStrPrev:
+				matrix.Clear()
+				timeStrPrev = timeStr
+
+			# Write the actual drawing to the canvas and then display
+			graphics.DrawText(offscreen_canvas, font, 20, cent_x - 6, textColor, timeStr)
+			time.sleep(0.05)	# Time buffer added so as to not overload the system
+			offscreen_canvas = matrix.SwapOnVSync(offscreen_canvas)
+
+
