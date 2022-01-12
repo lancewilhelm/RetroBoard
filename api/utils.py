@@ -35,7 +35,9 @@ options.pwm_lsb_nanoseconds = 130
 options.brightness = 100
 options.multiplexing = 0
 options.scan_mode = 1
-options.pwm_bits = 11	# this seems to affect flickering of the leds
+options.pwm_bits = 11	# this seems to affect flickering of the leds somewhat
+options.led_rgb_sequence = 'RGB'
+options.row_address_type = 0
 
 matrix = RGBMatrix(options = options)
 
