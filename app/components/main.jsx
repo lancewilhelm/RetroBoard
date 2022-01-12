@@ -20,7 +20,7 @@ export default function Main() {
                 variant='outline-dark'
                 onClick={() => sendCommand('app')}
             >
-                Pixel
+                Clock
             </Button>
         </div>
     );

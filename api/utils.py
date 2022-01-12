@@ -3,21 +3,38 @@ from flask_cors import CORS
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 import sys
 import os
-import logging 
+import logging
+import argparse 
 
-# Configure the logging to write to file as well as screen
+#-------------------------------------------------------------------------
+# Argparsing
+#-------------------------------------------------------------------------
+parser = argparse.ArgumentParser()
+parser.add_argument('-d', "--debug-mode", action="store", help="Determines what debug mode will be displayed on screen. [info (default), debug, warning, critical]", default="info", type=str)
+
+args = parser.parse_args()
+
+#-------------------------------------------------------------------------
+# Logging confuguration
+#-------------------------------------------------------------------------
 logging.basicConfig(level=logging.DEBUG, filename='log.txt', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
 console = logging.StreamHandler()
-console.setLevel(logging.INFO)
+if args.debug_mode == 'info':
+	console.setLevel(logging.INFO)
+elif args.debug_mode == 'debug':
+	console.setLevel(logging.DEBUG)
 logging.getLogger().addHandler(console)
 
-# Create the quart object
+#-------------------------------------------------------------------------
+# Flask server configuration
+#-------------------------------------------------------------------------
 logging.debug('creating the api flask object')
 api = Flask(__name__)
 CORS(api)       # CORS BS that we likely don't need to worry about'
 
-
-# Setup the LED matrix using the rpi-rgb-led-matrix library
+#-------------------------------------------------------------------------
+# LED Matrix configuration
+#-------------------------------------------------------------------------
 logging.debug('setting up the led matrix options')
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/..'))
 options = RGBMatrixOptions()
