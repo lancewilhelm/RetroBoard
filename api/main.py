@@ -2,6 +2,7 @@
 from utils import api
 import routes 
 import logging
+import os
 
 # Start the quart server if this file was called
 if __name__ == '__main__':

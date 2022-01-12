@@ -131,3 +131,4 @@ dmypy.json
 rpi-rgb-led-matrix/
 
 .vscode/
+api/log.txt
