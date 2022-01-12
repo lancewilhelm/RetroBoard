@@ -6,5 +6,5 @@ import os
 
 # Start the flask server if this file was called as __main__
 if __name__ == '__main__':
-    logging.info('starting the flask server')
-    api.run(host='0.0.0.0')
+	logging.info('starting the flask server')
+	api.run(host='0.0.0.0')
