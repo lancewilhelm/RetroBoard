@@ -5,19 +5,24 @@ import sys
 import os
 import logging 
 
-# Configure the logging to write to file as well as screen
+#-------------------------------------------------------------------------
+# Logging confuguration
+#-------------------------------------------------------------------------
 logging.basicConfig(level=logging.DEBUG, filename='log.txt', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
 console = logging.StreamHandler()
 console.setLevel(logging.INFO)
 logging.getLogger().addHandler(console)
 
-# Create the quart object
+#-------------------------------------------------------------------------
+# Flask server configuration
+#-------------------------------------------------------------------------
 logging.debug('creating the api flask object')
 api = Flask(__name__)
 CORS(api)       # CORS BS that we likely don't need to worry about'
 
-
-# Setup the LED matrix using the rpi-rgb-led-matrix library
+#-------------------------------------------------------------------------
+# LED Matrix configuration
+#-------------------------------------------------------------------------
 logging.debug('setting up the led matrix options')
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/..'))
 options = RGBMatrixOptions()

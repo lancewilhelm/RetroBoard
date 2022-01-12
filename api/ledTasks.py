@@ -8,23 +8,33 @@ import threading
 from rgbmatrix import graphics
 import math
 
+# Tasks object array which stores any current running tasks. This allows
+# for threads to be stopped later by recalling their objects back up.
 tasks = []
 
-# Utility functions for the animations below
-def scale_col(val, lo, hi):
+#-------------------------------------------------------------------------
+# Utility functions:
+#-------------------------------------------------------------------------
+# The scale_color function is used to scale up any number into the 0 to 
+# 255 scale. This is useful for color calculations
+def scale_color(val, lo, hi):
     if val < lo:
         return 0
     if val > hi:
         return 255
     return 255 * (val - lo) / (hi - lo)
 
-
+# Rotation function used for the rotating block animation. Might be useful
+# elsewhere
 def rotate(x, y, sin, cos):
     return x * cos - y * sin, x * sin + y * cos
 
-# This is a class template that is used for making threads stoppable
-# We will be using it to run led tasks on screen while we do other things
+#-------------------------------------------------------------------------
+# Stoppable Thread Class:
+#  This is a class template that is used for making threads stoppable. We
+# will be using it to run led tasks on screen while we do other things
 # and then stop them when we request it
+#-------------------------------------------------------------------------
 class StoppableThread(threading.Thread):
     def __init__(self,  *args, **kwargs):
         super(StoppableThread, self).__init__(*args, **kwargs)
@@ -36,6 +46,13 @@ class StoppableThread(threading.Thread):
     def stopped(self):
         return self._stop_event.is_set()
 
+#-------------------------------------------------------------------------
+# LED Animations: 
+#   Animations are in the form of classes from which objects can be made
+# wherever needed. This allows them to inherit the stoppable thread class
+# that is needed to run these animations asynchronously
+#-------------------------------------------------------------------------
+# A simple test animation for when we are getting started
 class TestAnimation(StoppableThread):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -127,7 +144,7 @@ class RotatingBlock(StoppableThread):
         # Pre calculate colors
         col_table = []
         for x in range(int(min_rotate), int(max_rotate)):
-            col_table.insert(x, scale_col(x, min_display, max_display))
+            col_table.insert(x, scale_color(x, min_display, max_display))
 
         offset_canvas = matrix.CreateFrameCanvas()
 
@@ -157,6 +174,7 @@ class RotatingBlock(StoppableThread):
 
             offset_canvas = matrix.SwapOnVSync(offset_canvas)
 
+# Another test drawing on the screen
 class SimpleSquare(StoppableThread):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
