@@ -18,9 +18,9 @@ export default function Main() {
             <Button
             className={styles.button}
                 variant='outline-dark'
-                onClick={() => sendCommand('pixel')}
+                onClick={() => sendCommand('app')}
             >
-                Pixel
+                Clock
             </Button>
         </div>
     );
