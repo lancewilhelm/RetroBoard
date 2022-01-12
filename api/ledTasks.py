@@ -41,7 +41,7 @@ class StoppableThread(threading.Thread):
 		self._stop_event = threading.Event()
 
 	def stop(self):
-		logging.debug('Stopping thread for {}'.format(self.__name__))
+		logging.debug('Stopping thread for {}'.format(type(self).__name__))
 		self._stop_event.set()
 
 	def stopped(self):
@@ -76,50 +76,6 @@ class TestAnimation(StoppableThread):
 			matrix.Clear()
 			matrix.SetImage(image, n, n)
 			time.sleep(0.05)
-
-# This is a test function to display a simple single white pixel in the middle of the screen using SwapOnVSync
-class PixelTest(StoppableThread):
-	def __init__(self, *args, **kwargs):
-		super().__init__(*args, **kwargs)
-
-	def run(self):
-		logging.debug('starting pixel test with vsync')
-		cent_x = matrix.width / 2
-		cent_y = matrix.height / 2
-
-		offset_canvas = matrix.CreateFrameCanvas()
-
-		offset_canvas.SetPixel(cent_x, cent_y, 255, 255, 255)
-
-		offset_canvas = matrix.SwapOnVSync(offset_canvas)
-
-# This is a test function for scrolling text
-class ScrollingText(StoppableThread):
-	def __init__(self, *args, **kwargs):
-		super().__init__(*args, **kwargs)
-
-	def run(self):
-		logging.debug('starting scrolling text')
-		offscreen_canvas = matrix.CreateFrameCanvas()
-		font = graphics.Font()
-		font.LoadFont("./fonts/7x13.bdf")
-		textColor = graphics.Color(255, 255, 255)
-		pos = offscreen_canvas.width
-		my_text = 'bendersux'
-
-		while True:
-			if self.stopped():
-				logging.debug('stopping scrolling text')
-				matrix.Clear()
-				return
-			offscreen_canvas.Clear()
-			len = graphics.DrawText(offscreen_canvas, font, pos, 10, textColor, my_text)
-			pos -= 1
-			if (pos + len < 0):
-				pos = offscreen_canvas.width
-
-			time.sleep(0.05)
-			offscreen_canvas = matrix.SwapOnVSync(offscreen_canvas)
 
 # This is a test function for scrolling text
 class RotatingBlock(StoppableThread):
@@ -199,7 +155,7 @@ class Clock(StoppableThread):
 		while True:
 			# Check to see if we have stopped
 			if self.stopped():
-				matrix.clear()
+				matrix.Clear()
 				return
 
 			offscreen_canvas.Clear()

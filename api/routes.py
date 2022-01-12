@@ -22,7 +22,7 @@ def pixel_route():
 		ledTasks.tasks.append(t1)
 		try:
 			logging.debug('starting thread')
-			t1.run()
+			t1.start()
 		except Exception:
 			logging.exception('Exception occured in pixel route')
 			
