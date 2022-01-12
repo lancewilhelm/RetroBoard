@@ -51,13 +51,15 @@ class TestAnimation(StoppableThread):
         draw.line((0, 0, 31, 31), fill=(255, 0, 0))
         draw.line((0, 31, 31, 0), fill=(0, 255, 0))
 
+        matrix.SetImage(image, 0, 0)
+
         # Then scroll image across matrix...
-        for n in range(-32, 33):
-            if self.stopped():
-                break
-            matrix.Clear()
-            matrix.SetImage(image, n, n)
-            time.sleep(0.05)
+        # for n in range(-32, 33):
+        #     if self.stopped():
+        #         break
+        #     matrix.Clear()
+        #     matrix.SetImage(image, n, n)
+        #     time.sleep(0.05)
 
 # This is a test function to display a simple single white pixel in the middle of the screen using SwapOnVSync
 class PixelTest(StoppableThread):
@@ -156,3 +158,70 @@ class RotatingBlock(StoppableThread):
                         offset_canvas.SetPixel(rot_x + cent_x, rot_y + cent_y, 0, 0, 0)
 
             offset_canvas = matrix.SwapOnVSync(offset_canvas)
+
+class SimpleSquare(StoppableThread):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def run(self):
+        logging.debug('starting simple square')
+        offset_canvas = matrix.CreateFrameCanvas()
+        while True:
+            for x in range(0, matrix.width):
+                offset_canvas.SetPixel(x, x, 255, 255, 255)
+                offset_canvas.SetPixel(offset_canvas.height - 1 - x, x, 255, 0, 255)
+
+            for x in range(0, offset_canvas.width):
+                offset_canvas.SetPixel(x, 0, 255, 0, 0)
+                offset_canvas.SetPixel(x, offset_canvas.height - 1, 255, 255, 0)
+
+            for y in range(0, offset_canvas.height):
+                offset_canvas.SetPixel(0, y, 0, 0, 255)
+                offset_canvas.SetPixel(offset_canvas.width - 1, y, 0, 255, 0)
+            offset_canvas = matrix.SwapOnVSync(offset_canvas)
+
+def test():
+    logging.debug('starting test animation')
+    cent_x = matrix.width / 2
+    cent_y = matrix.height / 2
+
+    rotate_square = min(matrix.width, matrix.height) * 1.41
+    min_rotate = cent_x - rotate_square / 2
+    max_rotate = cent_x + rotate_square / 2
+
+    display_square = min(matrix.width, matrix.height) * 0.7
+    min_display = cent_x - display_square / 2
+    max_display = cent_x + display_square / 2
+
+    deg_to_rad = 2 * 3.14159265 / 360
+    rotation = 0
+
+    # Pre calculate colors
+    col_table = []
+    for x in range(int(min_rotate), int(max_rotate)):
+        col_table.insert(x, scale_col(x, min_display, max_display))
+
+    offset_canvas = matrix.CreateFrameCanvas()
+
+    while True:
+        rotation += 1
+        rotation %= 360
+
+        # calculate sin and cos once for each frame
+        angle = rotation * deg_to_rad
+        sin = math.sin(angle)
+        cos = math.cos(angle)
+
+        for x in range(int(min_rotate), int(max_rotate)):
+            for y in range(int(min_rotate), int(max_rotate)):
+                # Our rotate center is always offset by cent_x
+                rot_x, rot_y = rotate(x - cent_x, y - cent_x, sin, cos)
+
+                if x >= min_display and x < max_display and y >= min_display and y < max_display:
+                    x_col = col_table[x]
+                    y_col = col_table[y]
+                    offset_canvas.SetPixel(rot_x + cent_x, rot_y + cent_y, x_col, 255 - y_col, y_col)
+                else:
+                    offset_canvas.SetPixel(rot_x + cent_x, rot_y + cent_y, 0, 0, 0)
+
+        offset_canvas = matrix.SwapOnVSync(offset_canvas)
