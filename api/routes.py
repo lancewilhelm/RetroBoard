@@ -28,7 +28,6 @@ def pixel_route():
 			
 		return 'OK'
 	else:
-		logging.debug('Attempting to stop from the route side')
 		t2 = ledTasks.tasks[0]
 		t2.stop()
 		ledTasks.tasks = []
