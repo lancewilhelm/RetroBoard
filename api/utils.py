@@ -1,3 +1,4 @@
+from posixpath import defpath
 from flask import Flask
 from flask_cors import CORS
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
@@ -5,6 +6,7 @@ import sys
 import os
 import logging
 import argparse 
+from collections import defaultdict
 
 #-------------------------------------------------------------------------
 # Argparsing
@@ -57,5 +59,20 @@ options.led_rgb_sequence = 'RGB'
 options.row_address_type = 0
 
 matrix = RGBMatrix(options = options)
+cent_x = matrix.width / 2
+cent_y = matrix.height / 2
+
+# Grab the list of fonts in the font folder
+logging.debug('forming font dictionary')
+font_dict = defaultdict(str)
+path = './fonts/'
+dir = os.fsencode(path)
+dir_list = os.listdir(dir)
+
+for file in dir_list:
+	filename = os.fsencode(file).decode('UTF-8')
+	if filename.endswith('.bdf'):
+		file_path = os.path.join(path, filename)
+		font_dict[filename[:-4]] = file_path#
 
 logging.debug('utils complete')
