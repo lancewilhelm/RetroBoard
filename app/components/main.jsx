@@ -1,6 +1,7 @@
 import { Button } from 'react-bootstrap';
 import styles from '../styles/Main.module.css';
 import { localIP } from './config';
+import { Gear } from 'react-bootstrap-icons';
 
 //! You must set your local IP address below so that the
 export default function Main() {
