@@ -79,7 +79,6 @@ for file in dir_list:
 #-------------------------------------------------------------------------
 # Settings configuration
 #-------------------------------------------------------------------------
-
 class Settings():
 	def __init__(self):
 		self.font_dict = font_dict
