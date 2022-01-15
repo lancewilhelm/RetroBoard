@@ -1,7 +1,7 @@
 # Render index.html from templates if the user navigates to /
 import time
-from flask import render_template
-from utils import api, matrix
+from flask import render_template, request
+from utils import api, settings
 import ledTasks
 import logging
 
@@ -17,6 +17,7 @@ def index_route():
 @api.route('/api/app', methods=['GET'])
 def pixel_route():
 	logging.info('API request received for {}'.format('pixel'))
+
 	if len(ledTasks.tasks) == 0:
 		t1 = ledTasks.Clock()
 		ledTasks.tasks.append(t1)
@@ -27,8 +28,28 @@ def pixel_route():
 			logging.exception('Exception occured in pixel route')
 			
 		return 'OK'
+
 	else:
 		t2 = ledTasks.tasks[0]
 		t2.stop()
 		ledTasks.tasks = []
 		return 'OK'
+
+# App route for settings pull
+@api.route('/api/settings', methods=['GET', 'POST'])
+def settings_route():
+	logging.debug('settings request received')
+	
+	if request.method == 'GET':
+		# Get the settings from the settings task
+		with open('/home/pi/RetroBoard/settings.json', 'r') as filehandle:
+			return filehandle.read()
+	
+	elif request.method == 'POST':
+		s = str(request.form['settings'])
+		# Write the settings to webpagesettings.txt
+		# with open('/home/pi/RetroBoard/settings.json', 'w') as filehandle:
+		# 	filehandle.write(s)
+
+		# settings.loadSettings()
+		return "OK"
