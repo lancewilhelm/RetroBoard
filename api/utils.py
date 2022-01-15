@@ -65,7 +65,7 @@ cent_y = matrix.height / 2
 # Grab the list of fonts in the font folder
 logging.debug('forming font dictionary')
 font_dict = defaultdict(str)
-path = './fonts/'
+path = '/home/pi/RetroBoard/api/fonts/'
 dir = os.fsencode(path)
 dir_list = os.listdir(dir)
 
