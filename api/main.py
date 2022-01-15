@@ -7,7 +7,6 @@ import ledTasks
 
 # Start the flask server if this file was called as __main__
 if __name__ == '__main__':
-	logging.debug('starting the clock as an opening app')
 	clock = ledTasks.Clock()
 	ledTasks.tasks.append(clock)
 	clock.start()

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import time
-from utils import matrix, cent_x, cent_y, font_dict
+from utils import matrix, font_dict, settings
 import time
 from PIL import Image, ImageDraw
 import logging
@@ -27,6 +27,9 @@ def rotate(x, y, sin, cos):
 	'''Used for the rotating block animation. Might be useful elsewhere'''
 	return x * cos - y * sin, x * sin + y * cos
 
+cent_x = matrix.width / 2
+cent_y = matrix.height / 2
+
 #-------------------------------------------------------------------------
 # Stoppable Thread Class:
 #-------------------------------------------------------------------------
@@ -37,7 +40,7 @@ class StoppableThread(threading.Thread):
 		self._stop_event = threading.Event()
 
 	def stop(self):
-		logging.debug('Stopping thread for {}'.format(type(self).__name__))
+		logging.debug('stopping thread for {}'.format(type(self).__name__))
 		self._stop_event.set()
 
 	def stopped(self):
@@ -54,7 +57,7 @@ class Clock(StoppableThread):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.font = graphics.Font()
-		self.font_path = font_dict['4x6']
+		self.font_path = settings.active_font
 		self.font.LoadFont(self.font_path)
 		self.font_height = self.font.height
 		self.font_width = self.font.CharacterWidth(ord('L'))
