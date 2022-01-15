@@ -24,4 +24,4 @@
 #
 # m h  dom mon dow   command
 
-@reboot sh /home/pi/pingPongBallClock/code/clockBootup.sh >/home/pi/cronlog 2>&1
+@reboot sh /home/pi/RetroBoard/BoardBootup.sh >/home/pi/cronlog 2>&1
