@@ -1,17 +1,35 @@
 import Head from 'next/head';
 import styles from '../styles/Index.module.css';
 import Main from '../components/main';
-import { Button } from 'react-bootstrap';
-import { Bluetooth, Gear } from 'react-bootstrap-icons';
+import { Button, DropdownButton, Dropdown } from 'react-bootstrap';
+import { Gear } from 'react-bootstrap-icons';
 import { Modal } from 'react-bootstrap';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { localIP } from '../components/config';
 
 export default function Home() {
     // Set the state variable for the modal
     const [modalOpen, setModalOpen] = useState(false);
+    const [settings, setSettings] = useState({});
+    const [fonts, setFonts] = useState([]);
 
     const handleModalOpen = () => setModalOpen(true);
     const handleModalClose = () => setModalOpen(false);
+
+    function addFontDropdowns(data) {
+        return (
+            fonts.map((x, i) => <Dropdown.Item key={i}>{x}</Dropdown.Item>)
+        )
+    }
+
+    useEffect(() => {
+        fetch('http://' + localIP + ':5000/api/settings')
+            .then(res => res.json())
+            .then(data => {
+                setSettings(data);
+                setFonts(Object.keys(data.font_dict))
+            });
+    }, [])
 
     return (
         <div className={styles.container}>
@@ -29,12 +47,15 @@ export default function Home() {
                 <Main className={styles.main}/>
             </div>
 
-            <Modal show={modalOpen} fullscreen={true} onHide={handleModalClose} className={styles.settingsModal} dialogClassName={styles.settingsModal} contentClassName={styles.modalContent} backdropClassName={styles.modalBackdrop} fullscreen={true} scrollable={true} centered>
+            <Modal show={modalOpen} fullscreen={"true"} onHide={handleModalClose} className={styles.settingsModal} dialogClassName={styles.settingsModal} contentClassName={styles.modalContent} backdropClassName={styles.modalBackdrop} fullscreen={true} scrollable={true} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Retroboard Settings</Modal.Title>
                 </Modal.Header>
                 <Modal.Body className={styles.modalBody}>
-                    This is going to be where the settings exist
+                    <DropdownButton id='font-dropdown' title='Font Selection'>
+                    {addFontDropdowns()}
+                    </DropdownButton>
+                    Active Font Path: {settings.active_font}
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant='outline-dark' onClick={handleModalClose}>
