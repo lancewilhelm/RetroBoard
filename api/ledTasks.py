@@ -58,6 +58,7 @@ class StoppableThread(threading.Thread):
 			'x': cent_x - (5 * self.font_width / 2),
 			'y': cent_y + (self.font_height / 2) - 2
 		}
+		settings.updateBool = False
 
 #-------------------------------------------------------------------------
 # LED Animations: 
@@ -82,6 +83,10 @@ class Clock(StoppableThread):
 			if self.stopped():
 				matrix.Clear()
 				return
+
+			# Check for a settings change that needs fto be loaded
+			if settings.updateBool:
+				self.loadSettings()
 
 			offscreen_canvas.Clear()
 			# Grab the latest time

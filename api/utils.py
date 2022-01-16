@@ -83,6 +83,7 @@ class Settings():
 	def __init__(self):
 		self.font_dict = font_dict
 		self.active_font = font_dict['6x9']
+		self.updateBool = True
 
 	def dumpSettings(self, settings=None):
 		logging.debug('dumping settings to settings.json')
@@ -102,6 +103,7 @@ class Settings():
 
 		self.font_dict = settings['font_dict']
 		self.active_font = settings['active_font']
+		self.updateBool = True
 
 #  Create the settings object and then loads the settings from the stored file.
 settings = Settings()
