@@ -2,7 +2,7 @@ import Head from 'next/head';
 import styles from '../styles/Index.module.css';
 import Main from '../components/main';
 import { Button, DropdownButton, Dropdown } from 'react-bootstrap';
-import { Gear } from 'react-bootstrap-icons';
+import { Fonts, Gear } from 'react-bootstrap-icons';
 import { Modal } from 'react-bootstrap';
 import { useState, useEffect } from 'react';
 import { localIP } from '../components/config';
@@ -12,13 +12,21 @@ export default function Home() {
     const [modalOpen, setModalOpen] = useState(false);
     const [settings, setSettings] = useState({});
     const [fonts, setFonts] = useState([]);
+    const [activeFont, setActiveFont] = useState();
 
     const handleModalOpen = () => setModalOpen(true);
     const handleModalClose = () => setModalOpen(false);
 
+    function changeActiveFont(x) {
+        setActiveFont(settings.font_dict[x.toString()])
+        let settings_copy = Object.assign({}, settings);
+        settings_copy.active_font = settings.font_dict[x.toString()];
+        setSettings(settings_copy);
+    }
+
     function addFontDropdowns(data) {
         return (
-            fonts.map((x, i) => <Dropdown.Item key={i}>{x}</Dropdown.Item>)
+            fonts.map((x, i) => <Dropdown.Item key={i} onClick={() => changeActiveFont(x)}>{x}</Dropdown.Item>)
         )
     }
 
@@ -38,6 +46,7 @@ export default function Home() {
             .then(data => {
                 setSettings(data);
                 setFonts(Object.keys(data.font_dict))
+                setActiveFont(data.active_font)
             });
     }, [])
 
@@ -57,7 +66,7 @@ export default function Home() {
                 <Main className={styles.main}/>
             </div>
 
-            <Modal show={modalOpen} fullscreen={"true"} onHide={handleModalClose} className={styles.settingsModal} dialogClassName={styles.settingsModal} contentClassName={styles.modalContent} backdropClassName={styles.modalBackdrop} fullscreen={true} scrollable={true} centered>
+            <Modal show={modalOpen} fullscreen="true" onHide={handleModalClose} className={styles.settingsModal} dialogClassName={styles.settingsModal} contentClassName={styles.modalContent} backdropClassName={styles.modalBackdrop} fullscreen={true} scrollable={true} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Retroboard Settings</Modal.Title>
                 </Modal.Header>
@@ -65,7 +74,7 @@ export default function Home() {
                     <DropdownButton id='font-dropdown' title='Font Selection'>
                     {addFontDropdowns()}
                     </DropdownButton>
-                    Active Font Path: {settings.active_font}
+                    Active Font Path: {activeFont}
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant='outline-dark' onClick={handleModalClose}>
