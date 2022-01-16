@@ -6,6 +6,7 @@ import { Fonts, Gear } from 'react-bootstrap-icons';
 import { Modal } from 'react-bootstrap';
 import { useState, useEffect } from 'react';
 import { localIP } from '../components/config';
+import Slider from '@mui/material/Slider';
 
 export default function Home() {
     // Set the state variable for the modal
@@ -13,6 +14,7 @@ export default function Home() {
     const [settings, setSettings] = useState({});
     const [fonts, setFonts] = useState([]);
     const [activeFont, setActiveFont] = useState();
+    const [brightness, setBrightness] = useState();
 
     const handleModalOpen = () => setModalOpen(true);
     const handleModalClose = () => setModalOpen(false);
@@ -21,6 +23,13 @@ export default function Home() {
         setActiveFont(settings.font_dict[x.toString()])
         let settings_copy = Object.assign({}, settings);
         settings_copy.active_font = settings.font_dict[x.toString()];
+        setSettings(settings_copy);
+    }
+
+    function changeBrightness(value) {
+        setBrightness(value);
+        let settings_copy = Object.assign({}, settings);
+        settings_copy.brightness = value;
         setSettings(settings_copy);
     }
 
@@ -45,8 +54,9 @@ export default function Home() {
             .then(res => res.json())
             .then(data => {
                 setSettings(data);
-                setFonts(Object.keys(data.font_dict))
-                setActiveFont(data.active_font)
+                setFonts(Object.keys(data.font_dict));
+                setActiveFont(data.active_font);
+                setBrightness(data.brightness);
             });
     }, [])
 
@@ -71,10 +81,13 @@ export default function Home() {
                     <Modal.Title>Retroboard Settings</Modal.Title>
                 </Modal.Header>
                 <Modal.Body className={styles.modalBody}>
+                    <div>
                     <DropdownButton id='font-dropdown' title='Font Selection'>
                     {addFontDropdowns()}
                     </DropdownButton>
-                    Active Font Path: {activeFont}
+                    </div>
+                    <div>Active Font Path: {activeFont}</div>
+                    <div>Brightness: <Slider defaultValue={brightness} aria-label='default' valueLabelDisplay='auto' sx={{width: 200}} onChangeCommitted={(e, val) => changeBrightness(val)}/></div>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant='outline-dark' onClick={handleModalClose}>

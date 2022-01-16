@@ -8,6 +8,9 @@
     "start": "next start"
   },
   "dependencies": {
+    "@emotion/react": "^11.7.1",
+    "@emotion/styled": "^11.6.0",
+    "@mui/material": "^5.2.8",
     "bootstrap": "^4.6.0",
     "bootstrap-icons": "^1.7.2",
     "next": "10.1.3",
