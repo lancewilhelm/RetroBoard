@@ -38,6 +38,7 @@ class StoppableThread(threading.Thread):
 	def __init__(self,  *args, **kwargs):
 		super(StoppableThread, self).__init__(*args, **kwargs)
 		self._stop_event = threading.Event()
+		self.loadSettings()
 
 	def stop(self):
 		logging.debug('stopping thread for {}'.format(type(self).__name__))
@@ -45,6 +46,18 @@ class StoppableThread(threading.Thread):
 
 	def stopped(self):
 		return self._stop_event.is_set()
+
+	def loadSettings(self):
+		self.font = graphics.Font()
+		self.font_path = settings.active_font
+		self.font.LoadFont(self.font_path)
+		self.font_height = self.font.height
+		self.font_width = self.font.CharacterWidth(ord('L'))
+		self.staticColor = graphics.Color(255, 255, 255)
+		self.position = {
+			'x': cent_x - (5 * self.font_width / 2),
+			'y': cent_y + (self.font_height / 2) - 2
+		}
 
 #-------------------------------------------------------------------------
 # LED Animations: 
@@ -56,16 +69,6 @@ class StoppableThread(threading.Thread):
 class Clock(StoppableThread):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-		self.font = graphics.Font()
-		self.font_path = settings.active_font
-		self.font.LoadFont(self.font_path)
-		self.font_height = self.font.height
-		self.font_width = self.font.CharacterWidth(ord('L'))
-		self.staticColor = graphics.Color(255, 255, 255)
-		self.position = {
-			'x': cent_x - (5 * self.font_width / 2),
-			'y': cent_y + (self.font_height / 2) - 2
-		}
 
 	def run(self):
 		logging.debug('starting clock')
@@ -111,5 +114,3 @@ class Clock(StoppableThread):
 			graphics.DrawText(offscreen_canvas, self.font, self.position['x'], self.position['y'], self.staticColor, timeStr)
 			time.sleep(0.05)	# Time buffer added so as to not overload the system
 			offscreen_canvas = matrix.SwapOnVSync(offscreen_canvas)
-
-
