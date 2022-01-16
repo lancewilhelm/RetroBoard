@@ -4,7 +4,6 @@ from flask import render_template, request
 from utils import api, settings
 import ledTasks
 import logging
-import json
 
 #-------------------------------------------------------------------------
 # Routes:
@@ -49,5 +48,5 @@ def settings_route():
 		settingsFromWeb = request.json
 		# Write the settings to webpagesettings.txt
 		settings.dumpSettings(settingsFromWeb)
-		settings.loadSettings()
+		settings.importSettings()
 		return "OK"

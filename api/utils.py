@@ -83,8 +83,9 @@ class Settings():
 	def __init__(self):
 		self.font_dict = font_dict
 		self.active_font = font_dict['6x9']
+		self.updateBool = True
 
-	def dumpSettings(self, settings = None):
+	def dumpSettings(self, settings=None):
 		logging.debug('dumping settings to settings.json')
 		if settings == None:
 			settings = {
@@ -95,16 +96,17 @@ class Settings():
 		with open('/home/pi/RetroBoard/settings.json', 'w') as filehandle:
 			json.dump(settings, filehandle)
 
-	def loadSettings(self):
+	def importSettings(self):
 		logging.debug('loading settings from settings.json')
 		with open('/home/pi/RetroBoard/settings.json', 'r') as filehandle:
 			settings = json.load(filehandle)
 
 		self.font_dict = settings['font_dict']
 		self.active_font = settings['active_font']
+		self.updateBool = True
 
 #  Create the settings object and then loads the settings from the stored file.
 settings = Settings()
-settings.loadSettings()
+settings.importSettings()
 
 logging.debug('utils complete')
