@@ -21,12 +21,7 @@ def pixel_route():
 	if len(ledTasks.tasks) == 0:
 		t1 = ledTasks.Clock()
 		ledTasks.tasks.append(t1)
-		try:
-			logging.debug('starting thread')
-			t1.start()
-		except Exception:
-			logging.exception('Exception occured in pixel route')
-			
+		t1.start()
 		return 'OK'
 
 	else:

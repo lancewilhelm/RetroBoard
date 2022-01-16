@@ -90,7 +90,8 @@ class Settings():
 		if settings == None:
 			settings = {
 				'font_dict': self.font_dict,
-				'active_font': self.active_font
+				'active_font': self.active_font,
+				'brightness': matrix.brightness
 			}
 
 		with open('/home/pi/RetroBoard/settings.json', 'w') as filehandle:
@@ -103,10 +104,12 @@ class Settings():
 
 		self.font_dict = settings['font_dict']
 		self.active_font = settings['active_font']
+		matrix.brightness = settings['brightness']
 		self.updateBool = True
 
 #  Create the settings object and then loads the settings from the stored file.
 settings = Settings()
+# settings.dumpSettings()
 settings.importSettings()
 
 logging.debug('utils complete')
