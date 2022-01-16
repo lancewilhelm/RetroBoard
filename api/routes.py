@@ -48,6 +48,7 @@ def settings_route():
 	elif request.method == 'POST':
 		s = str(request.form['settings'])
 		# Write the settings to webpagesettings.txt
+		print(s)
 		# with open('/home/pi/RetroBoard/settings.json', 'w') as filehandle:
 		# 	filehandle.write(s)
 

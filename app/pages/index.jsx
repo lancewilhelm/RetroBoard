@@ -22,6 +22,16 @@ export default function Home() {
         )
     }
 
+    function sendSettings() {
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(settings)
+        };
+        fetch('http://' + localIP + ':5000/api/settings');
+        handleModalClose();
+    }
+
     useEffect(() => {
         fetch('http://' + localIP + ':5000/api/settings')
             .then(res => res.json())
@@ -61,7 +71,7 @@ export default function Home() {
                     <Button variant='outline-dark' onClick={handleModalClose}>
                         Close
                     </Button>
-                    <Button variant='outline-dark' onClick={handleModalClose}>
+                    <Button variant='outline-dark' onClick={sendSettings}>
                         Save Changes
                     </Button>
                 </Modal.Footer>
