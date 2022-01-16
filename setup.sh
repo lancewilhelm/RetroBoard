@@ -5,8 +5,7 @@ sudo apt-get update
 wget https://nodejs.org/dist/v14.16.1/node-v14.16.1-linux-armv7l.tar.xz
 
 sudo apt-get install python3-pip
-sudo apt-get install rabbitmq-server
-sudo pip3 install flask flask-cors pillow celery python-dotenv sqlalchemy flower
+sudo pip3 install flask flask-cors pillow
 sudo apt install libopenjp2-7
 
 sudo rabbitmq-server -detached
@@ -21,3 +20,8 @@ sudo pip3 -v install docker-compose
 
 curl https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/master/rgb-matrix.sh >rgb-matrix.sh
 sudo bash rgb-matrix.sh
+
+#setup cron for @reboot
+sudo rm /var/spool/cron/crontabs/root
+sudo cp ~/RetroBoard/crontabScript /var/spool/cron/crontabs/root
+sudo chmod 600 /var/spool/cron/crontabs/root
