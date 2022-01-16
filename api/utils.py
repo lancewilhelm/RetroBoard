@@ -1,3 +1,4 @@
+from posixpath import defpath
 from flask import Flask
 from flask_cors import CORS
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
@@ -5,23 +6,27 @@ import sys
 import os
 import logging
 import argparse 
+from collections import defaultdict
+import json
 
 #-------------------------------------------------------------------------
 # Argparsing
 #-------------------------------------------------------------------------
 parser = argparse.ArgumentParser()
-parser.add_argument('-d', "--debug-mode", action="store", help="Determines what debug mode will be displayed on screen. [info (default), debug, warning, critical]", default="info", type=str)
+parser.add_argument('-l', "--logging-level", action="store", help="Determines what logging mode will be displayed on screen. [info (default), debug]", default="info", type=str)
 
 args = parser.parse_args()
 
 #-------------------------------------------------------------------------
 # Logging confuguration
 #-------------------------------------------------------------------------
-logging.basicConfig(level=logging.DEBUG, filename='log.txt', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, filename='log.txt', filemode='w', format='%(asctime)s - %(levelname)s - %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
 console = logging.StreamHandler()
-if args.debug_mode == 'info':
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', "%Y-%m-%d %H:%M:%S")
+console.setFormatter(formatter)
+if args.logging_level == 'info':
 	console.setLevel(logging.INFO)
-elif args.debug_mode == 'debug':
+elif args.logging_level == 'debug':
 	console.setLevel(logging.DEBUG)
 logging.getLogger().addHandler(console)
 
@@ -57,5 +62,51 @@ options.led_rgb_sequence = 'RGB'
 options.row_address_type = 0
 
 matrix = RGBMatrix(options = options)
+
+# Grab the list of fonts in the font folder
+logging.debug('forming font dictionary')
+font_dict = defaultdict(str)
+path = '/home/pi/RetroBoard/api/fonts/'
+dir = os.fsencode(path)
+dir_list = os.listdir(dir)
+
+for file in dir_list:
+	filename = os.fsencode(file).decode('UTF-8')
+	if filename.endswith('.bdf'):
+		file_path = os.path.join(path, filename)
+		font_dict[filename[:-4]] = file_path
+
+#-------------------------------------------------------------------------
+# Settings configuration
+#-------------------------------------------------------------------------
+class Settings():
+	def __init__(self):
+		self.font_dict = font_dict
+		self.active_font = font_dict['6x9']
+		self.updateBool = True
+
+	def dumpSettings(self, settings=None):
+		logging.debug('dumping settings to settings.json')
+		if settings == None:
+			settings = {
+				'font_dict': self.font_dict,
+				'active_font': self.active_font
+			}
+
+		with open('/home/pi/RetroBoard/settings.json', 'w') as filehandle:
+			json.dump(settings, filehandle)
+
+	def importSettings(self):
+		logging.debug('loading settings from settings.json')
+		with open('/home/pi/RetroBoard/settings.json', 'r') as filehandle:
+			settings = json.load(filehandle)
+
+		self.font_dict = settings['font_dict']
+		self.active_font = settings['active_font']
+		self.updateBool = True
+
+#  Create the settings object and then loads the settings from the stored file.
+settings = Settings()
+settings.importSettings()
 
 logging.debug('utils complete')

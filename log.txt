@@ -1,0 +1,10 @@
+root - DEBUG - creating the api flask object
+root - DEBUG - setting up the led matrix options
+root - DEBUG - forming font dictionary
+root - DEBUG - utils complete
+root - DEBUG - starting the clock as an opening app
+root - DEBUG - starting clock
+root - INFO - STARTING THE WARP ENGINES (starting flask)
+werkzeug - WARNING -  * Running on all addresses.
+   WARNING: This is a development server. Do not use it in a production deployment.
+werkzeug - INFO -  * Running on http://10.0.10.14:5000/ (Press CTRL+C to quit)
