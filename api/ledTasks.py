@@ -48,6 +48,7 @@ class StoppableThread(threading.Thread):
 		return self._stop_event.is_set()
 
 	def loadSettings(self):
+		logging.debug('loading settings for {}'.format(type(self).__name__))
 		self.font = graphics.Font()
 		self.font_path = settings.active_font
 		self.font.LoadFont(self.font_path)
