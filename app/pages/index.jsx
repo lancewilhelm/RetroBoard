@@ -28,7 +28,7 @@ export default function Home() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(settings)
         };
-        fetch('http://' + localIP + ':5000/api/settings');
+        fetch('http://' + localIP + ':5000/api/settings', requestOptions);
         handleModalClose();
     }
 
