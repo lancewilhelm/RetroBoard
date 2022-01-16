@@ -4,6 +4,7 @@ from flask import render_template, request
 from utils import api, settings
 import ledTasks
 import logging
+import json
 
 #-------------------------------------------------------------------------
 # Routes:
@@ -39,18 +40,14 @@ def pixel_route():
 @api.route('/api/settings', methods=['GET', 'POST'])
 def settings_route():
 	logging.debug('settings request received')
-	
 	if request.method == 'GET':
 		# Get the settings from the settings task
 		with open('/home/pi/RetroBoard/settings.json', 'r') as filehandle:
 			return filehandle.read()
 	
 	elif request.method == 'POST':
-		s = str(request.form['settings'])
+		settingsFromWeb = request.json
 		# Write the settings to webpagesettings.txt
-		print(s)
-		# with open('/home/pi/RetroBoard/settings.json', 'w') as filehandle:
-		# 	filehandle.write(s)
-
-		# settings.loadSettings()
+		settings.dumpSettings(settingsFromWeb)
+		settings.loadSettings()
 		return "OK"

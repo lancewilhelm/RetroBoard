@@ -84,12 +84,13 @@ class Settings():
 		self.font_dict = font_dict
 		self.active_font = font_dict['6x9']
 
-	def dumpSettings(self):
+	def dumpSettings(self, settings = None):
 		logging.debug('dumping settings to settings.json')
-		settings = {
-			'font_dict': self.font_dict,
-			'active_font': self.active_font
-		}
+		if settings == None:
+			settings = {
+				'font_dict': self.font_dict,
+				'active_font': self.active_font
+			}
 
 		with open('/home/pi/RetroBoard/settings.json', 'w') as filehandle:
 			json.dump(settings, filehandle)
