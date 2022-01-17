@@ -25,9 +25,16 @@ export default function Main() {
             <Button
             className={styles.button}
                 variant='outline-dark'
-                onClick={() => sendCommand('image')}
+                onClick={() => sendCommand('picture')}
             >
-                Image
+                Picture
+            </Button>
+            <Button
+            className={styles.button}
+                variant='dark'
+                onClick={() => sendCommand('clear')}
+            >
+                Clear
             </Button>
         </div>
     );
