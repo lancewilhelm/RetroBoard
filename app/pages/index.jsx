@@ -7,6 +7,7 @@ import { Modal } from 'react-bootstrap';
 import { useState, useEffect } from 'react';
 import { localIP } from '../components/config';
 import Slider from '@mui/material/Slider';
+import { SketchPicker } from 'react-color';
 
 export default function Home() {
     // Set the state variable for the modal
@@ -15,6 +16,7 @@ export default function Home() {
     const [fonts, setFonts] = useState([]);
     const [activeFont, setActiveFont] = useState();
     const [brightness, setBrightness] = useState();
+    const [staticColor, setStaticColor] = useState();
 
     const handleModalOpen = () => setModalOpen(true);
     const handleModalClose = () => setModalOpen(false);
@@ -30,6 +32,13 @@ export default function Home() {
         setBrightness(value);
         let settings_copy = Object.assign({}, settings);
         settings_copy.brightness = value;
+        setSettings(settings_copy);
+    }
+
+    function changeStaticColor(color, event) {
+        setStaticColor(color.rgb)
+        let settings_copy = Object.assign({}, settings);
+        settings_copy.staticColor = color.rgb;
         setSettings(settings_copy);
     }
 
@@ -57,6 +66,7 @@ export default function Home() {
                 setFonts(Object.keys(data.font_dict));
                 setActiveFont(data.active_font);
                 setBrightness(data.brightness);
+                setStaticColor(data.staticColor);
             });
     }, [])
 
@@ -87,7 +97,8 @@ export default function Home() {
                     </DropdownButton>
                     </div>
                     <div>Active Font Path: {activeFont}</div>
-                    <div>Brightness: <Slider defaultValue={brightness} aria-label='default' valueLabelDisplay='auto' sx={{width: 200}} onChangeCommitted={(e, val) => changeBrightness(val)}/></div>
+                    <div>Brightness: <Slider value={brightness} aria-label='default' valueLabelDisplay='auto' sx={{width: 200}} onChangeCommitted={(e, val) => changeBrightness(val)}/></div>
+                    <div>Color: <SketchPicker color={staticColor} onChange={(color, event) => setStaticColor(color)} onChangeComplete={changeStaticColor}/></div>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant='outline-dark' onClick={handleModalClose}>
