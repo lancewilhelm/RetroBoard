@@ -134,14 +134,6 @@ class Picture(StoppableThread):
 
 		matrix.SwapOnVSync(double_buffer)
 
-		# Listen for stoppage of the thread so we can perform a clean up
-		while True:
-			if self.stopped:
-				matrix.Clear()
-				return
-			
-			time.sleep(0.05)
-
 
 # Tasks object array for storing active task and the task dictionary to look up new ones
 running_tasks = []

@@ -60,6 +60,8 @@ options.scan_mode = 1
 options.pwm_bits = 11	# this seems to affect flickering of the leds somewhat
 options.led_rgb_sequence = 'RGB'
 options.row_address_type = 0
+# options.limit_refresh_rate_hz = 60
+options.disable_hardware_pulsing = True
 
 matrix = RGBMatrix(options = options)
 
