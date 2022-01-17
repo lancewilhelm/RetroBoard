@@ -38,6 +38,7 @@ class StoppableThread(threading.Thread):
 	def stop(self):
 		logging.debug('stopping thread for {}'.format(type(self).__name__))
 		self._stop_event.set()
+		matrix.Clear()
 
 	def stopped(self):
 		return self._stop_event.is_set()
@@ -78,7 +79,6 @@ class Clock(StoppableThread):
 		while True:
 			# Check to see if we have stopped
 			if self.stopped():
-				matrix.Clear()
 				return
 
 			# Check for a settings change that needs fto be loaded
@@ -141,13 +141,13 @@ def start_led_app(app):
 		task.start()
 		settings.current_thread = task
 		settings.running_apps.append('clock')
+		settings.dump_settings()
 	elif app == 'picture':
 		task = Picture()
 		task.start()
 		settings.current_thread = task
 		settings.running_apps.append('picture')
-	
-	settings.dump_settings()
+		settings.dump_settings()
 
 def stop_current_led_app():
 	settings.current_thread.stop()

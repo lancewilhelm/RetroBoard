@@ -7,6 +7,7 @@ import logging
 import argparse 
 from collections import defaultdict
 import json
+import asyncio
 
 #-------------------------------------------------------------------------
 # Argparsing
@@ -82,13 +83,13 @@ for file in dir_list:
 #-------------------------------------------------------------------------
 class Settings():
 	def __init__(self):
-		# Stored Settings
+		# Initialize stored settings with some defaults
 		self.font_dict = font_dict
 		self.active_font = font_dict['tom-thumb']
 		self.static_color = {'r': 255, 'g': 255, 'b': 255, 'a': 1}
 		self.running_apps = ['clock']
 		
-		# Non Stored Settings
+		# Non stored settings
 		self.current_thread = None
 		self.update_bool = True
 
@@ -108,15 +109,19 @@ class Settings():
 
 	def import_settings(self):
 		logging.debug('loading settings from settings.json')
-		with open('/home/pi/RetroBoard/settings.json', 'r') as filehandle:
-			settings = json.load(filehandle)
+		try:
+			with open('/home/pi/RetroBoard/settings.json', 'r') as filehandle:
+				settings = json.load(filehandle)
 
-		self.font_dict = settings['font_dict']
-		self.active_font = settings['active_font']
-		matrix.brightness = settings['brightness']
-		self.static_color = settings['static_color']
-		self.running_apps = settings['running_apps']
-		self.update_bool = True
+				self.font_dict = settings['font_dict']
+				self.active_font = settings['active_font']
+				matrix.brightness = settings['brightness']
+				self.static_color = settings['static_color']
+				self.running_apps = settings['running_apps']
+				self.update_bool = True
+
+		except FileNotFoundError:
+			self.dump_settings()
 
 #  Create the settings object and then loads the settings from the stored file.
 settings = Settings()
