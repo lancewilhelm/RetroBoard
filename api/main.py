@@ -8,7 +8,7 @@ import ledTasks
 # Start the flask server if this file was called as __main__
 if __name__ == '__main__':
 	clock = ledTasks.Clock()
-	ledTasks.tasks.append(clock)
+	ledTasks.running_tasks.append(clock)
 	clock.start()
 	
 	logging.info('STARTING THE WARP ENGINES (starting flask)')

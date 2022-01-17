@@ -2,15 +2,11 @@
 import time
 from utils import matrix, font_dict, settings
 import time
-from PIL import Image, ImageDraw
+from PIL import Image
 import logging
 import threading
 from rgbmatrix import graphics
 import math
-
-# Tasks object array which stores any current running tasks. This allows
-# for threads to be stopped later by recalling their objects back up.
-tasks = []
 
 #-------------------------------------------------------------------------
 # Utility functions:
@@ -71,6 +67,7 @@ class StoppableThread(threading.Thread):
 class Clock(StoppableThread):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
+		self.name = 'clock'
 
 	def run(self):
 		logging.debug('starting clock')
@@ -121,8 +118,25 @@ class Clock(StoppableThread):
 			time.sleep(0.05)	# Time buffer added so as to not overload the system
 			offscreen_canvas = matrix.SwapOnVSync(offscreen_canvas)
 
-class Image(StoppableThread):
+class Picture(StoppableThread):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
+		self.name = 'picture'
 
-	
+	def run(self):
+		self.image = Image.open('./images/plant.png').convert('RGB')
+		# self.image.resize((matrix.width, matrix.height), Image.ANTIALIAS)
+
+		double_buffer = matrix.CreateFrameCanvas()
+
+		double_buffer.SetImage(self.image, 0)
+
+		matrix.SwapOnVSync(double_buffer)
+
+
+# Tasks object array for storing active task and the task dictionary to look up new ones
+running_tasks = []
+task_dict = {
+	'clock': Clock(),
+	'picture': Picture()
+}

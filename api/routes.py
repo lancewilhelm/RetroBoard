@@ -19,16 +19,26 @@ def pixel_route():
 	request_form = request.get_json()
 	logging.info('API request received for {}'.format(request_form['app']))
 
-	if len(ledTasks.tasks) == 0:
-		t1 = ledTasks.Clock()
-		ledTasks.tasks.append(t1)
-		t1.start()
+	if len(ledTasks.running_tasks) == 0:
+		if request_form['app'] != 'clear':
+			task = ledTasks.task_dict[request_form['app']]
+			ledTasks.running_tasks.append(task)
+			task.start()
 		return 'OK'
 
 	else:
-		t2 = ledTasks.tasks[0]
-		t2.stop()
-		ledTasks.tasks = []
+		task = ledTasks.running_tasks[0]
+		if request_form['app'] == 'clear':
+			task.stop()
+			task.join()
+			ledTasks.running_tasks = []
+		elif task.name != request_form['app']: 
+			task.stop()
+			task.join()
+			ledTasks.running_tasks = []
+			task = ledTasks.task_dict[request_form['app']]
+			ledTasks.running_tasks.append(task)
+
 		return 'OK'
 
 # App route for settings pull
