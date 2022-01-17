@@ -67,7 +67,7 @@ export default function Home() {
                 setFonts(Object.keys(data.font_dict));
                 setActiveFont(data.active_font);
                 setBrightness(data.brightness);
-                setStaticColor(data.staticColor);
+                setStaticColor(data.static_color);
             });
     }, [])
 
