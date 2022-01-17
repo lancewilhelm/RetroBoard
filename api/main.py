@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-from utils import api
+from ctypes import LittleEndianStructure
+from utils import Settings, api, settings
 import routes 
 import logging
 import os
@@ -7,9 +8,7 @@ import ledTasks
 
 # Start the flask server if this file was called as __main__
 if __name__ == '__main__':
-	clock = ledTasks.Clock()
-	ledTasks.tasks.append(clock)
-	clock.start()
+	ledTasks.start_led_app(settings.running_apps[0])
 	
 	logging.info('STARTING THE WARP ENGINES (starting flask)')
 	api.run(host='0.0.0.0')

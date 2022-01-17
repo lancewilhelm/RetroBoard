@@ -1,4 +1,3 @@
-from posixpath import defpath
 from flask import Flask
 from flask_cors import CORS
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
@@ -60,6 +59,8 @@ options.scan_mode = 1
 options.pwm_bits = 11	# this seems to affect flickering of the leds somewhat
 options.led_rgb_sequence = 'RGB'
 options.row_address_type = 0
+# options.limit_refresh_rate_hz = 60
+options.disable_hardware_pulsing = True
 
 matrix = RGBMatrix(options = options)
 
@@ -81,25 +82,31 @@ for file in dir_list:
 #-------------------------------------------------------------------------
 class Settings():
 	def __init__(self):
+		# Stored Settings
 		self.font_dict = font_dict
 		self.active_font = font_dict['tom-thumb']
-		self.staticColor = {'r': 255, 'g': 255, 'b': 255, 'a': 1}
-		self.updateBool = True
+		self.static_color = {'r': 255, 'g': 255, 'b': 255, 'a': 1}
+		self.running_apps = ['clock']
+		
+		# Non Stored Settings
+		self.current_thread = None
+		self.update_bool = True
 
-	def dumpSettings(self, settings=None):
+	def dump_settings(self, settings=None):
 		logging.debug('dumping settings to settings.json')
 		if settings == None:
 			settings = {
 				'font_dict': self.font_dict,
 				'active_font': self.active_font,
 				'brightness': matrix.brightness,
-				'staticColor': self.staticColor
+				'static_color': self.static_color,
+				'running_apps': self.running_apps
 			}
 
 		with open('/home/pi/RetroBoard/settings.json', 'w') as filehandle:
 			json.dump(settings, filehandle)
 
-	def importSettings(self):
+	def import_settings(self):
 		logging.debug('loading settings from settings.json')
 		with open('/home/pi/RetroBoard/settings.json', 'r') as filehandle:
 			settings = json.load(filehandle)
@@ -107,12 +114,13 @@ class Settings():
 		self.font_dict = settings['font_dict']
 		self.active_font = settings['active_font']
 		matrix.brightness = settings['brightness']
-		self.staticColor = settings['staticColor']
-		self.updateBool = True
+		self.static_color = settings['static_color']
+		self.running_apps = settings['running_apps']
+		self.update_bool = True
 
 #  Create the settings object and then loads the settings from the stored file.
 settings = Settings()
-# settings.dumpSettings()
-settings.importSettings()
+# settings.dump_settings()
+settings.import_settings()
 
 logging.debug('utils complete')
