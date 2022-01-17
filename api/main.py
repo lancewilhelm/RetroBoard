@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
-from ctypes import LittleEndianStructure
-from utils import Settings, api, settings
+from utils import api, settings
 import routes 
 import logging
-import os
 import ledTasks
 
 # Start the flask server if this file was called as __main__
