@@ -1,4 +1,3 @@
-from posixpath import defpath
 from flask import Flask
 from flask_cors import CORS
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
@@ -83,9 +82,14 @@ for file in dir_list:
 #-------------------------------------------------------------------------
 class Settings():
 	def __init__(self):
+		# Stored Settings
 		self.font_dict = font_dict
 		self.active_font = font_dict['tom-thumb']
 		self.static_color = {'r': 255, 'g': 255, 'b': 255, 'a': 1}
+		self.running_apps = ['clock']
+		
+		# Non Stored Settings
+		self.current_thread = None
 		self.update_bool = True
 
 	def dump_settings(self, settings=None):
@@ -95,7 +99,8 @@ class Settings():
 				'font_dict': self.font_dict,
 				'active_font': self.active_font,
 				'brightness': matrix.brightness,
-				'static_color': self.static_color
+				'static_color': self.static_color,
+				'running_apps': self.running_apps
 			}
 
 		with open('/home/pi/RetroBoard/settings.json', 'w') as filehandle:
@@ -110,11 +115,12 @@ class Settings():
 		self.active_font = settings['active_font']
 		matrix.brightness = settings['brightness']
 		self.static_color = settings['static_color']
+		self.running_apps = settings['running_apps']
 		self.update_bool = True
 
 #  Create the settings object and then loads the settings from the stored file.
 settings = Settings()
-# settings.dump_settings()
+settings.dump_settings()
 settings.import_settings()
 
 logging.debug('utils complete')
