@@ -5,12 +5,12 @@ import { localIP } from './config';
 //! You must set your local IP address below so that the
 export default function Main() {
     async function sendCommand(command) {
-        const url_base = 'http://' + localIP + ':5000/api/';
-
-        const res = await fetch(url_base + command, {
-            method: 'GET',
-        });
-        return res;
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({app: command})
+        };
+        fetch('http://' + localIP + ':5000/api/app', requestOptions);
     }
 
     return (
@@ -18,9 +18,16 @@ export default function Main() {
             <Button
             className={styles.button}
                 variant='outline-dark'
-                onClick={() => sendCommand('app')}
+                onClick={() => sendCommand('clock')}
             >
                 Clock
+            </Button>
+            <Button
+            className={styles.button}
+                variant='outline-dark'
+                onClick={() => sendCommand('image')}
+            >
+                Image
             </Button>
         </div>
     );
