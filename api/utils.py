@@ -93,7 +93,7 @@ class Settings():
 		self.current_thread = None
 		self.update_bool = True
 
-	async def dump_settings(self, settings=None):
+	def dump_settings(self, settings=None):
 		logging.debug('dumping settings to settings.json')
 		if settings == None:
 			settings = {
@@ -107,20 +107,21 @@ class Settings():
 		with open('/home/pi/RetroBoard/settings.json', 'w') as filehandle:
 			json.dump(settings, filehandle)
 
-	async def import_settings(self):
+	def import_settings(self):
 		logging.debug('loading settings from settings.json')
 		try:
 			with open('/home/pi/RetroBoard/settings.json', 'r') as filehandle:
 				settings = json.load(filehandle)
-		except FileNotFoundError:
-			await self.dump_settings()
 
-		self.font_dict = settings['font_dict']
-		self.active_font = settings['active_font']
-		matrix.brightness = settings['brightness']
-		self.static_color = settings['static_color']
-		self.running_apps = settings['running_apps']
-		self.update_bool = True
+				self.font_dict = settings['font_dict']
+				self.active_font = settings['active_font']
+				matrix.brightness = settings['brightness']
+				self.static_color = settings['static_color']
+				self.running_apps = settings['running_apps']
+				self.update_bool = True
+
+		except FileNotFoundError:
+			self.dump_settings()
 
 #  Create the settings object and then loads the settings from the stored file.
 settings = Settings()
