@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import time
-from utils import matrix, settings
+from setup import matrix, settings
 import time
 from PIL import Image
 import logging

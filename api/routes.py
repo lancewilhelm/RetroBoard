@@ -1,6 +1,6 @@
 # Render index.html from templates if the user navigates to /
 from flask import render_template, request
-from utils import api, settings
+from setup import api, settings
 import ledTasks
 import logging
 

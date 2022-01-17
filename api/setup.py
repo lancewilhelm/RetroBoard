@@ -7,7 +7,6 @@ import logging
 import argparse 
 from collections import defaultdict
 import json
-import asyncio
 
 #-------------------------------------------------------------------------
 # Argparsing

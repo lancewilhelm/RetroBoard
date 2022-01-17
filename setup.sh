@@ -5,7 +5,7 @@ sudo apt-get update
 wget https://nodejs.org/dist/v14.16.1/node-v14.16.1-linux-armv7l.tar.xz
 
 sudo apt-get install python3-pip
-sudo pip3 install flask flask-cors pillow
+sudo pip3 install flask flask-cors pillow bdflib
 sudo apt install libopenjp2-7
 
 sudo rabbitmq-server -detached
