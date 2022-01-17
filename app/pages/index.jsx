@@ -7,7 +7,8 @@ import { Modal } from 'react-bootstrap';
 import { useState, useEffect } from 'react';
 import { localIP } from '../components/config';
 import Slider from '@mui/material/Slider';
-import { SketchPicker } from 'react-color';
+import { ChromePicker } from 'react-color';
+import ColorButton from '../components/ColorButton';
 
 export default function Home() {
     // Set the state variable for the modal
@@ -98,7 +99,8 @@ export default function Home() {
                     </div>
                     <div>Active Font Path: {activeFont}</div>
                     <div>Brightness: <Slider value={brightness} aria-label='default' valueLabelDisplay='auto' sx={{width: 200}} onChangeCommitted={(e, val) => changeBrightness(val)}/></div>
-                    <div>Color: <SketchPicker color={staticColor} onChange={(color, event) => setStaticColor(color)} onChangeComplete={changeStaticColor}/></div>
+                    {/* <div>Color: <ChromePicker color={staticColor} onChange={(color, event) => setStaticColor(color)} onChangeComplete={changeStaticColor} disableAlpha={true}/></div> */}
+                    <div>Color: <ColorButton staticColor={staticColor} setStaticColor={setStaticColor} changeStaticColor={changeStaticColor}/></div>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant='outline-dark' onClick={handleModalClose}>
