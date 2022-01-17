@@ -54,7 +54,7 @@ class StoppableThread(threading.Thread):
 		self.font.LoadFont(self.font_path)
 		self.font_height = self.font.height
 		self.font_width = self.font.CharacterWidth(ord('L'))
-		self.staticColor = graphics.Color(255, 255, 255)
+		self.staticColor = graphics.Color(settings.staticColor['r'], settings.staticColor['g'], settings.staticColor['b'])
 		self.position = {
 			'x': cent_x - (5 * self.font_width / 2),
 			'y': cent_y + (self.font_height / 2) - 2
