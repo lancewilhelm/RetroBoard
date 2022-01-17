@@ -146,6 +146,8 @@ def start_led_app(app):
 		task.start()
 		settings.current_thread = task
 		settings.running_apps.append('picture')
+	
+	settings.dump_settings()
 
 def stop_current_led_app():
 	settings.current_thread.stop()

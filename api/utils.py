@@ -120,7 +120,7 @@ class Settings():
 
 #  Create the settings object and then loads the settings from the stored file.
 settings = Settings()
-settings.dump_settings()
+# settings.dump_settings()
 settings.import_settings()
 
 logging.debug('utils complete')
