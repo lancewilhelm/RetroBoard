@@ -20,7 +20,25 @@ def pixel_route():
 	request_form = request.get_json()
 	logging.debug('API request received for {}. Tasks currently running {}'.format(request_form['app'], ledTasks.running_tasks))
 
+	if len(ledTasks.running_tasks) == 0:
+		if request_form['app'] != 'clear':
+			task = ledTasks.task_dict[request_form['app']]
+			ledTasks.running_tasks.append(task)
+			task.start()
+		return 'OK'
 
+	else:
+		task = ledTasks.running_tasks[0]
+		if request_form['app'] == 'clear':
+			task.stop()
+			task.join()
+			ledTasks.running_tasks = []
+		elif task.name != request_form['app']: 
+			task.stop()
+			task.join()
+			ledTasks.running_tasks = []
+			task = ledTasks.task_dict[request_form['app']]
+			ledTasks.running_tasks.append(task)
 
 	return 'OK'
 
