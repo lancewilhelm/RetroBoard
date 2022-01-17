@@ -1,9 +1,9 @@
 # Render index.html from templates if the user navigates to /
-import time
 from flask import render_template, request
 from utils import api, settings
 import ledTasks
 import logging
+import threading
 
 #-------------------------------------------------------------------------
 # Routes:
@@ -17,29 +17,33 @@ def index_route():
 @api.route('/api/app', methods=['POST'])
 def pixel_route():
 	request_form = request.get_json()
-	logging.info('API request received for {}'.format(request_form['app']))
+	logging.debug('API request received for {}. Tasks currently running {}'.format(request_form['app'], ledTasks.running_tasks))
 
 	if len(ledTasks.running_tasks) == 0:
 		if request_form['app'] != 'clear':
 			task = ledTasks.task_dict[request_form['app']]
+			print(task._started.is_set())
 			ledTasks.running_tasks.append(task)
 			task.start()
-		return 'OK'
-
+			print(task._started.is_set())
 	else:
 		task = ledTasks.running_tasks[0]
 		if request_form['app'] == 'clear':
 			task.stop()
-			task.join()
 			ledTasks.running_tasks = []
+			task.join()
+			print(task._started.is_set())
 		elif task.name != request_form['app']: 
 			task.stop()
-			task.join()
 			ledTasks.running_tasks = []
-			task = ledTasks.task_dict[request_form['app']]
-			ledTasks.running_tasks.append(task)
+			task.join()
+			task2 = ledTasks.task_dict[request_form['app']]
+			ledTasks.running_tasks.append(task2)
 
-		return 'OK'
+	for thread in threading.enumerate():
+		print(thread.name)
+
+	return 'OK'
 
 # App route for settings pull
 @api.route('/api/settings', methods=['GET', 'POST'])
