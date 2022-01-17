@@ -4,6 +4,7 @@ from utils import api, settings
 import ledTasks
 import logging
 import threading
+import asyncio
 
 #-------------------------------------------------------------------------
 # Routes:
@@ -19,29 +20,7 @@ def pixel_route():
 	request_form = request.get_json()
 	logging.debug('API request received for {}. Tasks currently running {}'.format(request_form['app'], ledTasks.running_tasks))
 
-	if len(ledTasks.running_tasks) == 0:
-		if request_form['app'] != 'clear':
-			task = ledTasks.task_dict[request_form['app']]
-			print(task._started.is_set())
-			ledTasks.running_tasks.append(task)
-			task.start()
-			print(task._started.is_set())
-	else:
-		task = ledTasks.running_tasks[0]
-		if request_form['app'] == 'clear':
-			task.stop()
-			ledTasks.running_tasks = []
-			task.join()
-			print(task._started.is_set())
-		elif task.name != request_form['app']: 
-			task.stop()
-			ledTasks.running_tasks = []
-			task.join()
-			task2 = ledTasks.task_dict[request_form['app']]
-			ledTasks.running_tasks.append(task2)
 
-	for thread in threading.enumerate():
-		print(thread.name)
 
 	return 'OK'
 
@@ -57,6 +36,6 @@ def settings_route():
 	elif request.method == 'POST':
 		settingsFromWeb = request.json
 		# Write the settings to webpagesettings.txt
-		settings.dumpSettings(settingsFromWeb)
-		settings.importSettings()
+		settings.dump_settings(settingsFromWeb)
+		settings.import_settings()
 		return "OK"

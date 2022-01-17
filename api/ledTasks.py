@@ -7,6 +7,7 @@ import logging
 import threading
 from rgbmatrix import graphics
 import math
+import asyncio
 
 #-------------------------------------------------------------------------
 # Utility functions:
@@ -50,12 +51,12 @@ class StoppableThread(threading.Thread):
 		self.font.LoadFont(self.font_path)
 		self.font_height = self.font.height
 		self.font_width = self.font.CharacterWidth(ord('L'))
-		self.staticColor = graphics.Color(settings.staticColor['r'], settings.staticColor['g'], settings.staticColor['b'])
+		self.static_color = graphics.Color(settings.static_color['r'], settings.static_color['g'], settings.static_color['b'])
 		self.position = {
 			'x': cent_x - (5 * self.font_width / 2),
 			'y': cent_y + (self.font_height / 2) - 2
 		}
-		settings.updateBool = False
+		settings.update_bool = False
 
 #-------------------------------------------------------------------------
 # LED Animations: 
@@ -83,7 +84,7 @@ class Clock(StoppableThread):
 				return
 
 			# Check for a settings change that needs fto be loaded
-			if settings.updateBool:
+			if settings.update_bool:
 				self.loadSettings()
 
 			offscreen_canvas.Clear()
@@ -95,26 +96,26 @@ class Clock(StoppableThread):
 
 			# Create the min string
 			if mins < 10:
-				minStr = '0' + str(mins)
+				min_str = '0' + str(mins)
 			else:
-				minStr = str(mins)
+				min_str = str(mins)
 
 			# Create the hour string
 			if hours < 10:
-				hourStr = '0' + str(hours)
+				hour_str = '0' + str(hours)
 			else:
-				hourStr = str(hours)
+				hour_str = str(hours)
 
 			# Create the time string either with a lit up colon or not
 			if secs % 2 == 1:
 				# Even seconds, concatenate the strings with a colon in the middle
-				timeStr = hourStr + ' ' + minStr
+				time_str = hour_str + ' ' + min_str
 			else:
 				# Odd seconds, concatenate the strings with a semicolon(blank) in the middle
-				timeStr = hourStr + ':' + minStr
+				time_str = hour_str + ':' + min_str
 			
 			# Write the actual drawing to the canvas and then display
-			graphics.DrawText(offscreen_canvas, self.font, self.position['x'], self.position['y'], self.staticColor, timeStr)
+			graphics.DrawText(offscreen_canvas, self.font, self.position['x'], self.position['y'], self.static_color, time_str)
 			time.sleep(0.05)	# Time buffer added so as to not overload the system
 			offscreen_canvas = matrix.SwapOnVSync(offscreen_canvas)
 
@@ -148,3 +149,52 @@ task_dict = {
 	'clock': Clock(),
 	'picture': Picture()
 }
+
+def clock_function(self):
+		logging.debug('starting clock')
+
+		# Establish the offscreen buffer to store changes too before publishing
+		offscreen_canvas = matrix.CreateFrameCanvas()
+
+		# Run the clock loop until stopped
+		while True:
+			# Check to see if we have stopped
+			if self.stopped():
+				matrix.Clear()
+				return
+
+			# Check for a settings change that needs fto be loaded
+			if settings.update_bool:
+				self.loadSettings()
+
+			offscreen_canvas.Clear()
+			# Grab the latest time
+			t = time.localtime()
+			hours = t.tm_hour
+			mins = t.tm_min
+			secs = t.tm_sec
+
+			# Create the min string
+			if mins < 10:
+				min_str = '0' + str(mins)
+			else:
+				min_str = str(mins)
+
+			# Create the hour string
+			if hours < 10:
+				hour_str = '0' + str(hours)
+			else:
+				hour_str = str(hours)
+
+			# Create the time string either with a lit up colon or not
+			if secs % 2 == 1:
+				# Even seconds, concatenate the strings with a colon in the middle
+				time_str = hour_str + ' ' + min_str
+			else:
+				# Odd seconds, concatenate the strings with a semicolon(blank) in the middle
+				time_str = hour_str + ':' + min_str
+			
+			# Write the actual drawing to the canvas and then display
+			graphics.DrawText(offscreen_canvas, self.font, self.position['x'], self.position['y'], self.staticColor, time_str)
+			time.sleep(0.05)	# Time buffer added so as to not overload the system
+			offscreen_canvas = matrix.SwapOnVSync(offscreen_canvas)
