@@ -1,5 +1,4 @@
 # Render index.html from templates if the user navigates to /
-import time
 from flask import render_template, request
 from utils import api, settings
 import ledTasks
@@ -14,26 +13,22 @@ def index_route():
 	return render_template('index.html')
 
 # App route for api
-@api.route('/api/app', methods=['GET'])
+@api.route('/api/app', methods=['POST'])
 def pixel_route():
-	logging.info('API request received for {}'.format('pixel'))
+	request_form = request.get_json()
+	logging.debug('API request received for {}. Task currently running {}'.format(request_form['app'], settings.current_thread))
 
-	if len(ledTasks.tasks) == 0:
-		t1 = ledTasks.Clock()
-		ledTasks.tasks.append(t1)
-		try:
-			logging.debug('starting thread')
-			t1.start()
-		except Exception:
-			logging.exception('Exception occured in pixel route')
-			
-		return 'OK'
-
+	if settings.current_thread == None:
+		if request_form['app'] != 'clear':
+			ledTasks.start_led_app(request_form['app'])
 	else:
-		t2 = ledTasks.tasks[0]
-		t2.stop()
-		ledTasks.tasks = []
-		return 'OK'
+		if request_form['app'] == 'clear':
+			ledTasks.stop_current_led_app()
+		elif request_form['app'] != settings.current_thread.name:
+			ledTasks.stop_current_led_app()
+			ledTasks.start_led_app(request_form['app'])
+
+	return 'OK'
 
 # App route for settings pull
 @api.route('/api/settings', methods=['GET', 'POST'])
@@ -47,6 +42,6 @@ def settings_route():
 	elif request.method == 'POST':
 		settingsFromWeb = request.json
 		# Write the settings to webpagesettings.txt
-		settings.dumpSettings(settingsFromWeb)
-		settings.importSettings()
+		settings.dump_settings(settingsFromWeb)
+		settings.import_settings()
 		return "OK"

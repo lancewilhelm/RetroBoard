@@ -1,19 +1,14 @@
 #!/usr/bin/env python3
 import time
-from utils import matrix, font_dict, settings
+from utils import matrix, settings
 import time
-from PIL import Image, ImageDraw
+from PIL import Image
 import logging
 import threading
 from rgbmatrix import graphics
-import math
-
-# Tasks object array which stores any current running tasks. This allows
-# for threads to be stopped later by recalling their objects back up.
-tasks = []
 
 #-------------------------------------------------------------------------
-# Utility functions:
+# Utility functions/variables:
 #-------------------------------------------------------------------------
 def scale_color(val, lo, hi):
 	'''Scales up any number into the 0 to 255 scale. This is useful for color calculations.'''
@@ -48,17 +43,18 @@ class StoppableThread(threading.Thread):
 		return self._stop_event.is_set()
 
 	def loadSettings(self):
+		logging.debug('loading settings for {}'.format(type(self).__name__))
 		self.font = graphics.Font()
 		self.font_path = settings.active_font
 		self.font.LoadFont(self.font_path)
 		self.font_height = self.font.height
 		self.font_width = self.font.CharacterWidth(ord('L'))
-		self.staticColor = graphics.Color(255, 255, 255)
+		self.static_color = graphics.Color(settings.static_color['r'], settings.static_color['g'], settings.static_color['b'])
 		self.position = {
 			'x': cent_x - (5 * self.font_width / 2),
 			'y': cent_y + (self.font_height / 2) - 2
 		}
-		settings.updateBool = False
+		settings.update_bool = False
 
 #-------------------------------------------------------------------------
 # LED Animations: 
@@ -70,6 +66,7 @@ class StoppableThread(threading.Thread):
 class Clock(StoppableThread):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
+		self.name = 'clock'
 
 	def run(self):
 		logging.debug('starting clock')
@@ -85,7 +82,7 @@ class Clock(StoppableThread):
 				return
 
 			# Check for a settings change that needs fto be loaded
-			if settings.updateBool:
+			if settings.update_bool:
 				self.loadSettings()
 
 			offscreen_canvas.Clear()
@@ -97,25 +94,62 @@ class Clock(StoppableThread):
 
 			# Create the min string
 			if mins < 10:
-				minStr = '0' + str(mins)
+				min_str = '0' + str(mins)
 			else:
-				minStr = str(mins)
+				min_str = str(mins)
 
 			# Create the hour string
 			if hours < 10:
-				hourStr = '0' + str(hours)
+				hour_str = '0' + str(hours)
 			else:
-				hourStr = str(hours)
+				hour_str = str(hours)
 
 			# Create the time string either with a lit up colon or not
 			if secs % 2 == 1:
 				# Even seconds, concatenate the strings with a colon in the middle
-				timeStr = hourStr + ' ' + minStr
+				time_str = hour_str + ' ' + min_str
 			else:
 				# Odd seconds, concatenate the strings with a semicolon(blank) in the middle
-				timeStr = hourStr + ':' + minStr
+				time_str = hour_str + ':' + min_str
 			
 			# Write the actual drawing to the canvas and then display
-			graphics.DrawText(offscreen_canvas, self.font, self.position['x'], self.position['y'], self.staticColor, timeStr)
+			graphics.DrawText(offscreen_canvas, self.font, self.position['x'], self.position['y'], self.static_color, time_str)
 			time.sleep(0.05)	# Time buffer added so as to not overload the system
 			offscreen_canvas = matrix.SwapOnVSync(offscreen_canvas)
+
+class Picture(StoppableThread):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.name = 'picture'
+
+	def run(self):
+		self.image = Image.open('./images/lancesig.png').convert('RGB')
+		# self.image.resize((matrix.width, matrix.height), Image.ANTIALIAS)
+
+		double_buffer = matrix.CreateFrameCanvas()
+
+		double_buffer.SetImage(self.image, 0)
+
+		matrix.SwapOnVSync(double_buffer)
+
+#-------------------------------------------------------------------------
+# LED Driving functions that are dependent on the objects defined above
+#-------------------------------------------------------------------------
+def start_led_app(app):
+	if app == 'clock':
+		task = Clock()
+		task.start()
+		settings.current_thread = task
+		settings.running_apps.append('clock')
+	elif app == 'picture':
+		task = Picture()
+		task.start()
+		settings.current_thread = task
+		settings.running_apps.append('picture')
+	
+	settings.dump_settings()
+
+def stop_current_led_app():
+	settings.current_thread.stop()
+	settings.current_thread = None
+	settings.running_apps = []
