@@ -120,3 +120,9 @@ class Clock(StoppableThread):
 			graphics.DrawText(offscreen_canvas, self.font, self.position['x'], self.position['y'], self.staticColor, timeStr)
 			time.sleep(0.05)	# Time buffer added so as to not overload the system
 			offscreen_canvas = matrix.SwapOnVSync(offscreen_canvas)
+
+class Image(StoppableThread):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+
+	

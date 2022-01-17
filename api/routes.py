@@ -14,9 +14,10 @@ def index_route():
 	return render_template('index.html')
 
 # App route for api
-@api.route('/api/app', methods=['GET'])
+@api.route('/api/app', methods=['POST'])
 def pixel_route():
-	logging.info('API request received for {}'.format('pixel'))
+	request_form = request.get_json()
+	logging.info('API request received for {}'.format(request_form['app']))
 
 	if len(ledTasks.tasks) == 0:
 		t1 = ledTasks.Clock()
