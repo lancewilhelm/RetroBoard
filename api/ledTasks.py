@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 import time
-from utils import matrix, font_dict, settings
+from utils import matrix, settings
 import time
 from PIL import Image
 import logging
 import threading
 from rgbmatrix import graphics
-import math
-import asyncio
 
 #-------------------------------------------------------------------------
-# Utility functions:
+# Utility functions/variables:
 #-------------------------------------------------------------------------
 def scale_color(val, lo, hi):
 	'''Scales up any number into the 0 to 255 scale. This is useful for color calculations.'''
@@ -134,59 +132,22 @@ class Picture(StoppableThread):
 
 		matrix.SwapOnVSync(double_buffer)
 
+#-------------------------------------------------------------------------
+# LED Driving functions that are dependent on the objects defined above
+#-------------------------------------------------------------------------
+def start_led_app(app):
+	if app == 'clock':
+		task = Clock()
+		task.start()
+		settings.current_thread = task
+		settings.running_apps.append('clock')
+	elif app == 'picture':
+		task = Picture()
+		task.start()
+		settings.current_thread = task
+		settings.running_apps.append('picture')
 
-# Tasks object array for storing active task and the task dictionary to look up new ones
-running_tasks = []
-task_dict = {
-	'clock': Clock(),
-	'picture': Picture()
-}
-
-def clock_function(self):
-		logging.debug('starting clock')
-
-		# Establish the offscreen buffer to store changes too before publishing
-		offscreen_canvas = matrix.CreateFrameCanvas()
-
-		# Run the clock loop until stopped
-		while True:
-			# Check to see if we have stopped
-			if self.stopped():
-				matrix.Clear()
-				return
-
-			# Check for a settings change that needs fto be loaded
-			if settings.update_bool:
-				self.loadSettings()
-
-			offscreen_canvas.Clear()
-			# Grab the latest time
-			t = time.localtime()
-			hours = t.tm_hour
-			mins = t.tm_min
-			secs = t.tm_sec
-
-			# Create the min string
-			if mins < 10:
-				min_str = '0' + str(mins)
-			else:
-				min_str = str(mins)
-
-			# Create the hour string
-			if hours < 10:
-				hour_str = '0' + str(hours)
-			else:
-				hour_str = str(hours)
-
-			# Create the time string either with a lit up colon or not
-			if secs % 2 == 1:
-				# Even seconds, concatenate the strings with a colon in the middle
-				time_str = hour_str + ' ' + min_str
-			else:
-				# Odd seconds, concatenate the strings with a semicolon(blank) in the middle
-				time_str = hour_str + ':' + min_str
-			
-			# Write the actual drawing to the canvas and then display
-			graphics.DrawText(offscreen_canvas, self.font, self.position['x'], self.position['y'], self.staticColor, time_str)
-			time.sleep(0.05)	# Time buffer added so as to not overload the system
-			offscreen_canvas = matrix.SwapOnVSync(offscreen_canvas)
+def stop_current_led_app():
+	settings.current_thread.stop()
+	settings.current_thread = None
+	settings.running_apps = []

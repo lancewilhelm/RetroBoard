@@ -3,8 +3,6 @@ from flask import render_template, request
 from utils import api, settings
 import ledTasks
 import logging
-import threading
-import asyncio
 
 #-------------------------------------------------------------------------
 # Routes:
@@ -18,27 +16,17 @@ def index_route():
 @api.route('/api/app', methods=['POST'])
 def pixel_route():
 	request_form = request.get_json()
-	logging.debug('API request received for {}. Tasks currently running {}'.format(request_form['app'], ledTasks.running_tasks))
+	logging.debug('API request received for {}. Task currently running {}'.format(request_form['app'], settings.current_thread))
 
-	if len(ledTasks.running_tasks) == 0:
+	if settings.current_thread == None:
 		if request_form['app'] != 'clear':
-			task = ledTasks.task_dict[request_form['app']]
-			ledTasks.running_tasks.append(task)
-			task.start()
-		return 'OK'
-
+			ledTasks.start_led_app(request_form['app'])
 	else:
-		task = ledTasks.running_tasks[0]
 		if request_form['app'] == 'clear':
-			task.stop()
-			task.join()
-			ledTasks.running_tasks = []
-		elif task.name != request_form['app']: 
-			task.stop()
-			task.join()
-			ledTasks.running_tasks = []
-			task = ledTasks.task_dict[request_form['app']]
-			ledTasks.running_tasks.append(task)
+			ledTasks.stop_current_led_app()
+		elif request_form['app'] != settings.current_thread.name:
+			ledTasks.stop_current_led_app()
+			ledTasks.start_led_app(request_form['app'])
 
 	return 'OK'
 
