@@ -15,7 +15,7 @@ export default function ColorButton(props) {
     };
 
 	return (
-		<div >
+		<div className={styles.container}>
 			<div className={styles.swatch} onClick={handleClick}>
 				<div className={styles.color} style={{background: `rgba(${ props.staticColor.r }, ${ props.staticColor.g }, ${ props.staticColor.b }, ${ props.staticColor.a })`}} />
 			</div>

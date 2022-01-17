@@ -87,20 +87,20 @@ export default function Home() {
                 <Main className={styles.main}/>
             </div>
 
-            <Modal show={modalOpen} fullscreen="true" onHide={handleModalClose} className={styles.settingsModal} dialogClassName={styles.settingsModal} contentClassName={styles.modalContent} backdropClassName={styles.modalBackdrop} fullscreen={true} scrollable={true} centered>
+            <Modal show={modalOpen} fullscreen="true" onHide={handleModalClose} className={styles.settingsModal} dialogClassName={styles.settingsModal} contentClassName={styles.settingsContent} backdropClassName={styles.settingsBackdrop} fullscreen={true} scrollable={true} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Retroboard Settings</Modal.Title>
                 </Modal.Header>
-                <Modal.Body className={styles.modalBody}>
-                    <div>
-                    <DropdownButton id='font-dropdown' title='Font Selection'>
-                    {addFontDropdowns()}
-                    </DropdownButton>
+                <Modal.Body className={styles.settingsBody}>
+                    <div className={styles.settingsContainer}>
+                        <DropdownButton id='font-dropdown' title='Font Selection'>
+                        {addFontDropdowns()}
+                        </DropdownButton>
                     </div>
-                    <div>Active Font Path: {activeFont}</div>
-                    <div>Brightness: <Slider value={brightness} aria-label='default' valueLabelDisplay='auto' sx={{width: 200}} onChangeCommitted={(e, val) => changeBrightness(val)}/></div>
+                    <div className={styles.settingsContainer}>Active Font Path: {activeFont}</div>
+                    <div className={styles.settingsContainer}>Brightness: <Slider className={styles.brightnessSlider} value={brightness} aria-label='default' valueLabelDisplay='auto' sx={{width: 200}} onChangeCommitted={(e, val) => changeBrightness(val)} /></div>
                     {/* <div>Color: <ChromePicker color={staticColor} onChange={(color, event) => setStaticColor(color)} onChangeComplete={changeStaticColor} disableAlpha={true}/></div> */}
-                    <div>Color: <ColorButton staticColor={staticColor} setStaticColor={setStaticColor} changeStaticColor={changeStaticColor}/></div>
+                    <div className={styles.settingsContainer}>Font Color: <ColorButton staticColor={staticColor} setStaticColor={setStaticColor} changeStaticColor={changeStaticColor} /></div>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant='outline-dark' onClick={handleModalClose}>
