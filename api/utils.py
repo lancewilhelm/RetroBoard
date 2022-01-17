@@ -7,6 +7,7 @@ import logging
 import argparse 
 from collections import defaultdict
 import json
+import asyncio
 
 #-------------------------------------------------------------------------
 # Argparsing
@@ -82,17 +83,17 @@ for file in dir_list:
 #-------------------------------------------------------------------------
 class Settings():
 	def __init__(self):
-		# Stored Settings
+		# Initialize stored settings with some defaults
 		self.font_dict = font_dict
 		self.active_font = font_dict['tom-thumb']
 		self.static_color = {'r': 255, 'g': 255, 'b': 255, 'a': 1}
 		self.running_apps = ['clock']
 		
-		# Non Stored Settings
+		# Non stored settings
 		self.current_thread = None
 		self.update_bool = True
 
-	def dump_settings(self, settings=None):
+	async def dump_settings(self, settings=None):
 		logging.debug('dumping settings to settings.json')
 		if settings == None:
 			settings = {
@@ -106,10 +107,13 @@ class Settings():
 		with open('/home/pi/RetroBoard/settings.json', 'w') as filehandle:
 			json.dump(settings, filehandle)
 
-	def import_settings(self):
+	async def import_settings(self):
 		logging.debug('loading settings from settings.json')
-		with open('/home/pi/RetroBoard/settings.json', 'r') as filehandle:
-			settings = json.load(filehandle)
+		try:
+			with open('/home/pi/RetroBoard/settings.json', 'r') as filehandle:
+				settings = json.load(filehandle)
+		except FileNotFoundError:
+			await self.dump_settings()
 
 		self.font_dict = settings['font_dict']
 		self.active_font = settings['active_font']

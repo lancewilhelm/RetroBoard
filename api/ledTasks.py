@@ -38,6 +38,7 @@ class StoppableThread(threading.Thread):
 	def stop(self):
 		logging.debug('stopping thread for {}'.format(type(self).__name__))
 		self._stop_event.set()
+		matrix.Clear()
 
 	def stopped(self):
 		return self._stop_event.is_set()
@@ -78,7 +79,6 @@ class Clock(StoppableThread):
 		while True:
 			# Check to see if we have stopped
 			if self.stopped():
-				matrix.Clear()
 				return
 
 			# Check for a settings change that needs fto be loaded
