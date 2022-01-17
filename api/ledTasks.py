@@ -123,7 +123,7 @@ class Picture(StoppableThread):
 		self.name = 'picture'
 
 	def run(self):
-		self.image = Image.open('./images/plant.png').convert('RGB')
+		self.image = Image.open('./images/lancesig.png').convert('RGB')
 		# self.image.resize((matrix.width, matrix.height), Image.ANTIALIAS)
 
 		double_buffer = matrix.CreateFrameCanvas()
