@@ -7,7 +7,8 @@ import logging
 import argparse 
 from collections import defaultdict
 import json
-import asyncio
+import numpy as np
+from bdflib import reader
 
 #-------------------------------------------------------------------------
 # Argparsing
@@ -60,7 +61,7 @@ options.scan_mode = 1
 options.pwm_bits = 11	# this seems to affect flickering of the leds somewhat
 options.led_rgb_sequence = 'RGB'
 options.row_address_type = 0
-# options.limit_refresh_rate_hz = 60
+options.limit_refresh_rate_hz = 0
 options.disable_hardware_pulsing = True
 
 matrix = RGBMatrix(options = options)
@@ -87,11 +88,16 @@ class Settings():
 		self.font_dict = font_dict
 		self.active_font = font_dict['tom-thumb']
 		self.static_color = {'r': 255, 'g': 255, 'b': 255, 'a': 1}
+		self.grad_start_color = {'r': 0, 'g': 0, 'b': 255, 'a': 1}
+		self.grad_end_color = {'r': 255, 'g': 0, 'b': 255, 'a': 1}
 		self.running_apps = ['clock']
+		self.color_mode = 'static'
 		
 		# Non stored settings
 		self.current_thread = None
 		self.update_bool = True
+		self.color_matrix = np.ndarray((matrix.width, matrix.height, 3), dtype=int)
+		self.color_matrix.fill(255)
 
 	def dump_settings(self, settings=None):
 		logging.debug('dumping settings to settings.json')
@@ -101,7 +107,10 @@ class Settings():
 				'active_font': self.active_font,
 				'brightness': matrix.brightness,
 				'static_color': self.static_color,
-				'running_apps': self.running_apps
+				'grad_start_color': self.grad_start_color,
+				'grad_end_color': self.grad_end_color,
+				'running_apps': self.running_apps,
+				'color_mode': self.color_mode
 			}
 
 		with open('/home/pi/RetroBoard/settings.json', 'w') as filehandle:
@@ -117,11 +126,21 @@ class Settings():
 				self.active_font = settings['active_font']
 				matrix.brightness = settings['brightness']
 				self.static_color = settings['static_color']
+				self.grad_start_color = settings['grad_start_color']
+				self.grad_end_color = settings['grad_end_color']
 				self.running_apps = settings['running_apps']
+				self.color_mode = settings['color_mode']
 				self.update_bool = True
 
 		except FileNotFoundError:
+			logging.debug('no settings.json file exists, creating one...')
 			self.dump_settings()
+
+	def load_font(self, path):
+		logging.debug('loading font {}'.format(path))
+		with open(path, 'rb') as filehandle:
+			font = reader.read_bdf(filehandle)
+		return font
 
 #  Create the settings object and then loads the settings from the stored file.
 settings = Settings()

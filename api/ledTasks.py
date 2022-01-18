@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 import time
-from utils import matrix, settings
+from setup import matrix, settings
 import time
 from PIL import Image
 import logging
 import threading
-from rgbmatrix import graphics
+import numpy as np
 
 #-------------------------------------------------------------------------
 # Utility functions/variables:
@@ -22,8 +22,39 @@ def rotate(x, y, sin, cos):
 	'''Used for the rotating block animation. Might be useful elsewhere'''
 	return x * cos - y * sin, x * sin + y * cos
 
-cent_x = matrix.width / 2
-cent_y = matrix.height / 2
+# Creates a linear color gradient
+def set_color_grad(start_color, end_color):
+	# Initially this is assuming moving from the far left of the grid to the right. Angles will be added later
+	width, height, _ = settings.color_matrix.shape
+
+	for i in range(width):
+		new_color = ((end_color - start_color) * (i / width) + start_color).astype(int)
+		settings.color_matrix[i,:] = new_color
+
+def set_static_color(color):
+	color_array = np.array([color['r'], color['g'], color['b']])
+	settings.color_matrix[:, :] = color_array
+
+def draw_glyph(canvas, x, y, glyph):
+	cm = settings.color_matrix
+	for i, row in enumerate(glyph.iter_pixels()):
+		for j, pixel, in enumerate(row):
+			pixel_x = x + j
+			pixel_y = y + i
+			if pixel:
+				canvas.SetPixel(pixel_x, pixel_y, cm[pixel_x, pixel_y, 0], cm[pixel_x, pixel_y, 1], cm[pixel_x, pixel_y, 2])
+
+def draw_text(canvas, x, y, font, text):
+	char_x = x
+	for char in text:
+		glyph = font[ord(char)]
+		char_y = y + (font.ptSize - glyph.bbH) - glyph.bbY
+		char_x += glyph.bbX
+		draw_glyph(canvas, char_x, char_y, glyph)
+		char_x += (glyph.advance - glyph.bbX)
+
+cent_x = int(matrix.width / 2)
+cent_y = int(matrix.height / 2)
 
 #-------------------------------------------------------------------------
 # Stoppable Thread Class:
@@ -45,17 +76,17 @@ class StoppableThread(threading.Thread):
 
 	def loadSettings(self):
 		logging.debug('loading settings for {}'.format(type(self).__name__))
-		self.font = graphics.Font()
-		self.font_path = settings.active_font
-		self.font.LoadFont(self.font_path)
-		self.font_height = self.font.height
-		self.font_width = self.font.CharacterWidth(ord('L'))
-		self.static_color = graphics.Color(settings.static_color['r'], settings.static_color['g'], settings.static_color['b'])
+		self.font = settings.load_font(settings.active_font)
+		self.font_width = self.font[ord(' ')].advance
+		self.font_height = self.font.ptSize
 		self.position = {
-			'x': cent_x - (5 * self.font_width / 2),
-			'y': cent_y + (self.font_height / 2) - 2
+			'x': int(cent_x - (5 * self.font_width) / 2),
+			'y': int(cent_y - self.font_height / 2)
 		}
 		settings.update_bool = False
+
+		if settings.color_mode == 'static':
+			set_static_color(settings.static_color)
 
 #-------------------------------------------------------------------------
 # LED Animations: 
@@ -79,6 +110,7 @@ class Clock(StoppableThread):
 		while True:
 			# Check to see if we have stopped
 			if self.stopped():
+				matrix.Clear()
 				return
 
 			# Check for a settings change that needs fto be loaded
@@ -113,7 +145,7 @@ class Clock(StoppableThread):
 				time_str = hour_str + ':' + min_str
 			
 			# Write the actual drawing to the canvas and then display
-			graphics.DrawText(offscreen_canvas, self.font, self.position['x'], self.position['y'], self.static_color, time_str)
+			draw_text(offscreen_canvas, self.position['x'], self.position['y'], self.font, time_str)
 			time.sleep(0.05)	# Time buffer added so as to not overload the system
 			offscreen_canvas = matrix.SwapOnVSync(offscreen_canvas)
 
