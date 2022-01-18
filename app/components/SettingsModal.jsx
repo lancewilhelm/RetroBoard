@@ -43,6 +43,10 @@ export default function SettingsModal(props) {
 		setSettings(settings_copy);
 	}
 
+	function changeColorMode(mode) {
+		console.log(mode)
+	}
+
 	function sendSettings() {
 		const requestOptions = {
 			method: 'POST',
@@ -73,10 +77,10 @@ export default function SettingsModal(props) {
 					<Modal.Title>Retroboard Settings</Modal.Title>
 				</Modal.Header>
 				<Modal.Body className={styles.settingsBody}>
-					<div className={styles.settingsContainer}><Autocomplete disablePortal id='font-selector' options={fonts} sx={{width: 200, marginRight: '10px'}} onChange={(e, val) => changeActiveFont(e, val)} renderInput={(params) => <TextField {...params} label='Font' />} /><Chip label={activeFont} variant='outlined'/></div>
+					<div className={styles.settingsContainer}><Autocomplete disablePortal className={styles.textBox} id='font-selector' options={fonts} sx={{width: 200}} onChange={(e, val) => changeActiveFont(e, val)} renderInput={(params) => <TextField {...params} label='Font' />} /><Chip label={activeFont} variant='outlined'/></div>
 					<div className={styles.settingsContainer}>Brightness: <Slider className={styles.brightnessSlider} value={brightness} aria-label='default' valueLabelDisplay='auto' sx={{width: 200}} onChangeCommitted={(e, val) => changeBrightness(val)} /></div>
 					<div className={styles.settingsContainer}>Static Font Color: <ColorButton staticColor={staticColor} setStaticColor={setStaticColor} changeStaticColor={changeStaticColor} /></div>
-					<div className={styles.settingsContainer}><Autocomplete disablePortal id='color-mode-selector' options={colorModeList} sx={{width: 200}} renderInput={(params) => <TextField {...params} label='Color Mode' />} /></div>
+					<div className={styles.settingsContainer}><Autocomplete disablePortal className={styles.textBox} id='color-mode-selector' options={colorModeList} sx={{width: 200}} renderInput={(params) => <TextField {...params} label='Color Mode' />} /><Chip label={colorMode} variant='outlined'/></div>
 				</Modal.Body>
 				<Modal.Footer>
 					<Button variant='outline-dark' onClick={props.handleModalClose}>
