@@ -86,7 +86,7 @@ class Settings():
 	def __init__(self):
 		# Initialize stored settings with some defaults
 		self.font_dict = font_dict
-		self.active_font = font_dict['tom-thumb']
+		self.active_font = 'tom-thumb'
 		self.static_color = {'r': 255, 'g': 255, 'b': 255, 'a': 1}
 		self.grad_start_color = {'r': 0, 'g': 0, 'b': 255, 'a': 1}
 		self.grad_end_color = {'r': 255, 'g': 0, 'b': 255, 'a': 1}
