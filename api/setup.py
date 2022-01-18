@@ -7,6 +7,8 @@ import logging
 import argparse 
 from collections import defaultdict
 import json
+import numpy as np
+from bdflib import reader
 
 #-------------------------------------------------------------------------
 # Argparsing
@@ -59,7 +61,7 @@ options.scan_mode = 1
 options.pwm_bits = 11	# this seems to affect flickering of the leds somewhat
 options.led_rgb_sequence = 'RGB'
 options.row_address_type = 0
-# options.limit_refresh_rate_hz = 60
+options.limit_refresh_rate_hz = 0
 options.disable_hardware_pulsing = True
 
 matrix = RGBMatrix(options = options)
@@ -91,6 +93,8 @@ class Settings():
 		# Non stored settings
 		self.current_thread = None
 		self.update_bool = True
+		self.color_matrix = np.ndarray((matrix.width, matrix.height, 3), dtype=int)
+		self.color_matrix.fill(255)
 
 	def dump_settings(self, settings=None):
 		logging.debug('dumping settings to settings.json')
@@ -121,6 +125,11 @@ class Settings():
 
 		except FileNotFoundError:
 			self.dump_settings()
+
+	def load_font(self, path):
+		with open(path, 'rb') as filehandle:
+			font = reader.read_bdf(filehandle)
+		return font
 
 #  Create the settings object and then loads the settings from the stored file.
 settings = Settings()

@@ -5,13 +5,8 @@ sudo apt-get update
 wget https://nodejs.org/dist/v14.16.1/node-v14.16.1-linux-armv7l.tar.xz
 
 sudo apt-get install python3-pip
-sudo pip3 install flask flask-cors pillow bdflib
+sudo pip3 install flask flask-cors pillow bdflib numpy opencv-python
 sudo apt install libopenjp2-7
-
-sudo rabbitmq-server -detached
-sudo rabbitmqctl add_user pi raspberry
-sudo rabbitmqctl add_vhost myvhost
-sudo rabbitmqctl set_permissions -p myvhost myuser ".*" ".*" ".*"
 
 wget http://ftp.us.debian.org/debian/pool/main/libs/libseccomp/libseccomp2_2.5.1-1_armhf.deb
 sudo dpkg -i libseccomp2_2.5.1-1_armhf.deb
