@@ -5,6 +5,7 @@ import time
 from PIL import Image
 import logging
 import threading
+import numpy as np
 
 #-------------------------------------------------------------------------
 # Utility functions/variables:
@@ -22,7 +23,7 @@ def rotate(x, y, sin, cos):
 	return x * cos - y * sin, x * sin + y * cos
 
 # Creates a linear color gradient
-def color_grad(start_color, end_color):
+def set_color_grad(start_color, end_color):
 	# Initially this is assuming moving from the far left of the grid to the right. Angles will be added later
 	width, height, _ = settings.color_matrix.shape
 
@@ -30,8 +31,9 @@ def color_grad(start_color, end_color):
 		new_color = ((end_color - start_color) * (i / width) + start_color).astype(int)
 		settings.color_matrix[i,:] = new_color
 
-def static_color(color):
-	settings.color_matrix[:, :] = color
+def set_static_color(color):
+	color_array = np.array([color['r'], color['g'], color['b']])
+	settings.color_matrix[:, :] = color_array
 
 def draw_glyph(canvas, x, y, glyph):
 	cm = settings.color_matrix
@@ -82,6 +84,9 @@ class StoppableThread(threading.Thread):
 			'y': int(cent_y - self.font_height / 2)
 		}
 		settings.update_bool = False
+
+		if settings.color_mode == 'static':
+			set_static_color(settings.static_color)
 
 #-------------------------------------------------------------------------
 # LED Animations: 

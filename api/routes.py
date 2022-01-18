@@ -40,8 +40,8 @@ def settings_route():
 			return filehandle.read()
 	
 	elif request.method == 'POST':
-		settingsFromWeb = request.json
+		settings_from_web = request.json
 		# Write the settings to webpagesettings.txt
-		settings.dump_settings(settingsFromWeb)
+		settings.dump_settings(settings_from_web)
 		settings.import_settings()
 		return "OK"

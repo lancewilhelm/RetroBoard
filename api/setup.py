@@ -88,7 +88,10 @@ class Settings():
 		self.font_dict = font_dict
 		self.active_font = font_dict['tom-thumb']
 		self.static_color = {'r': 255, 'g': 255, 'b': 255, 'a': 1}
+		self.grad_start_color = {'r': 0, 'g': 0, 'b': 255, 'a': 1}
+		self.grad_end_color = {'r': 255, 'g': 0, 'b': 255, 'a': 1}
 		self.running_apps = ['clock']
+		self.color_mode = 'static'
 		
 		# Non stored settings
 		self.current_thread = None
@@ -104,7 +107,10 @@ class Settings():
 				'active_font': self.active_font,
 				'brightness': matrix.brightness,
 				'static_color': self.static_color,
-				'running_apps': self.running_apps
+				'grad_start_color': self.grad_start_color,
+				'grad_end_color': self.grad_end_color,
+				'running_apps': self.running_apps,
+				'color_mode': self.color_mode
 			}
 
 		with open('/home/pi/RetroBoard/settings.json', 'w') as filehandle:
@@ -120,13 +126,18 @@ class Settings():
 				self.active_font = settings['active_font']
 				matrix.brightness = settings['brightness']
 				self.static_color = settings['static_color']
+				self.grad_start_color = settings['grad_start_color']
+				self.grad_end_color = settings['grad_end_color']
 				self.running_apps = settings['running_apps']
+				self.color_mode = settings['color_mode']
 				self.update_bool = True
 
 		except FileNotFoundError:
+			logging.debug('no settings.json file exists, creating one...')
 			self.dump_settings()
 
 	def load_font(self, path):
+		logging.debug('loading font {}'.format(path))
 		with open(path, 'rb') as filehandle:
 			font = reader.read_bdf(filehandle)
 		return font
