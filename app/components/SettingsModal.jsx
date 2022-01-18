@@ -17,6 +17,8 @@ export default function SettingsModal(props) {
 	const [brightness, setBrightness] = useState();
 	const [staticColor, setStaticColor] = useState();
 	const [colorMode, setColorMode] = useState();
+	const [gradStartColor, setGradStartColor] = useState();
+	const [gradEndColor, setGradEndColor] = useState();
 
 	const colorModeList = ['static', 'gradient']
 
@@ -43,6 +45,20 @@ export default function SettingsModal(props) {
 		setSettings(settings_copy);
 	}
 
+	function changeGradStartColor(color, event) {
+		setGradStartColor(color.rgb)
+		let settings_copy = Object.assign({}, settings);
+		settings_copy.grad_start_color = color.rgb;
+		setSettings(settings_copy);
+	}
+
+	function changeGradEndColor(color, event) {
+		setGradEndColor(color.rgb)
+		let settings_copy = Object.assign({}, settings);
+		settings_copy.grad_end_color = color.rgb;
+		setSettings(settings_copy);
+	}
+	
 	function changeColorMode(e, val) {
 		if (val != null) {
 			setColorMode(val)
@@ -72,6 +88,8 @@ export default function SettingsModal(props) {
 				setBrightness(data.brightness);
 				setStaticColor(data.static_color);
 				setColorMode(data.color_mode);
+				setGradStartColor(data.grad_start_color);
+				setGradEndColor(data.grad_end_color);
 			});
 	}, [])
 
@@ -85,7 +103,13 @@ export default function SettingsModal(props) {
 					<div className={styles.settingsContainer}><Autocomplete disablePortal className={styles.textBox} id='font-selector' options={fonts} sx={{width: 200}} onChange={(e, val) => changeActiveFont(e, val)} renderInput={(params) => <TextField {...params} label='Font' />} /><Chip label={activeFont} variant='outlined'/></div>
 					<div className={styles.settingsContainer}>Brightness: <Slider className={styles.brightnessSlider} value={brightness} aria-label='default' valueLabelDisplay='auto' sx={{width: 200}} onChangeCommitted={(e, val) => changeBrightness(val)} /></div>
 					<div className={styles.settingsContainer}><Autocomplete disablePortal className={styles.textBox} id='color-mode-selector' options={colorModeList} sx={{width: 200}} onChange={(e, val) => changeColorMode(e, val)} renderInput={(params) => <TextField {...params} label='Color Mode' />} /><Chip label={colorMode} variant='outlined'/></div>
-					{colorMode == 'static' ? (<div className={styles.settingsContainer}>Static Font Color: <ColorButton staticColor={staticColor} setStaticColor={setStaticColor} changeStaticColor={changeStaticColor} /></div>) : null}
+					{(() => {
+						if (colorMode == 'static') {
+						return (<div className={styles.settingsContainer}>Static Font Color: <ColorButton color={staticColor} setColor={setStaticColor} changeColor={changeStaticColor} /></div>)
+						} else if (colorMode == 'gradient') {
+							return (<div><div className={styles.settingsContainer}>Grad Start Color: <ColorButton color={gradStartColor} setColor={setGradStartColor} changeColor={changeGradStartColor} /></div><div className={styles.settingsContainer}>Grad End Color: <ColorButton color={gradEndColor} setColor={setGradEndColor} changeColor={changeGradEndColor} /></div></div>)
+						}			
+					})()}
 				</Modal.Body>
 				<Modal.Footer>
 					<Button variant='outline-dark' onClick={props.handleModalClose}>

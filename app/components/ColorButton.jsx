@@ -17,15 +17,15 @@ export default function ColorButton(props) {
 	return (
 		<div className={styles.container}>
 			<div className={styles.swatch} onClick={handleClick}>
-				<div className={styles.color} style={{background: `rgba(${ props.staticColor.r }, ${ props.staticColor.g }, ${ props.staticColor.b }, ${ props.staticColor.a })`}} />
+				<div className={styles.color} style={{background: `rgba(${ props.color.r }, ${ props.color.g }, ${ props.color.b }, ${ props.color.a })`}} />
 			</div>
 			{displayColorPicker ? (
 				<div className={styles.popover} >
 					<div className={styles.cover} onClick={handleClose} />
 					<ChromePicker 
-						color={props.staticColor} 
-						onChange={(color, event) => props.setStaticColor(color)} 
-						onChangeComplete={props.changeStaticColor} 
+						color={props.color} 
+						onChange={(color, event) => props.setColor(color)} 
+						onChangeComplete={props.changeColor} 
 						disableAlpha={true}
 					/>
 				</div>
