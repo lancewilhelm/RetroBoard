@@ -32,29 +32,3 @@
 .settingsButton {
   margin: 10px;
 }
-
-.settingsModal {
-  max-width: 100%;
-  padding: 0px 10px;
-}
-
-.settingsContent {
-  height: 100%;
-}
-
-.settingsBody {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.settingsContainer {
-  display: flex;
-  margin: 5px;
-  align-items: center;
-}
-
-.brightnessSlider {
-  margin-left: 10px;
-}
