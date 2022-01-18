@@ -24,11 +24,13 @@ def rotate(x, y, sin, cos):
 
 # Creates a linear color gradient
 def set_color_grad(start_color, end_color):
+	start_color_array = np.array([start_color['r'], start_color['g'], start_color['b']])
+	end_color_array = np.array([end_color['r'], end_color['g'], end_color['b']])
 	# Initially this is assuming moving from the far left of the grid to the right. Angles will be added later
 	width, height, _ = settings.color_matrix.shape
 
 	for i in range(width):
-		new_color = ((end_color - start_color) * (i / width) + start_color).astype(int)
+		new_color = ((end_color_array - start_color_array) * (i / width) + start_color_array).astype(int)
 		settings.color_matrix[i,:] = new_color
 
 def set_static_color(color):
@@ -76,7 +78,7 @@ class StoppableThread(threading.Thread):
 
 	def loadSettings(self):
 		logging.debug('loading settings for {}'.format(type(self).__name__))
-		self.font = settings.load_font(settings.active_font)
+		self.font = settings.load_font(settings.font_dict[settings.active_font])
 		self.font_width = self.font[ord(' ')].advance
 		self.font_height = self.font.ptSize
 		self.position = {
@@ -87,6 +89,8 @@ class StoppableThread(threading.Thread):
 
 		if settings.color_mode == 'static':
 			set_static_color(settings.static_color)
+		elif settings.color_mode == 'gradient':
+			set_color_grad(settings.grad_start_color, settings.grad_end_color)
 
 #-------------------------------------------------------------------------
 # LED Animations: 
