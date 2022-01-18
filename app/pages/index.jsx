@@ -9,6 +9,8 @@ import { localIP } from '../components/config';
 import Slider from '@mui/material/Slider';
 import { ChromePicker } from 'react-color';
 import ColorButton from '../components/ColorButton';
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material/Autocomplete';
 
 export default function Home() {
     // Set the state variable for the modal
@@ -18,6 +20,7 @@ export default function Home() {
     const [activeFont, setActiveFont] = useState();
     const [brightness, setBrightness] = useState();
     const [staticColor, setStaticColor] = useState();
+    const [colorMode, setColorMode] = useState();
 
     const handleModalOpen = () => setModalOpen(true);
     const handleModalClose = () => setModalOpen(false);
@@ -39,7 +42,7 @@ export default function Home() {
     function changeStaticColor(color, event) {
         setStaticColor(color.rgb)
         let settings_copy = Object.assign({}, settings);
-        settings_copy.staticColor = color.rgb;
+        settings_copy.static_color = color.rgb;
         setSettings(settings_copy);
     }
 
@@ -68,6 +71,7 @@ export default function Home() {
                 setActiveFont(data.active_font);
                 setBrightness(data.brightness);
                 setStaticColor(data.static_color);
+                setColorMode(data.color_mode);
             });
     }, [])
 
