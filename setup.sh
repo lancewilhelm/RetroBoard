@@ -19,4 +19,3 @@ sudo bash rgb-matrix.sh
 #setup cron for @reboot
 sudo rm /var/spool/cron/crontabs/root
 sudo cp ~/RetroBoard/crontabScript /var/spool/cron/crontabs/root
-sudo chmod 600 /var/spool/cron/crontabs/root

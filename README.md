@@ -55,7 +55,7 @@ The webapp is a React app built on the Next.js framework. React was chosen as it
 
 ### API
 
-The API was built simply from Flask. While this may not be the most robust for any serious applications, it provides a python basis for the API which allow for easy integration into the LED driver library. Also, the original author has a bit of experience in Python and Flask, so you are gonna have to deal with it for now...The app can be run with the command `sudo ./main.py` from the [`api`](api/) provided one has installed all the necessary dependencies.
+The API was built simply from Flask. While this may not be the most robust for any serious applications, it provides a python basis for the API which allow for easy integration into the LED driver library. Also, the original author has a bit of experience in Python and Flask, so you are gonna have to deal with it for now...The app can be run with the command `sudo ./main.py` from the [`api`](api/) directory provided one has installed all the necessary dependencies.
 
 ## Future
 
