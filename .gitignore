@@ -133,4 +133,3 @@ rpi-rgb-led-matrix/
 .vscode/
 api/log.txt
 settings.json
-app/components/config.js
