@@ -22,15 +22,21 @@ def rotate(x, y, sin, cos):
 	'''Used for the rotating block animation. Might be useful elsewhere'''
 	return x * cos - y * sin, x * sin + y * cos
 
+def clamp(n, minn, maxn):
+	return max(min(maxn, n), minn)
+
 # Creates a linear color gradient
 def set_color_grad(start_color, end_color):
 	start_color_array = np.array([start_color['r'], start_color['g'], start_color['b']])
 	end_color_array = np.array([end_color['r'], end_color['g'], end_color['b']])
+	t_0_pixel = start_color['offset'] * matrix.width
+	t_1_pixel = end_color['offset'] * matrix.width
+
 	# Initially this is assuming moving from the far left of the grid to the right. Angles will be added later
 	width, height, _ = settings.color_matrix.shape
 
 	for i in range(width):
-		new_color = ((end_color_array - start_color_array) * (i / width) + start_color_array).astype(int)
+		new_color = ((end_color_array - start_color_array) * clamp((i - t_0_pixel) / (t_1_pixel - t_0_pixel), 0.0, 1.0) + start_color_array).astype(int)
 		settings.color_matrix[i,:] = new_color
 
 def set_static_color(color):
@@ -168,6 +174,35 @@ class Picture(StoppableThread):
 
 		matrix.SwapOnVSync(double_buffer)
 
+class Solid(StoppableThread):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.name = 'solid'
+
+	def run(self):
+		cm = settings.color_matrix
+		# Establish the offscreen buffer to store changes too before publishing
+		offscreen_canvas = matrix.CreateFrameCanvas()
+
+		while True:
+			# Check to see if we have stopped
+			if self.stopped():
+				matrix.Clear()
+				return
+
+			# Check for a settings change that needs fto be loaded
+			if settings.update_bool:
+				self.loadSettings()
+
+			offscreen_canvas.Clear()
+
+			for x in range(matrix.width):
+				for y in range(matrix.height):
+					offscreen_canvas.SetPixel(x, y, cm[x, y, 0], cm[x, y, 1], cm[x, y, 2])
+
+			time.sleep(0.05)	# Time buffer added so as to not overload the system
+			offscreen_canvas = matrix.SwapOnVSync(offscreen_canvas)
+
 #-------------------------------------------------------------------------
 # LED Driving functions that are dependent on the objects defined above
 #-------------------------------------------------------------------------
@@ -183,6 +218,12 @@ def start_led_app(app):
 		task.start()
 		settings.current_thread = task
 		settings.running_apps.append('picture')
+		settings.dump_settings()
+	elif app == 'solid':
+		task = Solid()
+		task.start()
+		settings.current_thread = task
+		settings.running_apps.append('solid')
 		settings.dump_settings()
 
 def stop_current_led_app():

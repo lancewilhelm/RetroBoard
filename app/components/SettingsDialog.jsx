@@ -141,7 +141,7 @@ export default function SettingsDialog(props) {
                             aria-label='default'
                             valueLabelDisplay='auto'
                             sx={{ width: 200 }}
-                            onChangeCommitted={(e, val) =>
+                            onChange={(e, val) =>
                                 changeBrightness(val)
                             }
                         />
