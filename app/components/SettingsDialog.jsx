@@ -65,10 +65,10 @@ export default function SettingsDialog(props) {
         setGradPalette(palette);
     }
 
-    function parseGradPalette() {
+    function parseGradPalette(grad) {
         let settings_copy = Object.assign({}, settings);
         var gradient = []
-        for (const c of gradPalette) {
+        for (const c of grad) {
             const rgb = c.color.replace(/[^\d,]/g, '').split(',');
             const offset = parseFloat(c.offset);
             gradient.push({offset: offset, r: parseInt(rgb[0]), g: parseInt(rgb[1]), b: parseInt(rgb[2])});
@@ -77,8 +77,12 @@ export default function SettingsDialog(props) {
         setSettings(settings_copy);
     }
 
+    function updateGradPalette(grad) {
+        setGradPalette(grad);
+        parseGradPalette(grad);
+    }
+
     function sendSettings() {
-        parseGradPalette();
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -175,6 +179,7 @@ export default function SettingsDialog(props) {
                                     <GradientButton 
                                         gradPalette={gradPalette}
                                         setGradPalette={setGradPalette}
+                                        updateGradPalette={updateGradPalette}
                                         />
                                 </div>  
                             );
