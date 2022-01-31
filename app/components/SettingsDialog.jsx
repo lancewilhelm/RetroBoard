@@ -2,16 +2,17 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import styles from '../styles/SettingsModal.module.css';
 import Slider from '@mui/material/Slider';
-import ColorButton from '../components/ColorButton';
+import ColorButton from './ColorButton';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import Chip from '@mui/material/Chip';
-import { Modal } from 'react-bootstrap';
+import { Dialog, DialogContent, DialogTitle, DialogActions } from '@mui/material';
 import { Button } from 'react-bootstrap';
-import { localIP } from '../components/config';
+import { localIP } from './config';
 import GradientButton from './GradientButton';
+import { alignProperty } from '@mui/material/styles/cssUtils';
 
-export default function SettingsModal(props) {
+export default function SettingsDialog(props) {
     const [settings, setSettings] = useState({});
     const [reset, setReset] = useState(false);
     const [fonts, setFonts] = useState([]);
@@ -21,6 +22,7 @@ export default function SettingsModal(props) {
     const [colorMode, setColorMode] = useState();
     const [gradStartColor, setGradStartColor] = useState();
     const [gradEndColor, setGradEndColor] = useState();
+    const [scroll, setScroll] = React.useState('paper');
 
     const colorModeList = ['static', 'gradient'];
 
@@ -97,22 +99,17 @@ export default function SettingsModal(props) {
 
     return (
         <div className={styles.container}>
-            <Modal
-                show={props.modalOpen}
-                fullscreen='true'
-                onHide={props.handleModalClose}
-                className={styles.settingsModal}
-                dialogClassName={styles.settingsModal}
-                contentClassName={styles.settingsContent}
-                backdropClassName={styles.settingsBackdrop}
-                fullscreen={true}
-                scrollable={true}
-                centered
+            <Dialog
+                open={props.dialogOpen}
+                onClose={props.handleDialogClose}
+                scroll={scroll}
+                aria-labelledby="scroll-dialog-title"
+                aria-describedby="scroll-dialog-description"
+                fullScreen={true}
+                className={styles.dialog}
             >
-                <Modal.Header closeButton>
-                    <Modal.Title>Retroboard Settings</Modal.Title>
-                </Modal.Header>
-                <Modal.Body className={styles.settingsBody}>
+                <DialogTitle>Retroboard Settings</DialogTitle>
+                <DialogContent className={styles.settingsBody}>
                     <div className={styles.settingsContainer}>
                         <Autocomplete
                             disablePortal
@@ -192,8 +189,8 @@ export default function SettingsModal(props) {
                     <div className={styles.settingsContainer}>
                         <GradientButton />
                     </div>
-                </Modal.Body>
-                <Modal.Footer>
+                </DialogContent>
+                <DialogActions>
                     <Button
                         variant='outline-danger'
                         onClick={() => setReset(!reset)}
@@ -202,15 +199,15 @@ export default function SettingsModal(props) {
                     </Button>
                     <Button
                         variant='outline-dark'
-                        onClick={props.handleModalClose}
+                        onClick={props.handleDialogClose}
                     >
                         Close
                     </Button>
                     <Button variant='outline-dark' onClick={sendSettings}>
                         Save Changes
                     </Button>
-                </Modal.Footer>
-            </Modal>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 }

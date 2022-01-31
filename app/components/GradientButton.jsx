@@ -42,7 +42,7 @@ const GradientButton = () => {
                 maxStops: 3,
                 paletteHeight: 32,
                 palette,
-                onPaletteChange: setPalette,
+                onPaletteChange: setPalette
             }}
         >
             <WrappedSketchPicker />
