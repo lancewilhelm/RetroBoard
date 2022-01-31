@@ -36,7 +36,7 @@ export default function GradientButton(props) {
                 maxStops: 2,
                 paletteHeight: 32,
                 palette: props.gradPalette,
-                onPaletteChange: props.setGradPalette
+                onPaletteChange: props.updateGradPalette
             }}
         >
             <WrappedSketchPicker />
