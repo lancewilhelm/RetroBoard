@@ -90,7 +90,7 @@ class StoppableThread(threading.Thread):
 		if settings.color_mode == 'static':
 			set_static_color(settings.static_color)
 		elif settings.color_mode == 'gradient':
-			set_color_grad(settings.grad_start_color, settings.grad_end_color)
+			set_color_grad(settings.gradient[0], settings.gradient[-1])
 
 #-------------------------------------------------------------------------
 # LED Animations: 

@@ -1,12 +1,6 @@
-.settingsModal {
-	max-width: 100%;
-	padding: 0px 10px;
+.dialog {
+	margin: 20px;
 }
-
-.settingsContent {
-	height: 100%;
-}
-
 .settingsBody {
 	flex-grow: 1;
 	display: flex;
@@ -26,4 +20,8 @@
 
 .textBox {
 	margin-right: 10px;
+}
+
+.button {
+	font-family: inherit;
 }
