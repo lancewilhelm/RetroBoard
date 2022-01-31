@@ -6,5 +6,8 @@
 }
 
 .button {
-	margin: 0px 10px;
+	color: black;
+	margin: 0px 5px;
+	font-family: inherit;
+	border-color: black;
 }

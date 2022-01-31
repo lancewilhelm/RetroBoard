@@ -1,17 +1,17 @@
 import Head from 'next/head';
 import styles from '../styles/Index.module.css';
 import Main from '../components/main';
-import { Button } from 'react-bootstrap';
+import { Button } from '@mui/material';
 import { Gear } from 'react-bootstrap-icons';
 import { useState } from 'react';
-import SettingsModal from '../components/SettingsModal';
+import SettingsDialog from '../components/SettingsDialog';
 
 export default function Home() {
     // Set the state variable for the modal
-    const [modalOpen, setModalOpen] = useState(false);
+    const [dialogOpen, setDialogOpen] = useState(false);
 
-    const handleModalOpen = () => setModalOpen(true);
-    const handleModalClose = () => setModalOpen(false);
+    const handleDialogOpen = () => setDialogOpen(true);
+    const handleDialogClose = () => setDialogOpen(false);
 
     return (
         <div className={styles.container}>
@@ -21,8 +21,8 @@ export default function Home() {
             <div className={styles.menuBar}>
                 <Button
                     className={styles.settingsButton}
-                    variant='outline-dark'
-                    onClick={handleModalOpen}
+                    variant='ou'
+                    onClick={handleDialogOpen}
                 >
                     <Gear />
                 </Button>
@@ -33,10 +33,10 @@ export default function Home() {
                 <Main className={styles.main} />
             </div>
 
-            <SettingsModal
-                modalOpen={modalOpen}
-                handleModalOpen={handleModalOpen}
-                handleModalClose={handleModalClose}
+            <SettingsDialog
+                dialogOpen={dialogOpen}
+                handleDialogOpen={handleDialogOpen}
+                handleDialogClose={handleDialogClose}
             />
         </div>
     );
