@@ -32,6 +32,13 @@ export default function Main() {
             <Button
             className={styles.button}
                 variant='outlined'
+                onClick={() => sendCommand('solid')}
+            >
+                Solid
+            </Button>
+            <Button
+            className={styles.button}
+                variant='outlined'
                 onClick={() => sendCommand('clear')}
             >
                 Clear
