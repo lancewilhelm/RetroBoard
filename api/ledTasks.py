@@ -6,6 +6,7 @@ from PIL import Image
 import logging
 import threading
 import numpy as np
+import requests
 
 #-------------------------------------------------------------------------
 # Utility functions/variables:
@@ -203,6 +204,65 @@ class Solid(StoppableThread):
 			time.sleep(0.05)	# Time buffer added so as to not overload the system
 			offscreen_canvas = matrix.SwapOnVSync(offscreen_canvas)
 
+class Ticker(StoppableThread):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.name = 'ticker'
+		set_static_color({'r': 255, 'g': 255, 'b': 255, 'a': 1})
+	
+	def run(self):
+		ticker = 'ETH'
+		logging.debug('starting ticker')
+
+		# Establish the offscreen buffer to store changes too before publishing
+		offscreen_canvas = matrix.CreateFrameCanvas()
+
+		# Run the ticker loop until stopped
+		while True:
+			# Check to see if we have stopped
+			if self.stopped():
+				matrix.Clear()
+				return
+
+			# Check for a settings change that needs fto be loaded
+			if settings.update_bool:
+				self.loadSettings()
+
+			offscreen_canvas.Clear()
+
+			# Get time so we know when to update
+			t = time.localtime()
+			hours = t.tm_hour
+			mins = t.tm_min
+			secs = t.tm_sec
+
+			url = 'https://www.alphavantage.co/query?function=CRYPTO_INTRADAY&symbol=ETH&market=USD&interval=15min&apikey={}'.format(settings.apikeys['alphavantage'])
+			r = requests.get(url)
+			data = r.json()
+			close_vals = [float(n['4. close']) for n in data['Time Series Crypto (15min)'].values()]
+			max_val = max(close_vals)
+			min_val = min(close_vals)
+			graph_color = None 
+			if close_vals[0] > close_vals[-1]:
+				graph_color = [0, 255, 0]
+			else:
+				graph_color = [255, 0, 0]
+
+			graph_height = 18
+
+			# Write the actual drawing to the canvas and then display
+			draw_text(offscreen_canvas, 2, 1, self.font, ticker + 'USD')
+			draw_text(offscreen_canvas, 2, 7, self.font, '${:.2f}'.format(close_vals[0]))
+			for i in range(matrix.width):
+				y = 32 - int((close_vals[i] - min_val) / (max_val - min_val) * graph_height)
+				for j in range(y, matrix.height):
+					offscreen_canvas.SetPixel(matrix.width - i, j, graph_color[0], graph_color[1], graph_color[2])
+			offscreen_canvas = matrix.SwapOnVSync(offscreen_canvas)
+			
+			# Break for right now due to the api limits. Need to find the right API somewhere
+			break
+
+
 #-------------------------------------------------------------------------
 # LED Driving functions that are dependent on the objects defined above
 #-------------------------------------------------------------------------
@@ -224,6 +284,12 @@ def start_led_app(app):
 		task.start()
 		settings.current_thread = task
 		settings.running_apps.append('solid')
+		settings.dump_settings()
+	elif app == 'ticker':
+		task = Ticker()
+		task.start()
+		settings.current_thread = task
+		settings.running_apps.append('ticker')
 		settings.dump_settings()
 
 def stop_current_led_app():
