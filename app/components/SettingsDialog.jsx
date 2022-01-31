@@ -6,6 +6,11 @@ import { Dialog, DialogContent, DialogTitle, DialogActions, Button, Slider, Text
 import { localIP } from './config';
 import GradientButton from './GradientButton';
 
+const initialPallet = [
+    { offset: '0.00', color: 'rgb(238, 241, 11)' },
+    { offset: '1.00', color: 'rgb(126, 32, 207)' },
+];
+
 export default function SettingsDialog(props) {
     const [settings, setSettings] = useState({});
     const [reset, setReset] = useState(false);
@@ -14,9 +19,8 @@ export default function SettingsDialog(props) {
     const [brightness, setBrightness] = useState();
     const [staticColor, setStaticColor] = useState();
     const [colorMode, setColorMode] = useState();
-    const [gradStartColor, setGradStartColor] = useState();
-    const [gradEndColor, setGradEndColor] = useState();
     const [scroll, setScroll] = React.useState('paper');
+    const [gradPalette, setGradPalette] = useState(initialPallet);
 
     const colorModeList = ['static', 'gradient'];
 
@@ -43,20 +47,6 @@ export default function SettingsDialog(props) {
         setSettings(settings_copy);
     }
 
-    function changeGradStartColor(color, event) {
-        setGradStartColor(color.rgb);
-        let settings_copy = Object.assign({}, settings);
-        settings_copy.grad_start_color = color.rgb;
-        setSettings(settings_copy);
-    }
-
-    function changeGradEndColor(color, event) {
-        setGradEndColor(color.rgb);
-        let settings_copy = Object.assign({}, settings);
-        settings_copy.grad_end_color = color.rgb;
-        setSettings(settings_copy);
-    }
-
     function changeColorMode(e, val) {
         if (val != null) {
             setColorMode(val);
@@ -66,7 +56,29 @@ export default function SettingsDialog(props) {
         }
     }
 
+    function changeGradPalette(grad) {
+        var palette = [];
+        for (const c of grad) {
+            const clr = 'rgb(' + c.r + ', ' + c.g + ', ' + c.b + ')';
+            palette.push({offset: String(c.offset), color: clr})
+        }
+        setGradPalette(palette);
+    }
+
+    function parseGradPalette() {
+        let settings_copy = Object.assign({}, settings);
+        var gradient = []
+        for (const c of gradPalette) {
+            const rgb = c.color.replace(/[^\d,]/g, '').split(',');
+            const offset = parseFloat(c.offset);
+            gradient.push({offset: offset, r: parseInt(rgb[0]), g: parseInt(rgb[1]), b: parseInt(rgb[2])});
+        }
+        settings_copy.gradient = gradient;
+        setSettings(settings_copy);
+    }
+
     function sendSettings() {
+        parseGradPalette();
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -86,8 +98,7 @@ export default function SettingsDialog(props) {
                 setBrightness(data.brightness);
                 setStaticColor(data.static_color);
                 setColorMode(data.color_mode);
-                setGradStartColor(data.grad_start_color);
-                setGradEndColor(data.grad_end_color);
+                changeGradPalette(data.gradient);
             });
     }, [reset]);
 
@@ -159,30 +170,16 @@ export default function SettingsDialog(props) {
                             );
                         } else if (colorMode == 'gradient') {
                             return (
-                                <div>
-                                    <div className={styles.settingsContainer}>
-                                        Grad Start Color:{' '}
-                                        <ColorButton
-                                            color={gradStartColor}
-                                            setColor={setGradStartColor}
-                                            changeColor={changeGradStartColor}
+                                <div className={styles.settingsContainer}>
+                                    Gradient Picker: 
+                                    <GradientButton 
+                                        gradPalette={gradPalette}
+                                        setGradPalette={setGradPalette}
                                         />
-                                    </div>
-                                    <div className={styles.settingsContainer}>
-                                        Grad End Color:{' '}
-                                        <ColorButton
-                                            color={gradEndColor}
-                                            setColor={setGradEndColor}
-                                            changeColor={changeGradEndColor}
-                                        />
-                                    </div>
-                                </div>
+                                </div>  
                             );
                         }
                     })()}
-                    <div className={styles.settingsContainer}>
-                        <GradientButton />
-                    </div>
                 </DialogContent>
                 <DialogActions>
                     <Button

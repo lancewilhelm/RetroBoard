@@ -4,31 +4,25 @@ import { GradientPickerPopover } from 'react-linear-gradient-picker';
 import 'react-linear-gradient-picker/dist/index.css';
 import '../styles/GradientButton.module.css';
 
-const rgbToRgba = (rgb, a = 1) =>
-    rgb.replace('rgb(', 'rgba(').replace(')', `, ${a})`);
-
-const WrappedSketchPicker = ({ onSelect, ...rest }) => {
-    return (
-        <SketchPicker
-            {...rest}
-            color={rgbToRgba(rest.color, rest.opacity)}
-            onChange={(c) => {
-                const { r, g, b, a } = c.rgb;
-                onSelect(`rgb(${r}, ${g}, ${b})`, a);
-            }}
-        />
-    );
-};
-
-const initialPallet = [
-    { offset: '0.00', color: 'rgb(238, 241, 11)' },
-    { offset: '1.00', color: 'rgb(126, 32, 207)' },
-];
-
-const GradientButton = () => {
+export default function GradientButton(props) {
     const [open, setOpen] = useState(false);
     const [angle, setAngle] = useState(90);
-    const [palette, setPalette] = useState(initialPallet);
+
+    const rgbToRgba = (rgb, a = 1) =>
+    rgb.replace('rgb(', 'rgba(').replace(')', `, ${a})`);
+
+    const WrappedSketchPicker = ({ onSelect, ...rest }) => {
+        return (
+            <SketchPicker
+                {...rest}
+                color={rgbToRgba(rest.color, rest.opacity)}
+                onChange={(c) => {
+                    const { r, g, b, a } = c.rgb;
+                    onSelect(`rgb(${r}, ${g}, ${b})`, a);
+                }}
+            />
+        );
+    };
 
     return (
         <GradientPickerPopover 
@@ -39,15 +33,13 @@ const GradientButton = () => {
                 setAngle,
                 showAnglePicker: true,
                 width: 220,
-                maxStops: 3,
+                maxStops: 2,
                 paletteHeight: 32,
-                palette,
-                onPaletteChange: setPalette
+                palette: props.gradPalette,
+                onPaletteChange: props.setGradPalette
             }}
         >
             <WrappedSketchPicker />
         </GradientPickerPopover>
     );
 };
-
-export default GradientButton;

@@ -21,7 +21,7 @@ export default function Home() {
             <div className={styles.menuBar}>
                 <Button
                     className={styles.settingsButton}
-                    variant='ou'
+                    variant=''
                     onClick={handleDialogOpen}
                 >
                     <Gear />
