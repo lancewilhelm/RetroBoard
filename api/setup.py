@@ -88,10 +88,11 @@ class Settings():
 		self.font_dict = font_dict
 		self.active_font = 'tom-thumb'
 		self.static_color = {'r': 255, 'g': 255, 'b': 255, 'a': 1}
-		self.grad_start_color = {'r': 0, 'g': 0, 'b': 255, 'a': 1}
-		self.grad_end_color = {'r': 255, 'g': 0, 'b': 255, 'a': 1}
+		# self.grad_start_color = {'r': 0, 'g': 0, 'b': 255, 'a': 1}
+		# self.grad_end_color = {'r': 255, 'g': 0, 'b': 255, 'a': 1}
+		self.gradient = [{'offset': 0.0, 'r': 0, 'g': 0, 'b': 255, 'a': 1}, {'offset': 1.0, 'r': 255, 'g': 0, 'b': 255, 'a': 1}]
 		self.running_apps = ['clock']
-		self.color_mode = 'static'
+		self.color_mode = 'gradient'
 		
 		# Non stored settings
 		self.current_thread = None
@@ -107,8 +108,9 @@ class Settings():
 				'active_font': self.active_font,
 				'brightness': matrix.brightness,
 				'static_color': self.static_color,
-				'grad_start_color': self.grad_start_color,
-				'grad_end_color': self.grad_end_color,
+				# 'grad_start_color': self.grad_start_color,
+				# 'grad_end_color': self.grad_end_color,
+				'gradient': self.gradient,
 				'running_apps': self.running_apps,
 				'color_mode': self.color_mode
 			}
@@ -126,8 +128,9 @@ class Settings():
 				self.active_font = settings['active_font']
 				matrix.brightness = settings['brightness']
 				self.static_color = settings['static_color']
-				self.grad_start_color = settings['grad_start_color']
-				self.grad_end_color = settings['grad_end_color']
+				# self.grad_start_color = settings['grad_start_color']
+				# self.grad_end_color = settings['grad_end_color']
+				self.gradient = settings['gradient']
 				self.running_apps = settings['running_apps']
 				self.color_mode = settings['color_mode']
 				self.update_bool = True

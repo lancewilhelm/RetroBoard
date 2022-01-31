@@ -1,4 +1,4 @@
-import { Button } from 'react-bootstrap';
+import { Button } from '@mui/material';
 import styles from '../styles/Main.module.css';
 import { localIP } from './config';
 
@@ -17,21 +17,21 @@ export default function Main() {
         <div className={styles.container}>
             <Button
             className={styles.button}
-                variant='outline-dark'
+                variant='outlined'
                 onClick={() => sendCommand('clock')}
             >
                 Clock
             </Button>
             <Button
             className={styles.button}
-                variant='outline-dark'
+                variant='outlined'
                 onClick={() => sendCommand('picture')}
             >
                 Picture
             </Button>
             <Button
             className={styles.button}
-                variant='dark'
+                variant='outlined'
                 onClick={() => sendCommand('clear')}
             >
                 Clear
