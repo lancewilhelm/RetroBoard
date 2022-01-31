@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import styles from '../styles/Index.module.css';
 import Main from '../components/main';
-import { Button } from 'react-bootstrap';
+import { Button } from '@mui/material';
 import { Gear } from 'react-bootstrap-icons';
 import { useState } from 'react';
 import SettingsDialog from '../components/SettingsDialog';
@@ -21,7 +21,7 @@ export default function Home() {
             <div className={styles.menuBar}>
                 <Button
                     className={styles.settingsButton}
-                    variant='outline-dark'
+                    variant='ou'
                     onClick={handleDialogOpen}
                 >
                     <Gear />

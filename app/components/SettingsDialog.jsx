@@ -1,16 +1,10 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import styles from '../styles/SettingsModal.module.css';
-import Slider from '@mui/material/Slider';
+import styles from '../styles/SettingsDialog.module.css';
 import ColorButton from './ColorButton';
-import TextField from '@mui/material/TextField';
-import Autocomplete from '@mui/material/Autocomplete';
-import Chip from '@mui/material/Chip';
-import { Dialog, DialogContent, DialogTitle, DialogActions } from '@mui/material';
-import { Button } from 'react-bootstrap';
+import { Dialog, DialogContent, DialogTitle, DialogActions, Button, Slider, TextField, Autocomplete, Chip } from '@mui/material';
 import { localIP } from './config';
 import GradientButton from './GradientButton';
-import { alignProperty } from '@mui/material/styles/cssUtils';
 
 export default function SettingsDialog(props) {
     const [settings, setSettings] = useState({});
@@ -79,7 +73,7 @@ export default function SettingsDialog(props) {
             body: JSON.stringify(settings),
         };
         fetch('http://' + localIP + ':5000/api/settings', requestOptions);
-        props.handleModalClose();
+        props.handleDialogClose();
     }
 
     useEffect(() => {
@@ -192,18 +186,25 @@ export default function SettingsDialog(props) {
                 </DialogContent>
                 <DialogActions>
                     <Button
-                        variant='outline-danger'
+                        className={styles.button}
+                        variant='outlined'
+                        color='error'
                         onClick={() => setReset(!reset)}
                     >
                         Reset
                     </Button>
                     <Button
-                        variant='outline-dark'
+                        className={styles.button}
+                        variant='outlined'
                         onClick={props.handleDialogClose}
                     >
                         Close
                     </Button>
-                    <Button variant='outline-dark' onClick={sendSettings}>
+                    <Button 
+                    className={styles.button}
+                    variant='outlined' 
+                    color='success'
+                    onClick={sendSettings}>
                         Save Changes
                     </Button>
                 </DialogActions>
