@@ -99,6 +99,7 @@ class Settings():
 		self.update_bool = True
 		self.color_matrix = np.ndarray((matrix.width, matrix.height, 3), dtype=int)
 		self.color_matrix.fill(255)
+		self.apikeys = {}
 
 	def dump_settings(self, settings=None):
 		logging.debug('dumping settings to settings.json')
@@ -138,6 +139,13 @@ class Settings():
 		except FileNotFoundError:
 			logging.debug('no settings.json file exists, creating one...')
 			self.dump_settings()
+
+		try:
+			with open('/home/pi/RetroBoard/apikeys.json', 'r') as filehandle:
+				apikeys = json.load(filehandle)
+				self.apikeys = apikeys
+		except:
+			loggind.debug('no apikeys.json file exists...')
 
 	def load_font(self, path):
 		logging.debug('loading font {}'.format(path))
