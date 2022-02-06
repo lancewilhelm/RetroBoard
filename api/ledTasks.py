@@ -240,10 +240,12 @@ class Ticker(StoppableThread):
 				price_diff = price - self.c_vals[63]
 				if price_diff > 0:
 					self.graph_color = [0, 255, 0]
+					price_diff = '+' + '{:.2f}'.format(price_diff)
 				else:
 					self.graph_color = [255, 0, 0]
+					price_diff = '{:.2f}'.format(price_diff)
 
-				draw_text(self.offscreen_canvas, 35, 7, self.font, '{:.2f}'.format(price_diff), self.graph_color)
+				draw_text(self.offscreen_canvas, 35, 7, self.font, '{}'.format(price_diff), self.graph_color)
 
 				# if the timestamp of the current received price is greater than 1s then refresh the historical data
 				if time > self.historical_update_time * 1000:
