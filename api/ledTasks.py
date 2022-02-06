@@ -7,6 +7,8 @@ import logging
 import threading
 import numpy as np
 import requests
+import websocket
+import json
 
 #-------------------------------------------------------------------------
 # Utility functions/variables:
@@ -44,22 +46,25 @@ def set_static_color(color):
 	color_array = np.array([color['r'], color['g'], color['b']])
 	settings.color_matrix[:, :] = color_array
 
-def draw_glyph(canvas, x, y, glyph):
+def draw_glyph(canvas, x, y, glyph, color=None):
 	cm = settings.color_matrix
 	for i, row in enumerate(glyph.iter_pixels()):
 		for j, pixel, in enumerate(row):
 			pixel_x = x + j
 			pixel_y = y + i
 			if pixel:
-				canvas.SetPixel(pixel_x, pixel_y, cm[pixel_x, pixel_y, 0], cm[pixel_x, pixel_y, 1], cm[pixel_x, pixel_y, 2])
+				if color == None:
+					canvas.SetPixel(pixel_x, pixel_y, cm[pixel_x, pixel_y, 0], cm[pixel_x, pixel_y, 1], cm[pixel_x, pixel_y, 2])
+				else:
+					canvas.SetPixel(pixel_x, pixel_y, color[0], color[1], color[2])
 
-def draw_text(canvas, x, y, font, text):
+def draw_text(canvas, x, y, font, text, color=None):
 	char_x = x
 	for char in text:
 		glyph = font[ord(char)]
 		char_y = y + (font.ptSize - glyph.bbH) - glyph.bbY
 		char_x += glyph.bbX
-		draw_glyph(canvas, char_x, char_y, glyph)
+		draw_glyph(canvas, char_x, char_y, glyph, color)
 		char_x += (glyph.advance - glyph.bbX)
 
 cent_x = int(matrix.width / 2)
@@ -208,14 +213,62 @@ class Ticker(StoppableThread):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.name = 'ticker'
-		set_static_color({'r': 255, 'g': 255, 'b': 255, 'a': 1})
+		self.ticker = 'ETHUSD'
+		self.ws = websocket.WebSocketApp('wss://ws.finnhub.io?token={}'.format(settings.apikeys['finnhub']), on_open=self.on_ws_open, on_message = self.on_ws_message, on_close = self.on_ws_close)
+		self.offscreen_canvas = matrix.CreateFrameCanvas()
+		self.close_vals = []
+		self.graph_color = [255, 255, 255]
+		self.graph_height = 18
+		self.min_val = 0
+		self.max_val = 0
+
+	def on_ws_message(self, ws, message):
+		if self.stopped():
+			self.ws.close()
+		else:
+			try:
+				price = float(json.loads(message)['data'][0]['p'])
+				self.offscreen_canvas.Clear()
+				draw_text(self.offscreen_canvas, 2, 1, self.font, self.ticker, [255, 255, 255])
+				draw_text(self.offscreen_canvas, 2, 7, self.font, '${:.2f}'.format(price), [255, 255, 255])
+				draw_text(self.offscreen_canvas, 35, 7, self.font, '{:.2f}'.format(price - self.close_vals[63]), self.graph_color)
+				self.draw_graph()
+				self.offscreen_canvas = matrix.SwapOnVSync(self.offscreen_canvas)
+			except:
+				logging.debug('unable to ')
+
+	def on_ws_close(self, ws, code, msg):
+		print('closing websocket')
 	
+	def on_ws_open(self, ws):
+		ws.send('{"type":"subscribe","symbol":"BINANCE:ETHUSDT"}')
+
+	def get_historical_prices(self):
+		url = 'https://www.alphavantage.co/query?function=CRYPTO_INTRADAY&symbol=ETH&market=USD&interval=15min&apikey={}'.format(settings.apikeys['alphavantage'])
+		r = requests.get(url)
+		data = r.json()
+		self.close_vals = [float(n['4. close']) for n in data['Time Series Crypto (15min)'].values()]
+		self.max_val = max(self.close_vals)
+		self.min_val = min(self.close_vals)
+		if self.close_vals[0] > self.close_vals[63]:
+			self.graph_color = [0, 255, 0]
+		else:
+			self.graph_color = [255, 0, 0]
+		
+	def draw_graph(self):
+		for i in range(matrix.width):
+			y = 32 - int((self.close_vals[i] - self.min_val) / (self.max_val - self.min_val) * self.graph_height)
+			for j in range(y, matrix.height):
+				self.offscreen_canvas.SetPixel(matrix.width - i, j, self.graph_color[0], self.graph_color[1], self.graph_color[2])
+
 	def run(self):
-		ticker = 'ETH'
 		logging.debug('starting ticker')
 
-		# Establish the offscreen buffer to store changes too before publishing
-		offscreen_canvas = matrix.CreateFrameCanvas()
+		self.offscreen_canvas.Clear()
+
+		self.get_historical_prices()
+
+		self.ws.run_forever()
 
 		# Run the ticker loop until stopped
 		while True:
@@ -227,41 +280,6 @@ class Ticker(StoppableThread):
 			# Check for a settings change that needs fto be loaded
 			if settings.update_bool:
 				self.loadSettings()
-
-			offscreen_canvas.Clear()
-
-			# Get time so we know when to update
-			t = time.localtime()
-			hours = t.tm_hour
-			mins = t.tm_min
-			secs = t.tm_sec
-
-			url = 'https://www.alphavantage.co/query?function=CRYPTO_INTRADAY&symbol=ETH&market=USD&interval=15min&apikey={}'.format(settings.apikeys['alphavantage'])
-			r = requests.get(url)
-			data = r.json()
-			close_vals = [float(n['4. close']) for n in data['Time Series Crypto (15min)'].values()]
-			max_val = max(close_vals)
-			min_val = min(close_vals)
-			graph_color = None 
-			if close_vals[0] > close_vals[-1]:
-				graph_color = [0, 255, 0]
-			else:
-				graph_color = [255, 0, 0]
-
-			graph_height = 18
-
-			# Write the actual drawing to the canvas and then display
-			draw_text(offscreen_canvas, 2, 1, self.font, ticker + 'USD')
-			draw_text(offscreen_canvas, 2, 7, self.font, '${:.2f}'.format(close_vals[0]))
-			for i in range(matrix.width):
-				y = 32 - int((close_vals[i] - min_val) / (max_val - min_val) * graph_height)
-				for j in range(y, matrix.height):
-					offscreen_canvas.SetPixel(matrix.width - i, j, graph_color[0], graph_color[1], graph_color[2])
-			offscreen_canvas = matrix.SwapOnVSync(offscreen_canvas)
-			
-			# Break for right now due to the api limits. Need to find the right API somewhere
-			break
-
 
 #-------------------------------------------------------------------------
 # LED Driving functions that are dependent on the objects defined above
