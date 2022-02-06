@@ -237,10 +237,12 @@ class Ticker(StoppableThread):
 				draw_text(self.offscreen_canvas, 2, 7, self.font, '${:.2f}'.format(price), [255, 255, 255])
 				price_diff = price - self.c_vals[63]
 				if price_diff > 0:
-					draw_text(self.offscreen_canvas, 35, 7, self.font, '{:.2f}'.format(price_diff), [0, 255, 0])
+					self.graph_color = [0, 255, 0]
 				else:
-					draw_text(self.offscreen_canvas, 35, 7, self.font, '{:.2f}'.format(price_diff), [255, 0, 0])
-				
+					self.graph_color = [255, 0, 0]
+
+				draw_text(self.offscreen_canvas, 35, 7, self.font, '{:.2f}'.format(price_diff), self.graph_color)
+
 				# if the timestamp of the current received price is greater than 1s then refresh the historical data
 				if time > self.historical_update_time * 1000:
 					self.get_historical_prices()
@@ -269,18 +271,13 @@ class Ticker(StoppableThread):
 		self.c_vals = data['c']
 		self.max_c_val = max(self.c_vals)
 		self.min_c_val = min(self.c_vals)
-		if self.c_vals[0] > self.c_vals[63]:
-			self.graph_color = [0, 255, 0]
-		else:
-			self.graph_color = [255, 0, 0]
 		self.historical_update_time = int(time.mktime((datetime.now() + timedelta(minutes = 1)).timetuple()))
-		
 		
 	def draw_graph(self):
 		for i in range(matrix.width):
 			y = 32 - int((self.c_vals[i] - self.min_c_val) / (self.max_c_val - self.min_c_val) * self.graph_height)
 			for j in range(y, matrix.height):
-				self.offscreen_canvas.SetPixel(matrix.width - i, j, self.graph_color[0], self.graph_color[1], self.graph_color[2])
+				self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, self.graph_color[0], self.graph_color[1], self.graph_color[2])
 
 	def run(self):
 		logging.debug('starting ticker')
