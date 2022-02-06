@@ -5,6 +5,7 @@ import { useState } from 'react';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import SettingsDialog from '../components/SettingsDialog';
 import TickerSettings from '../components/TickerSettings';
+import { localIP } from '../components/config';
 
 export default function Home() {
 	// Set the state variable for the modal
@@ -18,6 +19,15 @@ export default function Home() {
 
 	const handleMainSettingsOpen = () => setMainSettingsOpen(true);
 	const handleMainSettingsClose = () => setMainSettingsOpen(false);
+
+	async function sendCommand(command) {
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({app: command})
+        };
+        fetch('http://' + localIP + ':5000/api/app', requestOptions);
+    }
 
 	return (
 		<div className={styles.pagecontainer}>

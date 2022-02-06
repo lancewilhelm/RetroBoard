@@ -2,11 +2,10 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import styles from '../styles/TickerSettings.module.css';
 import { Dialog, DialogContent, DialogTitle, DialogActions, Button, Autocomplete, Chip, TextField } from '@mui/material';
-
+import { localIP } from './config';
 
 export default function TickerSettings(props) {
 	const [settings, setSettings] = useState({});
-	const [reset, setReset] = useState(false);;
 	const [scroll, setScroll] = useState('paper');
 	const [tickerType, setTickerType] = useState();
 
@@ -25,6 +24,14 @@ export default function TickerSettings(props) {
 		fetch('http://' + localIP + ':5000/api/settings', requestOptions);
 		props.handleDialogClose();
 	}
+
+	useEffect(() => {
+        fetch('http://' + localIP + ':5000/api/settings')
+            .then((res) => res.json())
+            .then((data) => {
+                props.setSettings(data);
+            });
+    }, [props.resetSettings]);
 
 	return (
 		<div className={styles.container}>
@@ -58,7 +65,7 @@ export default function TickerSettings(props) {
 						className={styles.button}
 						variant='outlined'
 						color='error'
-						onClick={() => setReset(!reset)}
+						onClick={() => props.setResetSettings(!props.setResetSettings)}
 					>
 						Reset
 					</Button>
