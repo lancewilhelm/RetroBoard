@@ -91,7 +91,7 @@ class StoppableThread(threading.Thread):
 
 	def loadSettings(self):
 		logging.debug('loading settings for {}'.format(type(self).__name__))
-		self.font = settings.load_font(settings.font_dict[settings.active_font])
+		self.font = settings.load_font(settings.main['font_dict'][settings.main['active_font']])
 		self.font_width = self.font[ord(' ')].advance
 		self.font_height = self.font.ptSize
 		self.position = {
@@ -100,10 +100,10 @@ class StoppableThread(threading.Thread):
 		}
 		settings.update_bool = False
 
-		if settings.color_mode == 'static':
-			set_static_color(settings.static_color)
-		elif settings.color_mode == 'gradient':
-			set_color_grad(settings.gradient[0], settings.gradient[-1])
+		if settings.main['color_mode'] == 'static':
+			set_static_color(settings.main['static_color'])
+		elif settings.main['color_mode'] == 'gradient':
+			set_color_grad(settings.main['gradient'][0], settings.main['gradient'][-1])
 
 #-------------------------------------------------------------------------
 # LED Animations: 
@@ -331,28 +331,28 @@ def start_led_app(app):
 		task = Clock()
 		task.start()
 		settings.current_thread = task
-		settings.running_apps.append('clock')
+		settings.main['running_apps'].append('clock')
 		settings.dump_settings()
 	elif app == 'picture':
 		task = Picture()
 		task.start()
 		settings.current_thread = task
-		settings.running_apps.append('picture')
+		settings.main['running_apps'].append('picture')
 		settings.dump_settings()
 	elif app == 'solid':
 		task = Solid()
 		task.start()
 		settings.current_thread = task
-		settings.running_apps.append('solid')
+		settings.main['running_apps'].append('solid')
 		settings.dump_settings()
 	elif app == 'ticker':
 		task = Ticker()
 		task.start()
 		settings.current_thread = task
-		settings.running_apps.append('ticker')
+		settings.main['running_apps'].append('ticker')
 		settings.dump_settings()
 
 def stop_current_led_app():
 	settings.current_thread.stop()
 	settings.current_thread = None
-	settings.running_apps = []
+	settings.main['running_apps'] = []
