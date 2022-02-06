@@ -219,10 +219,12 @@ class Ticker(StoppableThread):
 		self.offscreen_canvas = matrix.CreateFrameCanvas()
 		self.historical_prices = {}
 		self.graph_color = [255, 255, 255]
-		self.graph_height = 18
+		self.graph_height = 17
 		self.min_val = 0
 		self.max_val = 0
 		self.historical_update_time = 0
+		self.graph_style = 'bar'
+		self.graph_resolution = '15'
 
 	def on_ws_message(self, ws, message):
 		if self.stopped():
@@ -261,23 +263,43 @@ class Ticker(StoppableThread):
 
 	def get_historical_prices(self):
 		logging.debug('getting historical data')
-		resolution = '15'
+		
 		to_time = int(time.mktime(datetime.now().timetuple()))
 		from_time = int(time.mktime((datetime.now() - timedelta(days = 1)).timetuple()))
-		url = 'https://finnhub.io/api/v1/crypto/candle?symbol={}&resolution={}&from={}&to={}&token={}'.format(self.ticker, resolution, from_time, to_time, settings.apikeys['finnhub'])
+		
+		url = 'https://finnhub.io/api/v1/crypto/candle?symbol={}&resolution={}&from={}&to={}&token={}'.format(self.ticker, self.graph_resolution, from_time, to_time, settings.apikeys['finnhub'])
 		r = requests.get(url)
 		data = r.json()
 		self.historical_prices = data
+
 		self.c_vals = data['c']
-		self.max_c_val = max(self.c_vals)
-		self.min_c_val = min(self.c_vals)
+		self.o_vals = data['o']
+		self.t_vals = data['t']
+		self.h_vals = data['h']
+		self.l_vals = data['l']
+		self.c_vals.reverse()
+		self.o_vals.reverse()
+		self.t_vals.reverse()
+		self.h_vals.reverse()
+		self.l_vals.reverse()
+
 		self.historical_update_time = int(time.mktime((datetime.now() + timedelta(minutes = 1)).timetuple()))
 		
 	def draw_graph(self):
 		for i in range(matrix.width):
-			y = 32 - int((self.c_vals[i] - self.min_c_val) / (self.max_c_val - self.min_c_val) * self.graph_height)
-			for j in range(y, matrix.height):
-				self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, self.graph_color[0], self.graph_color[1], self.graph_color[2])
+			if self.graph_style == 'filled':
+				y = matrix.height - int((self.c_vals[i] - min(self.c_vals)) / (max(self.c_vals) - min(self.c_vals)) * self.graph_height)
+				for j in range(y, matrix.height):
+					self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, self.graph_color[0], self.graph_color[1], self.graph_color[2])
+			if self.graph_style == 'bar':
+				h_y = matrix.height - int((self.h_vals[i] - min(self.l_vals)) / (max(self.h_vals) - min(self.l_vals)) * self.graph_height)
+				l_y = matrix.height - int((self.l_vals[i] - min(self.l_vals)) / (max(self.h_vals) - min(self.l_vals)) * self.graph_height)
+				if self.c_vals[i] - self.o_vals[i] > 0:
+					for j in range(h_y, l_y):
+						self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 0, 255, 0)
+				else:
+					for j in range(h_y, l_y):
+						self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 255, 0, 0)
 
 	def run(self):
 		logging.debug('starting ticker')
