@@ -145,7 +145,7 @@ class Settings():
 				apikeys = json.load(filehandle)
 				self.apikeys = apikeys
 		except:
-			loggind.debug('no apikeys.json file exists...')
+			logging.debug('no apikeys.json file exists...')
 
 	def load_font(self, path):
 		logging.debug('loading font {}'.format(path))
