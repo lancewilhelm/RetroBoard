@@ -1,20 +1,25 @@
 import Head from 'next/head';
 import styles from '../styles/Index.module.css';
-import Main from '../components/main';
-import { Button } from '@mui/material';
-import { Gear } from 'react-bootstrap-icons';
+import { Button, ButtonGroup } from '@mui/material';
 import { useState } from 'react';
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import SettingsDialog from '../components/SettingsDialog';
+import TickerSettings from '../components/TickerSettings';
 
 export default function Home() {
     // Set the state variable for the modal
-    const [dialogOpen, setDialogOpen] = useState(false);
+    const [settings, setSettings] = useState({});
+    const [mainSettingsOpen, setMainSettingsOpen] = useState(false);
+    const [tickerSettingsOpen, setTickerSettingsOpen] = useState(false);
 
-    const handleDialogOpen = () => setDialogOpen(true);
-    const handleDialogClose = () => setDialogOpen(false);
+    const handleTickerSettingsOpen = () => setTickerSettingsOpen(true);
+    const handleTickerSettingsClose = () => setTickerSettingsOpen(false);
+
+    const handleMainSettingsOpen = () => setMainSettingsOpen(true);
+    const handleMainSettingsClose = () => setMainSettingsOpen(false);
 
     return (
-        <div className={styles.container}>
+        <div className={styles.pagecontainer}>
             <Head>
                 <title>Retro Magic Board</title>
             </Head>
@@ -22,21 +27,74 @@ export default function Home() {
                 <Button
                     className={styles.settingsButton}
                     variant=''
-                    onClick={handleDialogOpen}
+                    onClick={handleMainSettingsOpen}
                 >
-                    <Gear />
+                    <SettingsOutlinedIcon />
                 </Button>
             </div>
             <div className={styles.titleBar}>
                 <h1 className={styles.title}>Magic Color Board</h1>
                 <div className={styles.subtitle}>A board of wonders</div>
-                <Main className={styles.main} />
+                <div className={styles.maincontainer}>
+                    <Button
+                        className={styles.btn}
+                        variant='outlined'
+                        onClick={() => sendCommand('clock')}
+                    >
+                        Clock
+                    </Button>
+                    <Button
+                        className={styles.btn}
+                        variant='outlined'
+                        onClick={() => sendCommand('picture')}
+                    >
+                        Picture
+                    </Button>
+                    <ButtonGroup variant='outlined' className={styles.btngrp}>
+                        <Button
+                            onClick={() => sendCommand('ticker')}
+                            className={styles.btngrpbtn}
+                        >
+                            Ticker
+                        </Button>
+                        <Button
+                            className={styles.btngrpbtn}
+                            onClick={handleTickerSettingsOpen}
+                        >
+                            <SettingsOutlinedIcon fontSize='small' />
+                        </Button>
+                    </ButtonGroup>
+                    <Button
+                        className={styles.btn}
+                        variant='outlined'
+                        onClick={() => sendCommand('solid')}
+                    >
+                        Solid
+                    </Button>
+                    <Button
+                        className={styles.btn}
+                        variant='outlined'
+                        onClick={() => sendCommand('clear')}
+                    >
+                        Clear
+                    </Button>
+
+                    <TickerSettings
+                        tickerSettingsOpen={tickerSettingsOpen}
+                        handleTickerSettingsOpen={handleTickerSettingsOpen}
+                        handleTickerSettingsClose={handleTickerSettingsClose}
+                        settings={settings}
+                        setSettings={setSettings}
+                    />
+                </div>
             </div>
 
             <SettingsDialog
-                dialogOpen={dialogOpen}
-                handleDialogOpen={handleDialogOpen}
-                handleDialogClose={handleDialogClose}
+                mainSettingsOpen={mainSettingsOpen}
+                handleMainSettingsOpen={handleMainSettingsOpen}
+                handleMainSettingsClose={handleMainSettingsClose}
+                settings={settings}
+                setSettings={setSettings}
             />
         </div>
     );
