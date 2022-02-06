@@ -12,7 +12,6 @@ const initialPallet = [
 ];
 
 export default function SettingsDialog(props) {
-    const [reset, setReset] = useState(false);
     const [fonts, setFonts] = useState([]);
     const [activeFont, setActiveFont] = useState();
     const [brightness, setBrightness] = useState();
@@ -103,13 +102,13 @@ export default function SettingsDialog(props) {
                 setColorMode(data.color_mode);
                 changeGradPalette(data.gradient);
             });
-    }, [reset]);
+    }, [props.resetSettings]);
 
     return (
         <div className={styles.container}>
             <Dialog
-                open={props.dialogOpen}
-                onClose={props.handleDialogClose}
+                open={props.mainSettingsOpen}
+                onClose={props.handleMainSettingsClose}
                 scroll={scroll}
                 aria-labelledby="scroll-dialog-title"
                 aria-describedby="scroll-dialog-description"
@@ -190,14 +189,14 @@ export default function SettingsDialog(props) {
                         className={styles.button}
                         variant='outlined'
                         color='error'
-                        onClick={() => setReset(!reset)}
+                        onClick={() => props.setResetSettings(!props.resetSettings)}
                     >
                         Reset
                     </Button>
                     <Button
                         className={styles.button}
                         variant='outlined'
-                        onClick={props.handleDialogClose}
+                        onClick={props.handleMainSettingsClose}
                     >
                         Close
                     </Button>
