@@ -26,7 +26,7 @@ export default function SettingsDialog(props) {
         if (val != null) {
             setActiveFont(val);
             let settings_copy = Object.assign({}, props.settings);
-            settings_copy.active_font = val;
+            settings_copy.main.active_font = val;
             props.setSettings(settings_copy);
         }
     }
@@ -34,14 +34,14 @@ export default function SettingsDialog(props) {
     function changeBrightness(value) {
         setBrightness(value);
         let settings_copy = Object.assign({}, props.settings);
-        settings_copy.brightness = value;
+        settings_copy.main.brightness = value;
         props.setSettings(settings_copy);
     }
 
     function changeStaticColor(color, event) {
         setStaticColor(color.rgb);
         let settings_copy = Object.assign({}, props.settings);
-        settings_copy.static_color = color.rgb;
+        settings_copy.main.static_color = color.rgb;
         props.setSettings(settings_copy);
     }
 
@@ -49,7 +49,7 @@ export default function SettingsDialog(props) {
         if (val != null) {
             setColorMode(val);
             let settings_copy = Object.assign({}, props.settings);
-            settings_copy.color_mode = val;
+            settings_copy.main.color_mode = val;
             props.setSettings(settings_copy);
         }
     }
@@ -71,7 +71,7 @@ export default function SettingsDialog(props) {
             const offset = parseFloat(c.offset);
             gradient.push({offset: offset, r: parseInt(rgb[0]), g: parseInt(rgb[1]), b: parseInt(rgb[2])});
         }
-        settings_copy.gradient = gradient;
+        settings_copy.main.gradient = gradient;
         props.setSettings(settings_copy);
     }
 
@@ -87,7 +87,7 @@ export default function SettingsDialog(props) {
             body: JSON.stringify(props.settings),
         };
         fetch('http://' + localIP + ':5000/api/settings', requestOptions);
-        props.handleDialogClose();
+        props.handleMainSettingsClose();
     }
 
     useEffect(() => {
@@ -95,12 +95,12 @@ export default function SettingsDialog(props) {
             .then((res) => res.json())
             .then((data) => {
                 props.setSettings(data);
-                setFonts(Object.keys(data.font_dict));
-                setActiveFont(data.active_font);
-                setBrightness(data.brightness);
-                setStaticColor(data.static_color);
-                setColorMode(data.color_mode);
-                changeGradPalette(data.gradient);
+                setFonts(Object.keys(data.main.font_dict));
+                setActiveFont(data.main.active_font);
+                setBrightness(data.main.brightness);
+                setStaticColor(data.main.static_color);
+                setColorMode(data.main.color_mode);
+                changeGradPalette(data.main.gradient);
             });
     }, [props.resetSettings]);
 
