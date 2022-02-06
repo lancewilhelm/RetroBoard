@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import time
+from datetime import datetime, timedelta
 from setup import matrix, settings
 import time
 from PIL import Image
@@ -213,51 +214,71 @@ class Ticker(StoppableThread):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.name = 'ticker'
-		self.ticker = 'ETHUSD'
+		self.ticker = 'BINANCE:ETHUSDT'
 		self.ws = websocket.WebSocketApp('wss://ws.finnhub.io?token={}'.format(settings.apikeys['finnhub']), on_open=self.on_ws_open, on_message = self.on_ws_message, on_close = self.on_ws_close)
 		self.offscreen_canvas = matrix.CreateFrameCanvas()
-		self.close_vals = []
+		self.historical_prices = {}
 		self.graph_color = [255, 255, 255]
 		self.graph_height = 18
 		self.min_val = 0
 		self.max_val = 0
+		self.historical_update_time = 0
 
 	def on_ws_message(self, ws, message):
 		if self.stopped():
 			self.ws.close()
 		else:
 			try:
-				price = float(json.loads(message)['data'][0]['p'])
+				data = json.loads(message)['data']
+				price = float(data[0]['p'])
+				time = int(data[0]['t'])
 				self.offscreen_canvas.Clear()
 				draw_text(self.offscreen_canvas, 2, 1, self.font, self.ticker, [255, 255, 255])
 				draw_text(self.offscreen_canvas, 2, 7, self.font, '${:.2f}'.format(price), [255, 255, 255])
-				draw_text(self.offscreen_canvas, 35, 7, self.font, '{:.2f}'.format(price - self.close_vals[63]), self.graph_color)
+				price_diff = price - self.c_vals[63]
+				if price_diff > 0:
+					draw_text(self.offscreen_canvas, 35, 7, self.font, '{:.2f}'.format(price_diff), [0, 255, 0])
+				else:
+					draw_text(self.offscreen_canvas, 35, 7, self.font, '{:.2f}'.format(price_diff), [255, 0, 0])
+				
+				# if the timestamp of the current received price is greater than 1s then refresh the historical data
+				if time > self.historical_update_time * 1000:
+					self.get_historical_prices()
+
 				self.draw_graph()
 				self.offscreen_canvas = matrix.SwapOnVSync(self.offscreen_canvas)
 			except:
-				logging.debug('unable to ')
+				logging.debug('unable to handle or get live stock price')
 
 	def on_ws_close(self, ws, code, msg):
 		print('closing websocket')
 	
 	def on_ws_open(self, ws):
-		ws.send('{"type":"subscribe","symbol":"BINANCE:ETHUSDT"}')
+		send_string = '{"type":"subscribe","symbol":"' + self.ticker + '"}'
+		ws.send(send_string)
 
 	def get_historical_prices(self):
-		url = 'https://www.alphavantage.co/query?function=CRYPTO_INTRADAY&symbol=ETH&market=USD&interval=15min&apikey={}'.format(settings.apikeys['alphavantage'])
+		logging.debug('getting historical data')
+		resolution = '15'
+		to_time = int(time.mktime(datetime.now().timetuple()))
+		from_time = int(time.mktime((datetime.now() - timedelta(days = 1)).timetuple()))
+		url = 'https://finnhub.io/api/v1/crypto/candle?symbol={}&resolution={}&from={}&to={}&token={}'.format(self.ticker, resolution, from_time, to_time, settings.apikeys['finnhub'])
 		r = requests.get(url)
 		data = r.json()
-		self.close_vals = [float(n['4. close']) for n in data['Time Series Crypto (15min)'].values()]
-		self.max_val = max(self.close_vals)
-		self.min_val = min(self.close_vals)
-		if self.close_vals[0] > self.close_vals[63]:
+		self.historical_prices = data
+		self.c_vals = data['c']
+		self.max_c_val = max(self.c_vals)
+		self.min_c_val = min(self.c_vals)
+		if self.c_vals[0] > self.c_vals[63]:
 			self.graph_color = [0, 255, 0]
 		else:
 			self.graph_color = [255, 0, 0]
+		self.historical_update_time = int(time.mktime((datetime.now() + timedelta(minutes = 1)).timetuple()))
+		
 		
 	def draw_graph(self):
 		for i in range(matrix.width):
-			y = 32 - int((self.close_vals[i] - self.min_val) / (self.max_val - self.min_val) * self.graph_height)
+			y = 32 - int((self.c_vals[i] - self.min_c_val) / (self.max_c_val - self.min_c_val) * self.graph_height)
 			for j in range(y, matrix.height):
 				self.offscreen_canvas.SetPixel(matrix.width - i, j, self.graph_color[0], self.graph_color[1], self.graph_color[2])
 
