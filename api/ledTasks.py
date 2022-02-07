@@ -234,7 +234,14 @@ class Ticker(StoppableThread):
 				price = float(data[0]['p'])
 				time = int(data[0]['t'])
 				self.offscreen_canvas.Clear()
-				draw_text(self.offscreen_canvas, 2, 1, self.font, settings.ticker['symbol'], [255, 255, 255])
+				
+				# Remove the BINANCE from crypto symbols
+				if settings.ticker['equity_type'] == 'crypto':
+					display_symbol = settings.ticker['symbol'].split(':')[-1]
+				else:
+					display_symbol = settings.ticker['symbol']
+
+				draw_text(self.offscreen_canvas, 2, 1, self.font, display_symbol, [255, 255, 255])
 				draw_text(self.offscreen_canvas, 2, 7, self.font, '${:.2f}'.format(price), [255, 255, 255])
 				price_diff = price - self.c_vals[63]
 				if price_diff > 0:
