@@ -95,8 +95,10 @@ class Settings():
 		self.main['brightness'] = 100
 
 		self.ticker = {}
-		self.ticker['type'] = 'crypto'
+		self.ticker['equity_type'] = 'crypto'
 		self.ticker['symbol'] = 'BINANCE:ETHUSDT'
+		self.ticker['graph_type'] = 'bar'
+		self.ticker['graph_resolution'] = '15'
  
 		# Non stored settings
 		self.current_thread = None
@@ -120,6 +122,8 @@ class Settings():
 				settings = json.load(filehandle)
 
 				self.main = settings['main']
+				self.ticker = settings['ticker']
+
 				matrix.brightness = self.main['brightness']
 
 				self.update_bool = True
