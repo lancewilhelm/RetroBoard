@@ -91,7 +91,7 @@ class StoppableThread(threading.Thread):
 
 	def loadSettings(self):
 		logging.debug('loading settings for {}'.format(type(self).__name__))
-		self.font = settings.load_font(settings.font_dict[settings.active_font])
+		self.font = settings.load_font(settings.main['font_dict'][settings.main['active_font']])
 		self.font_width = self.font[ord(' ')].advance
 		self.font_height = self.font.ptSize
 		self.position = {
@@ -100,10 +100,10 @@ class StoppableThread(threading.Thread):
 		}
 		settings.update_bool = False
 
-		if settings.color_mode == 'static':
-			set_static_color(settings.static_color)
-		elif settings.color_mode == 'gradient':
-			set_color_grad(settings.gradient[0], settings.gradient[-1])
+		if settings.main['color_mode'] == 'static':
+			set_static_color(settings.main['static_color'])
+		elif settings.main['color_mode'] == 'gradient':
+			set_color_grad(settings.main['gradient'][0], settings.main['gradient'][-1])
 
 #-------------------------------------------------------------------------
 # LED Animations: 
@@ -214,8 +214,9 @@ class Ticker(StoppableThread):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.name = 'ticker'
-		self.ticker = 'BINANCE:ETHUSDT'
+
 		self.ws = websocket.WebSocketApp('wss://ws.finnhub.io?token={}'.format(settings.apikeys['finnhub']), on_open=self.on_ws_open, on_message = self.on_ws_message, on_close = self.on_ws_close)
+
 		self.offscreen_canvas = matrix.CreateFrameCanvas()
 		self.historical_prices = {}
 		self.graph_color = [255, 255, 255]
@@ -223,8 +224,6 @@ class Ticker(StoppableThread):
 		self.min_val = 0
 		self.max_val = 0
 		self.historical_update_time = 0
-		self.graph_style = 'bar'
-		self.graph_resolution = '15'
 
 	def on_ws_message(self, ws, message):
 		if self.stopped():
@@ -235,7 +234,14 @@ class Ticker(StoppableThread):
 				price = float(data[0]['p'])
 				time = int(data[0]['t'])
 				self.offscreen_canvas.Clear()
-				draw_text(self.offscreen_canvas, 2, 1, self.font, self.ticker, [255, 255, 255])
+				
+				# Remove the BINANCE from crypto symbols
+				if settings.ticker['equity_type'] == 'crypto':
+					display_symbol = settings.ticker['symbol'].split(':')[-1]
+				else:
+					display_symbol = settings.ticker['symbol']
+
+				draw_text(self.offscreen_canvas, 2, 1, self.font, display_symbol, [255, 255, 255])
 				draw_text(self.offscreen_canvas, 2, 7, self.font, '${:.2f}'.format(price), [255, 255, 255])
 				price_diff = price - self.c_vals[63]
 				if price_diff > 0:
@@ -260,7 +266,7 @@ class Ticker(StoppableThread):
 		print('closing websocket')
 	
 	def on_ws_open(self, ws):
-		send_string = '{"type":"subscribe","symbol":"' + self.ticker + '"}'
+		send_string = '{"type":"subscribe","symbol":"' + settings.ticker['symbol'] + '"}'
 		ws.send(send_string)
 
 	def get_historical_prices(self):
@@ -269,7 +275,7 @@ class Ticker(StoppableThread):
 		to_time = int(time.mktime(datetime.now().timetuple()))
 		from_time = int(time.mktime((datetime.now() - timedelta(days = 1)).timetuple()))
 		
-		url = 'https://finnhub.io/api/v1/crypto/candle?symbol={}&resolution={}&from={}&to={}&token={}'.format(self.ticker, self.graph_resolution, from_time, to_time, settings.apikeys['finnhub'])
+		url = 'https://finnhub.io/api/v1/crypto/candle?symbol={}&resolution={}&from={}&to={}&token={}'.format(settings.ticker['symbol'], settings.ticker['graph_resolution'], from_time, to_time, settings.apikeys['finnhub'])
 		r = requests.get(url)
 		data = r.json()
 		self.historical_prices = data
@@ -289,11 +295,11 @@ class Ticker(StoppableThread):
 		
 	def draw_graph(self):
 		for i in range(matrix.width):
-			if self.graph_style == 'filled':
+			if settings.ticker['graph_type'] == 'filled':
 				y = matrix.height - int((self.c_vals[i] - min(self.c_vals)) / (max(self.c_vals) - min(self.c_vals)) * self.graph_height)
 				for j in range(y, matrix.height):
 					self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, self.graph_color[0], self.graph_color[1], self.graph_color[2])
-			if self.graph_style == 'bar':
+			if settings.ticker['graph_type'] == 'bar':
 				h_y = matrix.height - int((self.h_vals[i] - min(self.l_vals)) / (max(self.h_vals) - min(self.l_vals)) * self.graph_height)
 				l_y = matrix.height - int((self.l_vals[i] - min(self.l_vals)) / (max(self.h_vals) - min(self.l_vals)) * self.graph_height)
 				if self.c_vals[i] - self.o_vals[i] > 0:
@@ -331,28 +337,28 @@ def start_led_app(app):
 		task = Clock()
 		task.start()
 		settings.current_thread = task
-		settings.running_apps.append('clock')
+		settings.main['running_apps'].append('clock')
 		settings.dump_settings()
 	elif app == 'picture':
 		task = Picture()
 		task.start()
 		settings.current_thread = task
-		settings.running_apps.append('picture')
+		settings.main['running_apps'].append('picture')
 		settings.dump_settings()
 	elif app == 'solid':
 		task = Solid()
 		task.start()
 		settings.current_thread = task
-		settings.running_apps.append('solid')
+		settings.main['running_apps'].append('solid')
 		settings.dump_settings()
 	elif app == 'ticker':
 		task = Ticker()
 		task.start()
 		settings.current_thread = task
-		settings.running_apps.append('ticker')
+		settings.main['running_apps'].append('ticker')
 		settings.dump_settings()
 
 def stop_current_led_app():
 	settings.current_thread.stop()
 	settings.current_thread = None
-	settings.running_apps = []
+	settings.main['running_apps'] = []
