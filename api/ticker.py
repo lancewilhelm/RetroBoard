@@ -1,23 +1,8 @@
-#https://pypi.org/project/websocket_client/
-import websocket
+import yfinance as yf
 
-def on_message(ws, message):
-    print(message)
+msft = yf.Ticker("ETH-USD")
 
-def on_error(ws, error):
-    print(error)
+print(msft.history(period='1d', interval='15m').to_json())
 
-def on_close(ws):
-    print("### closed ###")
-
-def on_open(ws):
-    ws.send('{"type":"subscribe","symbol":"BINANCE:ETHUSDT"}')
-
-if __name__ == "__main__":
-    websocket.enableTrace(True)
-    # ws = websocket.WebSocket()
-    # ws.connect("wss://ws.finnhub.io?token=c7vd5g2ad3i9ikp805vg")
-    # ws.send('{"type":"subscribe","symbol":"BINANCE:ETHUSDT"}')
-    # print(ws.recv())
-    ws = websocket.WebSocketApp("wss://ws.finnhub.io?token=c7vd5g2ad3i9ikp805vg", on_open=on_open)
-    ws.run_forever()
+# For searching for symbols
+url = 'https://finance.yahoo.com/_finance_doubledown/api/resource/searchassist;searchTerm=eth-usd?device=console&returnMeta=true'
