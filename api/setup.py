@@ -95,10 +95,10 @@ class Settings():
 		self.main['brightness'] = 100
 
 		self.ticker = {}
-		self.ticker['equity_type'] = 'crypto'
-		self.ticker['symbol'] = 'BINANCE:ETHUSDT'
+		self.ticker['symbol'] = 'ETH-USD'
 		self.ticker['graph_type'] = 'bar'
-		self.ticker['graph_resolution'] = '15'
+		self.ticker['graph_resolution'] = '15m'
+		self.ticker['graph_period'] = '2d'
  
 		# Non stored settings
 		self.current_thread = None
