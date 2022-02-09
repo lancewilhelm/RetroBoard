@@ -10,6 +10,7 @@ import numpy as np
 import requests
 import websocket
 import json
+import yfinance as yf
 
 #-------------------------------------------------------------------------
 # Utility functions/variables:
@@ -215,85 +216,43 @@ class Ticker(StoppableThread):
 		super().__init__(*args, **kwargs)
 		self.name = 'ticker'
 
-		self.ws = websocket.WebSocketApp('wss://ws.finnhub.io?token={}'.format(settings.apikeys['finnhub']), on_open=self.on_ws_open, on_message = self.on_ws_message, on_close = self.on_ws_close)
-
 		self.offscreen_canvas = matrix.CreateFrameCanvas()
-		self.historical_prices = {}
 		self.graph_color = [255, 255, 255]
 		self.graph_height = 17
 		self.min_val = 0
 		self.max_val = 0
-		self.historical_update_time = 0
+		self.price_update_time = 0
 
-	def on_ws_message(self, ws, message):
-		if self.stopped():
-			self.ws.close()
+	def get_prices(self):
+		logging.debug('getting prices')
+		
+		yf_ticker = yf.Ticker(settings.ticker['symbol'])
+		df = yf_ticker.history(period=settings.ticker['graph_period'], interval=settings.ticker['graph_resolution']).sort_index(ascending=False).reset_index()
+		df['t'] = df['Datetime'].apply(lambda x: int(x.value / 10**6))
+		df = df[:64]
+
+		self.c_vals = list(df['Close'])
+		self.o_vals = list(df['Open'])
+		self.l_vals = list(df['Low'])
+		self.h_vals = list(df['High'])
+		self.t_vals = list(df['t'])
+		
+	def draw_screen(self):
+		self.offscreen_canvas.Clear()
+		display_symbol = settings.ticker['symbol']
+
+		draw_text(self.offscreen_canvas, 2, 1, self.font, display_symbol, [255, 255, 255])
+		draw_text(self.offscreen_canvas, 2, 7, self.font, '${:.2f}'.format(self.c_vals[0]), [255, 255, 255])
+		price_diff = self.c_vals[0] - self.c_vals[63]
+		if price_diff > 0:
+			self.graph_color = [0, 255, 0]
+			price_diff = '+' + '{:.2f}'.format(price_diff)
 		else:
-			try:
-				data = json.loads(message)['data']
-				price = float(data[0]['p'])
-				time = int(data[0]['t'])
-				self.offscreen_canvas.Clear()
-				
-				# Remove the BINANCE from crypto symbols
-				if settings.ticker['equity_type'] == 'crypto':
-					display_symbol = settings.ticker['symbol'].split(':')[-1]
-				else:
-					display_symbol = settings.ticker['symbol']
+			self.graph_color = [255, 0, 0]
+			price_diff = '{:.2f}'.format(price_diff)
 
-				draw_text(self.offscreen_canvas, 2, 1, self.font, display_symbol, [255, 255, 255])
-				draw_text(self.offscreen_canvas, 2, 7, self.font, '${:.2f}'.format(price), [255, 255, 255])
-				price_diff = price - self.c_vals[63]
-				if price_diff > 0:
-					self.graph_color = [0, 255, 0]
-					price_diff = '+' + '{:.2f}'.format(price_diff)
-				else:
-					self.graph_color = [255, 0, 0]
-					price_diff = '{:.2f}'.format(price_diff)
-
-				draw_text(self.offscreen_canvas, 35, 7, self.font, '{}'.format(price_diff), self.graph_color)
-
-				# if the timestamp of the current received price is greater than 1s then refresh the historical data
-				if time > self.historical_update_time * 1000:
-					self.get_historical_prices()
-
-				self.draw_graph()
-				self.offscreen_canvas = matrix.SwapOnVSync(self.offscreen_canvas)
-			except:
-				logging.debug('unable to handle or get live stock price')
-
-	def on_ws_close(self, ws, code, msg):
-		print('closing websocket')
-	
-	def on_ws_open(self, ws):
-		send_string = '{"type":"subscribe","symbol":"' + settings.ticker['symbol'] + '"}'
-		ws.send(send_string)
-
-	def get_historical_prices(self):
-		logging.debug('getting historical data')
+		draw_text(self.offscreen_canvas, 35, 7, self.font, '{}'.format(price_diff), self.graph_color)
 		
-		to_time = int(time.mktime(datetime.now().timetuple()))
-		from_time = int(time.mktime((datetime.now() - timedelta(days = 1)).timetuple()))
-		
-		url = 'https://finnhub.io/api/v1/crypto/candle?symbol={}&resolution={}&from={}&to={}&token={}'.format(settings.ticker['symbol'], settings.ticker['graph_resolution'], from_time, to_time, settings.apikeys['finnhub'])
-		r = requests.get(url)
-		data = r.json()
-		self.historical_prices = data
-
-		self.c_vals = data['c']
-		self.o_vals = data['o']
-		self.t_vals = data['t']
-		self.h_vals = data['h']
-		self.l_vals = data['l']
-		self.c_vals.reverse()
-		self.o_vals.reverse()
-		self.t_vals.reverse()
-		self.h_vals.reverse()
-		self.l_vals.reverse()
-
-		self.historical_update_time = int(time.mktime((datetime.now() + timedelta(minutes = 1)).timetuple()))
-		
-	def draw_graph(self):
 		for i in range(matrix.width):
 			if settings.ticker['graph_type'] == 'filled':
 				y = matrix.height - int((self.c_vals[i] - min(self.c_vals)) / (max(self.c_vals) - min(self.c_vals)) * self.graph_height)
@@ -303,20 +262,27 @@ class Ticker(StoppableThread):
 				h_y = matrix.height - int((self.h_vals[i] - min(self.l_vals)) / (max(self.h_vals) - min(self.l_vals)) * self.graph_height)
 				l_y = matrix.height - int((self.l_vals[i] - min(self.l_vals)) / (max(self.h_vals) - min(self.l_vals)) * self.graph_height)
 				if self.c_vals[i] - self.o_vals[i] > 0:
-					for j in range(h_y, l_y):
-						self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 0, 255, 0)
+					if h_y != l_y:
+						for j in range(h_y, l_y):
+							self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 0, 255, 0)
+					else:
+						self.offscreen_canvas.SetPixel(matrix.width - (i + 1), h_y, 0, 255, 0)
 				else:
-					for j in range(h_y, l_y):
-						self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 255, 0, 0)
+					if h_y != l_y:
+						for j in range(h_y, l_y):
+							self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 255, 0, 0)
+					else:
+						self.offscreen_canvas.SetPixel(matrix.width - (i + 1), h_y, 255, 0, 0)
+
+		self.offscreen_canvas = matrix.SwapOnVSync(self.offscreen_canvas)
 
 	def run(self):
 		logging.debug('starting ticker')
 
-		self.offscreen_canvas.Clear()
-
-		self.get_historical_prices()
-
-		self.ws.run_forever()
+		self.offscreen_canvas = matrix.SwapOnVSync(self.offscreen_canvas)
+		self.price_update_time = int(time.mktime((datetime.now() + timedelta(seconds = 15)).timetuple()))
+		self.get_prices()
+		self.draw_screen()
 
 		# Run the ticker loop until stopped
 		while True:
@@ -325,9 +291,21 @@ class Ticker(StoppableThread):
 				matrix.Clear()
 				return
 
-			# Check for a settings change that needs fto be loaded
+			# Check for a settings change that needs to be loaded
 			if settings.update_bool:
+				print('updating settings')
 				self.loadSettings()
+				self.get_prices()
+				self.draw_screen()
+				self.price_update_time = int(time.mktime((datetime.now() + timedelta(seconds = 15)).timetuple()))
+			
+			t = int(time.mktime(datetime.now().timetuple()))
+			if t > self.price_update_time:
+				self.get_prices()
+				self.draw_screen()
+				self.price_update_time = int(time.mktime((datetime.now() + timedelta(seconds = 15)).timetuple()))
+
+			time.sleep(0.05)
 
 #-------------------------------------------------------------------------
 # LED Driving functions that are dependent on the objects defined above
