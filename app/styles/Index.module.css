@@ -1,4 +1,4 @@
-.container {
+.pagecontainer {
   height: 100vh;
   width: 100vw;
   display: flex;
@@ -31,4 +31,30 @@
 
 .settingsButton {
   margin: 10px;
+}
+
+.maincontainer	{
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin: 5px 0;
+}
+
+.btn {
+	color: black;
+	margin: 0px 5px;
+	font-family: inherit;
+	border-color: black;
+	padding: 5px 5px;
+}
+
+.btngrp {
+	margin: 0px 5px;
+}
+
+.btngrpbtn {
+	color: black;
+	font-family: inherit;
+	border-color: black;
+	padding: 5px 5px;
 }

@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 import time
+from datetime import datetime, timedelta
 from setup import matrix, settings
 import time
 from PIL import Image
 import logging
 import threading
 import numpy as np
+import requests
+import websocket
+import json
+import yfinance as yf
 
 #-------------------------------------------------------------------------
 # Utility functions/variables:
@@ -43,22 +48,25 @@ def set_static_color(color):
 	color_array = np.array([color['r'], color['g'], color['b']])
 	settings.color_matrix[:, :] = color_array
 
-def draw_glyph(canvas, x, y, glyph):
+def draw_glyph(canvas, x, y, glyph, color=None):
 	cm = settings.color_matrix
 	for i, row in enumerate(glyph.iter_pixels()):
 		for j, pixel, in enumerate(row):
 			pixel_x = x + j
 			pixel_y = y + i
 			if pixel:
-				canvas.SetPixel(pixel_x, pixel_y, cm[pixel_x, pixel_y, 0], cm[pixel_x, pixel_y, 1], cm[pixel_x, pixel_y, 2])
+				if color == None:
+					canvas.SetPixel(pixel_x, pixel_y, cm[pixel_x, pixel_y, 0], cm[pixel_x, pixel_y, 1], cm[pixel_x, pixel_y, 2])
+				else:
+					canvas.SetPixel(pixel_x, pixel_y, color[0], color[1], color[2])
 
-def draw_text(canvas, x, y, font, text):
+def draw_text(canvas, x, y, font, text, color=None):
 	char_x = x
 	for char in text:
 		glyph = font[ord(char)]
 		char_y = y + (font.ptSize - glyph.bbH) - glyph.bbY
 		char_x += glyph.bbX
-		draw_glyph(canvas, char_x, char_y, glyph)
+		draw_glyph(canvas, char_x, char_y, glyph, color)
 		char_x += (glyph.advance - glyph.bbX)
 
 cent_x = int(matrix.width / 2)
@@ -84,7 +92,7 @@ class StoppableThread(threading.Thread):
 
 	def loadSettings(self):
 		logging.debug('loading settings for {}'.format(type(self).__name__))
-		self.font = settings.load_font(settings.font_dict[settings.active_font])
+		self.font = settings.load_font(settings.main['font_dict'][settings.main['active_font']])
 		self.font_width = self.font[ord(' ')].advance
 		self.font_height = self.font.ptSize
 		self.position = {
@@ -93,10 +101,10 @@ class StoppableThread(threading.Thread):
 		}
 		settings.update_bool = False
 
-		if settings.color_mode == 'static':
-			set_static_color(settings.static_color)
-		elif settings.color_mode == 'gradient':
-			set_color_grad(settings.gradient[0], settings.gradient[-1])
+		if settings.main['color_mode'] == 'static':
+			set_static_color(settings.main['static_color'])
+		elif settings.main['color_mode'] == 'gradient':
+			set_color_grad(settings.main['gradient'][0], settings.main['gradient'][-1])
 
 #-------------------------------------------------------------------------
 # LED Animations: 
@@ -203,6 +211,142 @@ class Solid(StoppableThread):
 			time.sleep(0.05)	# Time buffer added so as to not overload the system
 			offscreen_canvas = matrix.SwapOnVSync(offscreen_canvas)
 
+class Ticker(StoppableThread):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.name = 'ticker'
+
+		self.offscreen_canvas = matrix.CreateFrameCanvas()
+		self.graph_color = [255, 255, 255]
+		self.graph_height = 16
+		self.min_val = 0
+		self.max_val = 0
+		self.price_update_time = 0
+
+	def get_prices(self):
+		logging.debug('getting prices')
+		
+		yf_ticker = yf.Ticker(settings.ticker['symbol'])
+		self.df = yf_ticker.history(period=settings.ticker['graph_period'], interval=settings.ticker['graph_resolution'], prepost=True).sort_index(ascending=False).reset_index()
+		if len(self.df) > 0:
+			self.df['t'] = self.df['Datetime'].apply(lambda x: int(x.value / 10**6))
+			self.df = self.df[:64]
+
+			self.c_vals = list(self.df['Close'])
+			self.o_vals = list(self.df['Open'])
+			self.l_vals = list(self.df['Low'])
+			self.h_vals = list(self.df['High'])
+			self.t_vals = list(self.df['t'])
+		
+	def draw_screen(self):
+		self.offscreen_canvas.Clear()
+		display_symbol = settings.ticker['symbol']
+
+		draw_text(self.offscreen_canvas, 2, 1, self.font, display_symbol, [255, 255, 255])
+
+		if len(self.df) > 0:
+			price = '${:.2f}'.format(self.c_vals[0])
+			draw_text(self.offscreen_canvas, 2, 7, self.font, price, [255, 255, 255])
+			price_diff = self.c_vals[0] - self.c_vals[-1]
+			if price_diff > 0:
+				self.graph_color = [0, 255, 0]
+				price_diff = '+' + '{:.2f}'.format(price_diff)
+			else:
+				self.graph_color = [255, 0, 0]
+				price_diff = '{:.2f}'.format(price_diff)
+
+			price_diff_location = len(price) * 4 + 2
+			draw_text(self.offscreen_canvas, price_diff_location, 7, self.font, '{}'.format(price_diff), self.graph_color)
+
+			c_y = [matrix.height - int((self.c_vals[i] - min(self.c_vals)) / (max(self.c_vals) - min(self.c_vals)) * self.graph_height) - 1 for i in range(len(self.c_vals))]
+			h_y = [matrix.height - int((self.h_vals[i] - min(self.l_vals)) / (max(self.h_vals) - min(self.l_vals)) * self.graph_height) - 1 for i in range(len(self.h_vals))]
+			l_y = [matrix.height - int((self.l_vals[i] - min(self.l_vals)) / (max(self.h_vals) - min(self.l_vals)) * self.graph_height) - 1 for i in range(len(self.h_vals))]
+			
+			if settings.ticker['graph_type'] == 'diff':
+				# Draw axis in gray
+				for i, y in enumerate(c_y):
+					if self.c_vals[i] < self.c_vals[-1]:
+						for j in range(c_y[-1], y + 1):
+							self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 50, 0, 0)
+						self.offscreen_canvas.SetPixel(matrix.width - (i + 1), y, 250, 0, 0)
+						if i != (len(c_y)-1) and y > c_y[i + 1]:
+							for j in range(max(c_y[i+1], c_y[-1]), y):
+								self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 250, 0, 0)
+						elif i != 0 and y > c_y[i - 1]:
+							for j in range(max(c_y[i-1], c_y[-1]), y):
+								self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 250, 0, 0)
+					else:
+						for j in range(y, c_y[-1] + 1):
+							self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 0, 50, 0)
+						self.offscreen_canvas.SetPixel(matrix.width - (i + 1), y, 0, 250, 0)
+						if i != (len(c_y)-1) and y < c_y[i + 1]:
+							for j in range(y, min(c_y[i+1], c_y[-1])):
+								self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 0, 250, 0)
+						elif i != 0 and y < c_y[i - 1]:
+							for j in range(y, min(c_y[i-1], c_y[-1])):
+								self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 0, 250, 0)
+
+			elif settings.ticker['graph_type'] == 'filled':
+				for i, y in enumerate(c_y):
+					for j in range(y, matrix.height):
+						self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, self.graph_color[0] * 0.2, self.graph_color[1] * 0.2, self.graph_color[2] * 0.2)
+					self.offscreen_canvas.SetPixel(matrix.width - (i + 1), y, self.graph_color[0], self.graph_color[1], self.graph_color[2])
+					if i != 0 and y < c_y[i-1]:
+						for j in range(y, c_y[i-1]):
+							self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, self.graph_color[0], self.graph_color[1], self.graph_color[2])
+					elif i != len(c_y) and y > c_y[i-1]:
+						for j in range(c_y[i-1], y):
+							self.offscreen_canvas.SetPixel(matrix.width - (i), j, self.graph_color[0], self.graph_color[1], self.graph_color[2])
+					
+			elif settings.ticker['graph_type'] == 'bar':
+				for i, c_val in enumerate(self.c_vals):
+					if c_val - self.o_vals[i] > 0:
+						if h_y[i] != l_y[i]:
+							for j in range(h_y[i], l_y[i]):
+								self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 0, 255, 0)
+						else:
+							self.offscreen_canvas.SetPixel(matrix.width - (i + 1), h_y[i], 0, 255, 0)
+					else:
+						if h_y[i] != l_y[i]:
+							for j in range(h_y[i], l_y[i]):
+								self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 255, 0, 0)
+						else:
+							self.offscreen_canvas.SetPixel(matrix.width - (i + 1), h_y[i], 255, 0, 0)
+		else:
+			draw_text(self.offscreen_canvas, 19, 20, self.font, 'NO DATA', [255, 255, 255])
+
+		self.offscreen_canvas = matrix.SwapOnVSync(self.offscreen_canvas)
+
+	def run(self):
+		logging.debug('starting ticker')
+
+		self.offscreen_canvas = matrix.SwapOnVSync(self.offscreen_canvas)
+		self.price_update_time = int(time.mktime((datetime.now() + timedelta(seconds = 15)).timetuple()))
+		self.get_prices()
+		self.draw_screen()
+
+		# Run the ticker loop until stopped
+		while True:
+			# Check to see if we have stopped
+			if self.stopped():
+				matrix.Clear()
+				return
+
+			# Check for a settings change that needs to be loaded
+			if settings.update_bool:
+				self.loadSettings()
+				self.get_prices()
+				self.draw_screen()
+				self.price_update_time = int(time.mktime((datetime.now() + timedelta(seconds = 15)).timetuple()))
+			
+			t = int(time.mktime(datetime.now().timetuple()))
+			if t > self.price_update_time:
+				self.get_prices()
+				self.draw_screen()
+				self.price_update_time = int(time.mktime((datetime.now() + timedelta(seconds = 15)).timetuple()))
+
+			time.sleep(0.05)
+
 #-------------------------------------------------------------------------
 # LED Driving functions that are dependent on the objects defined above
 #-------------------------------------------------------------------------
@@ -211,22 +355,28 @@ def start_led_app(app):
 		task = Clock()
 		task.start()
 		settings.current_thread = task
-		settings.running_apps.append('clock')
+		settings.main['running_apps'].append('clock')
 		settings.dump_settings()
 	elif app == 'picture':
 		task = Picture()
 		task.start()
 		settings.current_thread = task
-		settings.running_apps.append('picture')
+		settings.main['running_apps'].append('picture')
 		settings.dump_settings()
 	elif app == 'solid':
 		task = Solid()
 		task.start()
 		settings.current_thread = task
-		settings.running_apps.append('solid')
+		settings.main['running_apps'].append('solid')
+		settings.dump_settings()
+	elif app == 'ticker':
+		task = Ticker()
+		task.start()
+		settings.current_thread = task
+		settings.main['running_apps'].append('ticker')
 		settings.dump_settings()
 
 def stop_current_led_app():
 	settings.current_thread.stop()
 	settings.current_thread = None
-	settings.running_apps = []
+	settings.main['running_apps'] = []
