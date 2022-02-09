@@ -227,52 +227,59 @@ class Ticker(StoppableThread):
 		logging.debug('getting prices')
 		
 		yf_ticker = yf.Ticker(settings.ticker['symbol'])
-		df = yf_ticker.history(period=settings.ticker['graph_period'], interval=settings.ticker['graph_resolution']).sort_index(ascending=False).reset_index()
-		df['t'] = df['Datetime'].apply(lambda x: int(x.value / 10**6))
-		df = df[:64]
+		self.df = yf_ticker.history(period=settings.ticker['graph_period'], interval=settings.ticker['graph_resolution'], prepost=True).sort_index(ascending=False).reset_index()
+		if len(self.df) > 0:
+			self.df['t'] = self.df['Datetime'].apply(lambda x: int(x.value / 10**6))
+			self.df = self.df[:64]
 
-		self.c_vals = list(df['Close'])
-		self.o_vals = list(df['Open'])
-		self.l_vals = list(df['Low'])
-		self.h_vals = list(df['High'])
-		self.t_vals = list(df['t'])
+			self.c_vals = list(self.df['Close'])
+			self.o_vals = list(self.df['Open'])
+			self.l_vals = list(self.df['Low'])
+			self.h_vals = list(self.df['High'])
+			self.t_vals = list(self.df['t'])
 		
 	def draw_screen(self):
 		self.offscreen_canvas.Clear()
 		display_symbol = settings.ticker['symbol']
 
 		draw_text(self.offscreen_canvas, 2, 1, self.font, display_symbol, [255, 255, 255])
-		draw_text(self.offscreen_canvas, 2, 7, self.font, '${:.2f}'.format(self.c_vals[0]), [255, 255, 255])
-		price_diff = self.c_vals[0] - self.c_vals[63]
-		if price_diff > 0:
-			self.graph_color = [0, 255, 0]
-			price_diff = '+' + '{:.2f}'.format(price_diff)
-		else:
-			self.graph_color = [255, 0, 0]
-			price_diff = '{:.2f}'.format(price_diff)
 
-		draw_text(self.offscreen_canvas, 35, 7, self.font, '{}'.format(price_diff), self.graph_color)
-		
-		for i in range(matrix.width):
-			if settings.ticker['graph_type'] == 'filled':
-				y = matrix.height - int((self.c_vals[i] - min(self.c_vals)) / (max(self.c_vals) - min(self.c_vals)) * self.graph_height)
-				for j in range(y, matrix.height):
-					self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, self.graph_color[0], self.graph_color[1], self.graph_color[2])
-			if settings.ticker['graph_type'] == 'bar':
-				h_y = matrix.height - int((self.h_vals[i] - min(self.l_vals)) / (max(self.h_vals) - min(self.l_vals)) * self.graph_height)
-				l_y = matrix.height - int((self.l_vals[i] - min(self.l_vals)) / (max(self.h_vals) - min(self.l_vals)) * self.graph_height)
-				if self.c_vals[i] - self.o_vals[i] > 0:
-					if h_y != l_y:
-						for j in range(h_y, l_y):
-							self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 0, 255, 0)
+		if len(self.df) > 0:
+			price = '${:.2f}'.format(self.c_vals[0])
+			draw_text(self.offscreen_canvas, 2, 7, self.font, price, [255, 255, 255])
+			price_diff = self.c_vals[0] - self.c_vals[-1]
+			if price_diff > 0:
+				self.graph_color = [0, 255, 0]
+				price_diff = '+' + '{:.2f}'.format(price_diff)
+			else:
+				self.graph_color = [255, 0, 0]
+				price_diff = '{:.2f}'.format(price_diff)
+
+			price_diff_location = len(price) * 4 + 2
+			draw_text(self.offscreen_canvas, price_diff_location, 7, self.font, '{}'.format(price_diff), self.graph_color)
+			
+			for i in range(len(self.c_vals)):
+				if settings.ticker['graph_type'] == 'filled':
+					y = matrix.height - int((self.c_vals[i] - min(self.c_vals)) / (max(self.c_vals) - min(self.c_vals)) * self.graph_height)
+					for j in range(y, matrix.height):
+						self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, self.graph_color[0], self.graph_color[1], self.graph_color[2])
+				if settings.ticker['graph_type'] == 'bar':
+					h_y = matrix.height - int((self.h_vals[i] - min(self.l_vals)) / (max(self.h_vals) - min(self.l_vals)) * self.graph_height)
+					l_y = matrix.height - int((self.l_vals[i] - min(self.l_vals)) / (max(self.h_vals) - min(self.l_vals)) * self.graph_height)
+					if self.c_vals[i] - self.o_vals[i] > 0:
+						if h_y != l_y:
+							for j in range(h_y, l_y):
+								self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 0, 255, 0)
+						else:
+							self.offscreen_canvas.SetPixel(matrix.width - (i + 1), h_y, 0, 255, 0)
 					else:
-						self.offscreen_canvas.SetPixel(matrix.width - (i + 1), h_y, 0, 255, 0)
-				else:
-					if h_y != l_y:
-						for j in range(h_y, l_y):
-							self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 255, 0, 0)
-					else:
-						self.offscreen_canvas.SetPixel(matrix.width - (i + 1), h_y, 255, 0, 0)
+						if h_y != l_y:
+							for j in range(h_y, l_y):
+								self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 255, 0, 0)
+						else:
+							self.offscreen_canvas.SetPixel(matrix.width - (i + 1), h_y, 255, 0, 0)
+		else:
+			draw_text(self.offscreen_canvas, 19, 20, self.font, 'NO DATA', [255, 255, 255])
 
 		self.offscreen_canvas = matrix.SwapOnVSync(self.offscreen_canvas)
 
