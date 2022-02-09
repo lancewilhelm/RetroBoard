@@ -16,8 +16,6 @@ export default function TickerSettings(props) {
 	const equityTypeList = ['stock', 'crypto'];
 	const graphTypeList = ['filled', 'bar', 'diff'];
 
-	const apiKeys = require('../../apikeys.json');
-
 	function changeGraphType(e, val) {
 		setGraphType(val);
 		let settings_copy = Object.assign({}, props.settings);
