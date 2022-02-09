@@ -12,8 +12,6 @@ const initialPallet = [
 ];
 
 export default function SettingsDialog(props) {
-    const [settings, setSettings] = useState({});
-    const [reset, setReset] = useState(false);
     const [fonts, setFonts] = useState([]);
     const [activeFont, setActiveFont] = useState();
     const [brightness, setBrightness] = useState();
@@ -27,32 +25,32 @@ export default function SettingsDialog(props) {
     function changeActiveFont(e, val) {
         if (val != null) {
             setActiveFont(val);
-            let settings_copy = Object.assign({}, settings);
-            settings_copy.active_font = val;
-            setSettings(settings_copy);
+            let settings_copy = Object.assign({}, props.settings);
+            settings_copy.main.active_font = val;
+            props.setSettings(settings_copy);
         }
     }
 
     function changeBrightness(value) {
         setBrightness(value);
-        let settings_copy = Object.assign({}, settings);
-        settings_copy.brightness = value;
-        setSettings(settings_copy);
+        let settings_copy = Object.assign({}, props.settings);
+        settings_copy.main.brightness = value;
+        props.setSettings(settings_copy);
     }
 
     function changeStaticColor(color, event) {
         setStaticColor(color.rgb);
-        let settings_copy = Object.assign({}, settings);
-        settings_copy.static_color = color.rgb;
-        setSettings(settings_copy);
+        let settings_copy = Object.assign({}, props.settings);
+        settings_copy.main.static_color = color.rgb;
+        props.setSettings(settings_copy);
     }
 
     function changeColorMode(e, val) {
         if (val != null) {
             setColorMode(val);
-            let settings_copy = Object.assign({}, settings);
-            settings_copy.color_mode = val;
-            setSettings(settings_copy);
+            let settings_copy = Object.assign({}, props.settings);
+            settings_copy.main.color_mode = val;
+            props.setSettings(settings_copy);
         }
     }
 
@@ -66,15 +64,15 @@ export default function SettingsDialog(props) {
     }
 
     function parseGradPalette(grad) {
-        let settings_copy = Object.assign({}, settings);
+        let settings_copy = Object.assign({}, props.settings);
         var gradient = []
         for (const c of grad) {
             const rgb = c.color.replace(/[^\d,]/g, '').split(',');
             const offset = parseFloat(c.offset);
             gradient.push({offset: offset, r: parseInt(rgb[0]), g: parseInt(rgb[1]), b: parseInt(rgb[2])});
         }
-        settings_copy.gradient = gradient;
-        setSettings(settings_copy);
+        settings_copy.main.gradient = gradient;
+        props.setSettings(settings_copy);
     }
 
     function updateGradPalette(grad) {
@@ -86,31 +84,31 @@ export default function SettingsDialog(props) {
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(settings),
+            body: JSON.stringify(props.settings),
         };
         fetch('http://' + localIP + ':5000/api/settings', requestOptions);
-        props.handleDialogClose();
+        props.handleMainSettingsClose();
     }
 
     useEffect(() => {
         fetch('http://' + localIP + ':5000/api/settings')
             .then((res) => res.json())
             .then((data) => {
-                setSettings(data);
-                setFonts(Object.keys(data.font_dict));
-                setActiveFont(data.active_font);
-                setBrightness(data.brightness);
-                setStaticColor(data.static_color);
-                setColorMode(data.color_mode);
-                changeGradPalette(data.gradient);
+                props.setSettings(data);
+                setFonts(Object.keys(data.main.font_dict));
+                setActiveFont(data.main.active_font);
+                setBrightness(data.main.brightness);
+                setStaticColor(data.main.static_color);
+                setColorMode(data.main.color_mode);
+                changeGradPalette(data.main.gradient);
             });
-    }, [reset]);
+    }, [props.resetSettings]);
 
     return (
         <div className={styles.container}>
             <Dialog
-                open={props.dialogOpen}
-                onClose={props.handleDialogClose}
+                open={props.mainSettingsOpen}
+                onClose={props.handleMainSettingsClose}
                 scroll={scroll}
                 aria-labelledby="scroll-dialog-title"
                 aria-describedby="scroll-dialog-description"
@@ -191,14 +189,14 @@ export default function SettingsDialog(props) {
                         className={styles.button}
                         variant='outlined'
                         color='error'
-                        onClick={() => setReset(!reset)}
+                        onClick={() => props.setResetSettings(!props.resetSettings)}
                     >
                         Reset
                     </Button>
                     <Button
                         className={styles.button}
                         variant='outlined'
-                        onClick={props.handleDialogClose}
+                        onClick={props.handleMainSettingsClose}
                     >
                         Close
                     </Button>

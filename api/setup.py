@@ -85,35 +85,32 @@ for file in dir_list:
 class Settings():
 	def __init__(self):
 		# Initialize stored settings with some defaults
-		self.font_dict = font_dict
-		self.active_font = 'tom-thumb'
-		self.static_color = {'r': 255, 'g': 255, 'b': 255, 'a': 1}
-		# self.grad_start_color = {'r': 0, 'g': 0, 'b': 255, 'a': 1}
-		# self.grad_end_color = {'r': 255, 'g': 0, 'b': 255, 'a': 1}
-		self.gradient = [{'offset': 0.0, 'r': 0, 'g': 0, 'b': 255, 'a': 1}, {'offset': 1.0, 'r': 255, 'g': 0, 'b': 255, 'a': 1}]
-		self.running_apps = ['clock']
-		self.color_mode = 'gradient'
-		
+		self.main = {}
+		self.main['font_dict'] = font_dict
+		self.main['active_font'] = 'tom-thumb'
+		self.main['static_color'] = {'r': 255, 'g': 255, 'b': 255, 'a': 1}
+		self.main['gradient'] = [{'offset': 0.0, 'r': 0, 'g': 0, 'b': 255, 'a': 1}, {'offset': 1.0, 'r': 255, 'g': 0, 'b': 255, 'a': 1}]
+		self.main['running_apps'] = ['clock']
+		self.main['color_mode'] = 'gradient'
+		self.main['brightness'] = 100
+
+		self.ticker = {}
+		self.ticker['symbol'] = 'ETH-USD'
+		self.ticker['graph_type'] = 'bar'
+		self.ticker['graph_resolution'] = '15m'
+		self.ticker['graph_period'] = '2d'
+ 
 		# Non stored settings
 		self.current_thread = None
 		self.update_bool = True
 		self.color_matrix = np.ndarray((matrix.width, matrix.height, 3), dtype=int)
 		self.color_matrix.fill(255)
+		self.apikeys = {}
 
 	def dump_settings(self, settings=None):
 		logging.debug('dumping settings to settings.json')
 		if settings == None:
-			settings = {
-				'font_dict': self.font_dict,
-				'active_font': self.active_font,
-				'brightness': matrix.brightness,
-				'static_color': self.static_color,
-				# 'grad_start_color': self.grad_start_color,
-				# 'grad_end_color': self.grad_end_color,
-				'gradient': self.gradient,
-				'running_apps': self.running_apps,
-				'color_mode': self.color_mode
-			}
+			settings = {'main': self.main, 'ticker': self.ticker}
 
 		with open('/home/pi/RetroBoard/settings.json', 'w') as filehandle:
 			json.dump(settings, filehandle)
@@ -124,20 +121,23 @@ class Settings():
 			with open('/home/pi/RetroBoard/settings.json', 'r') as filehandle:
 				settings = json.load(filehandle)
 
-				self.font_dict = settings['font_dict']
-				self.active_font = settings['active_font']
-				matrix.brightness = settings['brightness']
-				self.static_color = settings['static_color']
-				# self.grad_start_color = settings['grad_start_color']
-				# self.grad_end_color = settings['grad_end_color']
-				self.gradient = settings['gradient']
-				self.running_apps = settings['running_apps']
-				self.color_mode = settings['color_mode']
+				self.main = settings['main']
+				self.ticker = settings['ticker']
+
+				matrix.brightness = self.main['brightness']
+
 				self.update_bool = True
 
 		except FileNotFoundError:
 			logging.debug('no settings.json file exists, creating one...')
 			self.dump_settings()
+
+		try:
+			with open('/home/pi/RetroBoard/apikeys.json', 'r') as filehandle:
+				apikeys = json.load(filehandle)
+				self.apikeys = apikeys
+		except:
+			logging.debug('no apikeys.json file exists...')
 
 	def load_font(self, path):
 		logging.debug('loading font {}'.format(path))
