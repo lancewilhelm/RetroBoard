@@ -14,7 +14,7 @@ export default function TickerSettings(props) {
 	const [displaySymbolList, setDisplaySymbolList] = useState([]);
 
 	const equityTypeList = ['stock', 'crypto'];
-	const graphTypeList = ['filled', 'bar'];
+	const graphTypeList = ['filled', 'bar', 'diff'];
 
 	const apiKeys = require('../../apikeys.json');
 
