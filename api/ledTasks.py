@@ -272,7 +272,7 @@ class Ticker(StoppableThread):
 						if i != (len(c_y)-1) and y > c_y[i + 1]:
 							for j in range(max(c_y[i+1], c_y[-1]), y):
 								self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 250, 0, 0)
-						elif i != 0 and y > c_y[i - 1]:
+						if i != 0 and y > c_y[i - 1]:
 							for j in range(max(c_y[i-1], c_y[-1]), y):
 								self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 250, 0, 0)
 					else:
@@ -282,7 +282,7 @@ class Ticker(StoppableThread):
 						if i != (len(c_y)-1) and y < c_y[i + 1]:
 							for j in range(y, min(c_y[i+1], c_y[-1])):
 								self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 0, 250, 0)
-						elif i != 0 and y < c_y[i - 1]:
+						if i != 0 and y < c_y[i - 1]:
 							for j in range(y, min(c_y[i-1], c_y[-1])):
 								self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 0, 250, 0)
 
