@@ -57,6 +57,13 @@ export default function Home() {
 					<Button
 						className={styles.btn}
 						variant='outlined'
+						onClick={() => sendCommand('text_clock')}
+					>
+						Text Clock
+					</Button>
+					<Button
+						className={styles.btn}
+						variant='outlined'
 						onClick={() => sendCommand('picture')}
 					>
 						Picture

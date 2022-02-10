@@ -11,6 +11,7 @@ import requests
 import websocket
 import json
 import yfinance as yf
+import math
 
 #-------------------------------------------------------------------------
 # Utility functions/variables:
@@ -95,10 +96,6 @@ class StoppableThread(threading.Thread):
 		self.font = settings.load_font(settings.main['font_dict'][settings.main['active_font']])
 		self.font_width = self.font[ord(' ')].advance
 		self.font_height = self.font.ptSize
-		self.position = {
-			'x': int(cent_x - (5 * self.font_width) / 2),
-			'y': int(cent_y - self.font_height / 2)
-		}
 		settings.update_bool = False
 
 		if settings.main['color_mode'] == 'static':
@@ -117,6 +114,10 @@ class Clock(StoppableThread):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.name = 'clock'
+		self.position = {
+			'x': int(cent_x - (5 * self.font_width) / 2),
+			'y': int(cent_y - self.font_height / 2)
+		}
 
 	def run(self):
 		logging.debug('starting clock')
@@ -164,6 +165,59 @@ class Clock(StoppableThread):
 			
 			# Write the actual drawing to the canvas and then display
 			draw_text(offscreen_canvas, self.position['x'], self.position['y'], self.font, time_str)
+			time.sleep(0.05)	# Time buffer added so as to not overload the system
+			offscreen_canvas = matrix.SwapOnVSync(offscreen_canvas)
+
+class TextClock(StoppableThread):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.name = 'text_clock'
+		self.num2words = {1: 'One', 2: 'Two', 3: 'Three', 4: 'Four', 5: 'Five', 6: 'Six', 7: 'Seven', 8: 'Eight', 9: 'Nine', 10: 'Ten', 11: 'Eleven', 12: 'Twelve', 13: 'Thirteen', 14: 'Fourteen', 15: 'Fifteen', 16: 'Sixteen', 17: 'Seventeen', 18: 'Eighteen', 19: 'Nineteen', 20: 'Twenty', 30: 'Thirty', 40: 'Forty', 50: 'Fifty', 60: 'Sixty', 70: 'Seventy', 80: 'Eighty', 90: 'Ninety', 0: 'Zero'}
+		self.position = {
+			'x': int(cent_x - (5 * self.font_width) / 2),
+			'y': int(cent_y - self.font_height / 2)
+		}
+
+	def run(self):
+		logging.debug('starting text clock')
+
+		# Establish the offscreen buffer to store changes too before publishing
+		offscreen_canvas = matrix.CreateFrameCanvas()
+
+		# Run the clock loop until stopped
+		while True:
+			# Check to see if we have stopped
+			if self.stopped():
+				matrix.Clear()
+				return
+
+			# Check for a settings change that needs fto be loaded
+			if settings.update_bool:
+				self.loadSettings()
+
+			offscreen_canvas.Clear()
+			# Grab the latest time
+			t = time.localtime()
+			hours = t.tm_hour
+			mins = t.tm_min
+
+			# Create the min string
+			if mins < 20:
+				min_str = self.num2words[mins]
+			else:
+				min_str = self.num2words[(math.floor(mins / 10) * 10)] + ' ' + self.num2words[(mins - (math.floor(mins / 10) * 10))]
+
+			# Create the hour string
+			if hours < 20:
+				hour_str = self.num2words[hours]
+			else:
+				hour_str = self.num2words[(math.floor(hours / 10) * 10)] + ' ' + self.num2words[(hours - (math.floor(hours / 10) * 10))]
+			
+			# Write the actual drawing to the canvas and then display
+			hour_x = int(cent_x - (len(hour_str) * 4 / 2))
+			min_x = int(cent_x - (len(min_str) * 4 / 2))
+			draw_text(offscreen_canvas, hour_x, self.position['y'] - 3, self.font, hour_str)
+			draw_text(offscreen_canvas, min_x, self.position['y'] + 3, self.font, min_str)
 			time.sleep(0.05)	# Time buffer added so as to not overload the system
 			offscreen_canvas = matrix.SwapOnVSync(offscreen_canvas)
 
@@ -355,25 +409,31 @@ def start_led_app(app):
 		task = Clock()
 		task.start()
 		settings.current_thread = task
-		settings.main['running_apps'].append('clock')
+		settings.main['running_apps'].append(task.name)
+		settings.dump_settings()
+	elif app == 'text_clock':
+		task = TextClock()
+		task.start()
+		settings.current_thread = task
+		settings.main['running_apps'].append(task.name)
 		settings.dump_settings()
 	elif app == 'picture':
 		task = Picture()
 		task.start()
 		settings.current_thread = task
-		settings.main['running_apps'].append('picture')
+		settings.main['running_apps'].append(task.name)
 		settings.dump_settings()
 	elif app == 'solid':
 		task = Solid()
 		task.start()
 		settings.current_thread = task
-		settings.main['running_apps'].append('solid')
+		settings.main['running_apps'].append(task.name)
 		settings.dump_settings()
 	elif app == 'ticker':
 		task = Ticker()
 		task.start()
 		settings.current_thread = task
-		settings.main['running_apps'].append('ticker')
+		settings.main['running_apps'].append(task.name)
 		settings.dump_settings()
 
 def stop_current_led_app():
