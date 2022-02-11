@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 import time
 from datetime import datetime, timedelta
-from setup import matrix, settings
+from setup import settings
 import time
 from PIL import Image
 import logging
 import threading
 import numpy as np
-import requests
-import websocket
-import json
 import yfinance as yf
 import math
+
+# If we are not in debug mode then import the led matrix
+if not settings.debug:
+	from setup import matrix
 
 #-------------------------------------------------------------------------
 # Utility functions/variables:
@@ -35,8 +36,8 @@ def clamp(n, minn, maxn):
 def set_color_grad(start_color, end_color):
 	start_color_array = np.array([start_color['r'], start_color['g'], start_color['b']])
 	end_color_array = np.array([end_color['r'], end_color['g'], end_color['b']])
-	t_0_pixel = start_color['offset'] * matrix.width
-	t_1_pixel = end_color['offset'] * matrix.width
+	t_0_pixel = start_color['offset'] * settings.width
+	t_1_pixel = end_color['offset'] * settings.width
 
 	# Initially this is assuming moving from the far left of the grid to the right. Angles will be added later
 	width, height, _ = settings.color_matrix.shape
@@ -70,8 +71,8 @@ def draw_text(canvas, x, y, font, text, color=None):
 		draw_glyph(canvas, char_x, char_y, glyph, color)
 		char_x += (glyph.advance - glyph.bbX)
 
-cent_x = int(matrix.width / 2)
-cent_y = int(matrix.height / 2)
+cent_x = int(settings.width / 2)
+cent_y = int(settings.height / 2)
 
 #-------------------------------------------------------------------------
 # Stoppable Thread Class:
@@ -228,7 +229,7 @@ class Picture(StoppableThread):
 
 	def run(self):
 		self.image = Image.open('./images/lancesig.png').convert('RGB')
-		# self.image.resize((matrix.width, matrix.height), Image.ANTIALIAS)
+		# self.image.resize((settings.width, settings.height), Image.ANTIALIAS)
 
 		double_buffer = matrix.CreateFrameCanvas()
 
@@ -258,8 +259,8 @@ class Solid(StoppableThread):
 
 			offscreen_canvas.Clear()
 
-			for x in range(matrix.width):
-				for y in range(matrix.height):
+			for x in range(settings.width):
+				for y in range(settings.height):
 					offscreen_canvas.SetPixel(x, y, cm[x, y, 0], cm[x, y, 1], cm[x, y, 2])
 
 			time.sleep(0.05)	# Time buffer added so as to not overload the system
@@ -312,60 +313,60 @@ class Ticker(StoppableThread):
 			price_diff_location = len(price) * 4 + 2
 			draw_text(self.offscreen_canvas, price_diff_location, 7, self.font, '{}'.format(price_diff), self.graph_color)
 
-			c_y = [matrix.height - int((self.c_vals[i] - min(self.c_vals)) / (max(self.c_vals) - min(self.c_vals)) * self.graph_height) - 1 for i in range(len(self.c_vals))]
-			h_y = [matrix.height - int((self.h_vals[i] - min(self.l_vals)) / (max(self.h_vals) - min(self.l_vals)) * self.graph_height) - 1 for i in range(len(self.h_vals))]
-			l_y = [matrix.height - int((self.l_vals[i] - min(self.l_vals)) / (max(self.h_vals) - min(self.l_vals)) * self.graph_height) - 1 for i in range(len(self.h_vals))]
+			c_y = [settings.height - int((self.c_vals[i] - min(self.c_vals)) / (max(self.c_vals) - min(self.c_vals)) * self.graph_height) - 1 for i in range(len(self.c_vals))]
+			h_y = [settings.height - int((self.h_vals[i] - min(self.l_vals)) / (max(self.h_vals) - min(self.l_vals)) * self.graph_height) - 1 for i in range(len(self.h_vals))]
+			l_y = [settings.height - int((self.l_vals[i] - min(self.l_vals)) / (max(self.h_vals) - min(self.l_vals)) * self.graph_height) - 1 for i in range(len(self.h_vals))]
 			
 			if settings.ticker['graph_type'] == 'diff':
 				# Draw axis in gray
 				for i, y in enumerate(c_y):
 					if self.c_vals[i] < self.c_vals[-1]:
 						for j in range(c_y[-1], y + 1):
-							self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 50, 0, 0)
-						self.offscreen_canvas.SetPixel(matrix.width - (i + 1), y, 250, 0, 0)
+							self.offscreen_canvas.SetPixel(settings.width - (i + 1), j, 50, 0, 0)
+						self.offscreen_canvas.SetPixel(settings.width - (i + 1), y, 250, 0, 0)
 						if i != (len(c_y)-1) and y > c_y[i + 1]:
 							for j in range(max(c_y[i+1], c_y[-1]), y):
-								self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 250, 0, 0)
+								self.offscreen_canvas.SetPixel(settings.width - (i + 1), j, 250, 0, 0)
 						if i != 0 and y > c_y[i - 1]:
 							for j in range(max(c_y[i-1], c_y[-1]), y):
-								self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 250, 0, 0)
+								self.offscreen_canvas.SetPixel(settings.width - (i + 1), j, 250, 0, 0)
 					else:
 						for j in range(y, c_y[-1] + 1):
-							self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 0, 50, 0)
-						self.offscreen_canvas.SetPixel(matrix.width - (i + 1), y, 0, 250, 0)
+							self.offscreen_canvas.SetPixel(settings.width - (i + 1), j, 0, 50, 0)
+						self.offscreen_canvas.SetPixel(settings.width - (i + 1), y, 0, 250, 0)
 						if i != (len(c_y)-1) and y < c_y[i + 1]:
 							for j in range(y, min(c_y[i+1], c_y[-1])):
-								self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 0, 250, 0)
+								self.offscreen_canvas.SetPixel(settings.width - (i + 1), j, 0, 250, 0)
 						if i != 0 and y < c_y[i - 1]:
 							for j in range(y, min(c_y[i-1], c_y[-1])):
-								self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 0, 250, 0)
+								self.offscreen_canvas.SetPixel(settings.width - (i + 1), j, 0, 250, 0)
 
 			elif settings.ticker['graph_type'] == 'filled':
 				for i, y in enumerate(c_y):
-					for j in range(y, matrix.height):
-						self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, self.graph_color[0] * 0.2, self.graph_color[1] * 0.2, self.graph_color[2] * 0.2)
-					self.offscreen_canvas.SetPixel(matrix.width - (i + 1), y, self.graph_color[0], self.graph_color[1], self.graph_color[2])
+					for j in range(y, settings.height):
+						self.offscreen_canvas.SetPixel(settings.width - (i + 1), j, self.graph_color[0] * 0.2, self.graph_color[1] * 0.2, self.graph_color[2] * 0.2)
+					self.offscreen_canvas.SetPixel(settings.width - (i + 1), y, self.graph_color[0], self.graph_color[1], self.graph_color[2])
 					if i != 0 and y < c_y[i-1]:
 						for j in range(y, c_y[i-1]):
-							self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, self.graph_color[0], self.graph_color[1], self.graph_color[2])
+							self.offscreen_canvas.SetPixel(settings.width - (i + 1), j, self.graph_color[0], self.graph_color[1], self.graph_color[2])
 					elif i != len(c_y) and y > c_y[i-1]:
 						for j in range(c_y[i-1], y):
-							self.offscreen_canvas.SetPixel(matrix.width - (i), j, self.graph_color[0], self.graph_color[1], self.graph_color[2])
+							self.offscreen_canvas.SetPixel(settings.width - (i), j, self.graph_color[0], self.graph_color[1], self.graph_color[2])
 					
 			elif settings.ticker['graph_type'] == 'bar':
 				for i, c_val in enumerate(self.c_vals):
 					if c_val - self.o_vals[i] > 0:
 						if h_y[i] != l_y[i]:
 							for j in range(h_y[i], l_y[i]):
-								self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 0, 255, 0)
+								self.offscreen_canvas.SetPixel(settings.width - (i + 1), j, 0, 255, 0)
 						else:
-							self.offscreen_canvas.SetPixel(matrix.width - (i + 1), h_y[i], 0, 255, 0)
+							self.offscreen_canvas.SetPixel(settings.width - (i + 1), h_y[i], 0, 255, 0)
 					else:
 						if h_y[i] != l_y[i]:
 							for j in range(h_y[i], l_y[i]):
-								self.offscreen_canvas.SetPixel(matrix.width - (i + 1), j, 255, 0, 0)
+								self.offscreen_canvas.SetPixel(settings.width - (i + 1), j, 255, 0, 0)
 						else:
-							self.offscreen_canvas.SetPixel(matrix.width - (i + 1), h_y[i], 255, 0, 0)
+							self.offscreen_canvas.SetPixel(settings.width - (i + 1), h_y[i], 255, 0, 0)
 		else:
 			draw_text(self.offscreen_canvas, 19, 20, self.font, 'NO DATA', [255, 255, 255])
 

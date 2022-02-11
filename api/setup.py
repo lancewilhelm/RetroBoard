@@ -1,6 +1,6 @@
+from ast import parse
 from flask import Flask
 from flask_cors import CORS
-from rgbmatrix import RGBMatrix, RGBMatrixOptions
 import sys
 import os
 import logging
@@ -15,6 +15,7 @@ from bdflib import reader
 #-------------------------------------------------------------------------
 parser = argparse.ArgumentParser()
 parser.add_argument('-l', "--logging-level", action="store", help="Determines what logging mode will be displayed on screen. [info (default), debug]", default="info", type=str)
+parser.add_argument('-d', '--debug', action='store_true', help='Runs the application without driving the led matrix. The matrix will be simulated at the index page of the api')
 
 args = parser.parse_args()
 
@@ -40,36 +41,40 @@ CORS(api)       # CORS BS that we likely don't need to worry about'
 
 #-------------------------------------------------------------------------
 # LED Matrix configuration
+# Only load these items if we are not in debug mode
 #-------------------------------------------------------------------------
-logging.debug('setting up the led matrix options')
-sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/..'))
-options = RGBMatrixOptions()
+if not args.debug:
+	logging.debug('setting up the led matrix options')
 
-# Configuration for the matrix. Refer to the rpi-rgb-led-matrix python binding docs for the meanings of each option
-options = RGBMatrixOptions()
-options.rows = 32
-options.cols = 64
-options.chain_length = 1
-options.parallel = 1
-options.hardware_mapping = 'adafruit-hat'
-options.drop_privileges = False
-options.gpio_slowdown = 1
-options.pwm_lsb_nanoseconds = 130
-options.brightness = 100
-options.multiplexing = 0
-options.scan_mode = 1
-options.pwm_bits = 11	# this seems to affect flickering of the leds somewhat
-options.led_rgb_sequence = 'RGB'
-options.row_address_type = 0
-options.limit_refresh_rate_hz = 0
-options.disable_hardware_pulsing = True
+	from rgbmatrix import RGBMatrix, RGBMatrixOptions
+	sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/..'))
+	options = RGBMatrixOptions()
 
-matrix = RGBMatrix(options = options)
+	# Configuration for the matrix. Refer to the rpi-rgb-led-matrix python binding docs for the meanings of each option
+	options = RGBMatrixOptions()
+	options.rows = 32
+	options.cols = 64
+	options.chain_length = 1
+	options.parallel = 1
+	options.hardware_mapping = 'adafruit-hat'
+	options.drop_privileges = False
+	options.gpio_slowdown = 1
+	options.pwm_lsb_nanoseconds = 130
+	options.brightness = 100
+	options.multiplexing = 0
+	options.scan_mode = 1
+	options.pwm_bits = 11	# this seems to affect flickering of the leds somewhat
+	options.led_rgb_sequence = 'RGB'
+	options.row_address_type = 0
+	options.limit_refresh_rate_hz = 0
+	options.disable_hardware_pulsing = True
+
+	matrix = RGBMatrix(options = options)
 
 # Grab the list of fonts in the font folder
 logging.debug('forming font dictionary')
 font_dict = defaultdict(str)
-path = '/home/pi/RetroBoard/api/fonts/'
+path = 'fonts/'
 dir = os.fsencode(path)
 dir_list = os.listdir(dir)
 
@@ -103,41 +108,38 @@ class Settings():
 		# Non stored settings
 		self.current_thread = None
 		self.update_bool = True
-		self.color_matrix = np.ndarray((matrix.width, matrix.height, 3), dtype=int)
+		self.width = 64
+		self.height = 32
+		self.color_matrix = np.ndarray((self.width, self.height, 3), dtype=int)
 		self.color_matrix.fill(255)
 		self.apikeys = {}
+		self.debug = args.debug
 
 	def dump_settings(self, settings=None):
 		logging.debug('dumping settings to settings.json')
 		if settings == None:
 			settings = {'main': self.main, 'ticker': self.ticker}
 
-		with open('/home/pi/RetroBoard/settings.json', 'w') as filehandle:
+		with open('../settings.json', 'w') as filehandle:
 			json.dump(settings, filehandle)
 
 	def import_settings(self):
 		logging.debug('loading settings from settings.json')
 		try:
-			with open('/home/pi/RetroBoard/settings.json', 'r') as filehandle:
+			with open('../settings.json', 'r') as filehandle:
 				settings = json.load(filehandle)
 
 				self.main = settings['main']
 				self.ticker = settings['ticker']
 
-				matrix.brightness = self.main['brightness']
+				if not self.debug:
+					matrix.brightness = self.main['brightness']
 
 				self.update_bool = True
 
 		except FileNotFoundError:
 			logging.debug('no settings.json file exists, creating one...')
 			self.dump_settings()
-
-		try:
-			with open('/home/pi/RetroBoard/apikeys.json', 'r') as filehandle:
-				apikeys = json.load(filehandle)
-				self.apikeys = apikeys
-		except:
-			logging.debug('no apikeys.json file exists...')
 
 	def load_font(self, path):
 		logging.debug('loading font {}'.format(path))
