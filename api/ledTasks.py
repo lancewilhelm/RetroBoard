@@ -13,6 +13,7 @@ import math
 # If we are not in debug mode then import the led matrix
 if not settings.debug:
 	from setup import matrix
+	offscreen_canvas = matrix.CreateFrameCanvas()
 
 #-------------------------------------------------------------------------
 # Utility functions/variables:
@@ -130,6 +131,8 @@ class Clock(StoppableThread):
 
 	def run(self):
 		logging.debug('starting clock')
+		# if not settings.debug:
+		# 	offscreen_canvas = matrix.CreateFrameCanvas()
 
 		# Run the clock loop until stopped
 		while True:
@@ -174,7 +177,7 @@ class Clock(StoppableThread):
 			if not settings.debug:
 				# Write the actual drawing to the canvas and then display
 				draw_text(offscreen_canvas, self.position['x'], self.position['y'], self.font, time_str)
-				offscreen_canvas = matrix.SwapOnVSync(offscreen_canvas)
+				self.offscreen_canvas = matrix.SwapOnVSync(offscreen_canvas)
 			
 			settings.update_canvas_bool = True
 			time.sleep(0.05)	# Time buffer added so as to not overload the system
@@ -238,11 +241,9 @@ class Picture(StoppableThread):
 		self.image = Image.open('./images/lancesig.png').convert('RGB')
 		# self.image.resize((settings.width, settings.height), Image.ANTIALIAS)
 
-		double_buffer = matrix.CreateFrameCanvas()
+		offscreen_canvas.SetImage(self.image, 0)
 
-		double_buffer.SetImage(self.image, 0)
-
-		matrix.SwapOnVSync(double_buffer)
+		matrix.SwapOnVSync(offscreen_canvas)
 
 class Solid(StoppableThread):
 	def __init__(self, *args, **kwargs):

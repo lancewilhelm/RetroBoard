@@ -9,4 +9,4 @@ if __name__ == '__main__':
 	ledTasks.start_led_app(settings.main['running_apps'][0])
 	
 	logging.info('STARTING THE WARP ENGINES (starting flask)')
-	api.run(host='0.0.0.0', port=3001)
+	api.run(host='0.0.0.0')
