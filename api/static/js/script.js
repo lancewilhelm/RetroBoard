@@ -56,19 +56,10 @@ var FONT = Object.freeze({
 	'.': [ 0x0, 0x0, 0x0, 0x0, 0x8 ],
 });
 
-function lerp(a, b, t) {
-	return (1 - t) * a + b * t;
-}
-
-function Display(canvas, update, maxFrames) {
+function Display(canvas) {
 	this.canvas = canvas || document.createElement("canvas");
 	this.ctx = this.canvas.getContext("2d");
 	this.mat = new Array(BUF_WIDTH * DM_HEIGHT);
-	
-	// Update function
-	this.update = update || (function(d) {});
-	this.frame = 0;
-	this.maxFrames = maxFrames || 100;
 	
 	this.set = function(x, y, v) {
 		v = v || false;
@@ -117,19 +108,6 @@ function Display(canvas, update, maxFrames) {
 			this.mat[i] = !this.mat[i];
 	};
 	
-	this.scroll = function(speed) {
-		var oldm = this.mat.slice();
-		for (var row = 0; row < DM_HEIGHT; row++) {
-			for (var x = 0; x < BUF_WIDTH-1; x++) {
-				if (x+speed > BUF_WIDTH || x+speed < 0) continue;
-				if (row < 0 || row > DM_HEIGHT) continue;
-				var ti = (x+speed) + row * BUF_WIDTH;
-				var si = x + row * BUF_WIDTH;
-				this.mat[ti] = oldm[si];
-			}
-		}
-	};
-	
 	this.redraw = function() {
 		var ctx = this.ctx;
 		var pad = DOT_PAD * 2;
@@ -168,58 +146,19 @@ function Display(canvas, update, maxFrames) {
 	
 	this.start = function() {
 		var that = this;
-		setInterval(function() {
-			that.redraw();
-			that.update(that, that.frame);
-			that.frame++;
-			that.frame = that.frame % that.maxFrames;
-		}, TIME_STEP * 1000);
+		this.clear();
+		this.textCenter('HELLO');
+		this.redraw();
+		const socket = new WebSocket('ws://' + location.host + '/data')
+		socket.addEventListener('message', e => {
+			console.log(e.data);
+		})
 	};
 }
 
 var canvas = document.getElementById("display");
 var ctx = canvas.getContext("2d");
 
-function inRange(v, a, b) {
-	return v >= a && v < b;
-}
 
-function pingPong(i, min, max) {
-	var range = max - min;
-    return min + Math.abs(((i + range) % (range * 2)) - range);
-}
-
-var tx = DM_WIDTH;
-var clr = 1.0;
-var t = 0;
-function sequence(d, f) {
-	if (f == 0) {
-		clr = 1.0;
-		tx = DM_WIDTH;
-		d.clear();
-		d.textCenter("HELLO");
-	} else if (inRange(f, 0, 50)) {
-		if (f % 4 == 0) d.invert();
-	} else if (f == 51) {
-		d.clear();
-		d.text(tx, 0, "WORLD...");
-	} else if (inRange(f, 51, 100)) {
-		if (tx > 0) d.scroll(-1);
-	} else if (inRange(f, 150, 200)) {
-		for (var i = 0; i < DM_HEIGHT; i++)
-			d.set(DM_WIDTH, i, true);
-		d.scroll(-1);
-	} else if (inRange(f, 201, 300)) {
-		var t = new Date().toLocaleTimeString('en-US', { 
-				hour12: false, 
-				hour: "numeric", 
-				minute: "numeric",
-				second: "numeric"
-		});
-		d.clear();
-		d.text(0, 0, t);
-	}
-}
-
-var d = new Display(canvas, sequence, 300);
+var d = new Display(canvas);
 d.start();

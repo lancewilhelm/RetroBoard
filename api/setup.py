@@ -1,6 +1,7 @@
 from ast import parse
 from flask import Flask
 from flask_cors import CORS
+from flask_sock import Sock
 import sys
 import os
 import logging
@@ -20,7 +21,7 @@ parser.add_argument('-d', '--debug', action='store_true', help='Runs the applica
 args = parser.parse_args()
 
 #-------------------------------------------------------------------------
-# Logging confuguration
+# Logging configuration
 #-------------------------------------------------------------------------
 logging.basicConfig(level=logging.DEBUG, filename='log.txt', filemode='w', format='%(asctime)s - %(levelname)s - %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
 console = logging.StreamHandler()
@@ -37,6 +38,7 @@ logging.getLogger().addHandler(console)
 #-------------------------------------------------------------------------
 logging.debug('creating the api flask object')
 api = Flask(__name__)
+sock = Sock(api)
 CORS(api)       # CORS BS that we likely don't need to worry about'
 
 #-------------------------------------------------------------------------
@@ -70,6 +72,7 @@ if not args.debug:
 	options.disable_hardware_pulsing = True
 
 	matrix = RGBMatrix(options = options)
+	offscreen_canvas = matrix.CreateFrameCanvas()
 
 # Grab the list of fonts in the font folder
 logging.debug('forming font dictionary')
@@ -107,7 +110,8 @@ class Settings():
  
 		# Non stored settings
 		self.current_thread = None
-		self.update_bool = True
+		self.update_settings_bool = True
+		self.update_canvas_bool = True
 		self.width = 64
 		self.height = 32
 		self.color_matrix = np.ndarray((self.width, self.height, 3), dtype=int)
@@ -135,7 +139,7 @@ class Settings():
 				if not self.debug:
 					matrix.brightness = self.main['brightness']
 
-				self.update_bool = True
+				self.update_settings_bool = True
 
 		except FileNotFoundError:
 			logging.debug('no settings.json file exists, creating one...')
