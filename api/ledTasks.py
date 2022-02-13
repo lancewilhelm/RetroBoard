@@ -33,6 +33,27 @@ def rotate(x, y, sin, cos):
 def clamp(n, minn, maxn):
 	return max(min(maxn, n), minn)
 
+def set_pixel(canvas, x, y, r, g, b):
+	if settings.debug:
+		pass
+	else:
+		canvas.SetPixel(x, y, r, g, b)
+	return
+
+def clear_screen(canvas):
+	if settings.debug:
+		pass
+	else:
+		canvas.clear()
+	return
+	
+def update_screen(canvas):
+	if settings.debug:
+		pass
+	else:
+		matrix.SwapOnVSync(canvas)
+	return
+
 # Creates a linear color gradient
 def set_color_grad(start_color, end_color):
 	start_color_array = np.array([start_color['r'], start_color['g'], start_color['b']])
@@ -59,9 +80,9 @@ def draw_glyph(canvas, x, y, glyph, color=None):
 			pixel_y = y + i
 			if pixel:
 				if color == None:
-					canvas.SetPixel(pixel_x, pixel_y, cm[pixel_x, pixel_y, 0], cm[pixel_x, pixel_y, 1], cm[pixel_x, pixel_y, 2])
+					set_pixel(canvas, pixel_x, pixel_y, cm[pixel_x, pixel_y, 0], cm[pixel_x, pixel_y, 1], cm[pixel_x, pixel_y, 2])
 				else:
-					canvas.SetPixel(pixel_x, pixel_y, color[0], color[1], color[2])
+					set_pixel(canvas, pixel_x, pixel_y, color[0], color[1], color[2])
 
 def draw_text(canvas, x, y, font, text, color=None):
 	char_x = x
