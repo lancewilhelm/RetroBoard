@@ -5,8 +5,8 @@ var CHAR_COUNT = 8;
 var BUF_CHAR_COUNT = 128;
 var DM_WIDTH = 64;
 var DM_HEIGHT = 32;
-var DOT_RADIUS = 5;
-var DOT_PAD = 1;
+var DOT_RADIUS = 4;
+var DOT_PAD = 2;
 var OUT_PAD = 5;
 
 function Display(canvas) {
