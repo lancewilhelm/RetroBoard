@@ -40,19 +40,18 @@ def set_pixel(canvas, x, y, r, g, b):
 		canvas.SetPixel(x, y, r, g, b)
 	return
 
-def clear_screen(canvas):
+def clear_screen():
 	if settings.debug:
 		pass
 	else:
-		canvas.clear()
+		matrix.Clear()
 	return
 	
 def update_screen(canvas):
 	if settings.debug:
 		pass
 	else:
-		matrix.SwapOnVSync(canvas)
-	return
+		return matrix.SwapOnVSync(canvas)
 
 # Creates a linear color gradient
 def set_color_grad(start_color, end_color):
@@ -113,11 +112,15 @@ class StoppableThread(threading.Thread):
 		super(StoppableThread, self).__init__(*args, **kwargs)
 		self._stop_event = threading.Event()
 		self.loadSettings()
+		if settings.debug:
+			pass
+		else:
+			self.offscreen_canvas = matrix.CreateFrameCanvas()
 
 	def stop(self):
 		logging.debug('stopping thread for {}'.format(type(self).__name__))
 		self._stop_event.set()
-		matrix.Clear()
+		clear_screen()
 
 	def stopped(self):
 		return self._stop_event.is_set()
@@ -159,15 +162,14 @@ class Clock(StoppableThread):
 		while True:
 			# Check to see if we have stopped
 			if self.stopped():
-				matrix.Clear()
+				clear_screen()
 				return
 
 			# Check for a settings change that needs fto be loaded
 			if settings.update_settings_bool:
 				self.loadSettings()
 
-			if not settings.debug:
-				offscreen_canvas.Clear()
+			clear_screen()
 			
 			# Grab the latest time
 			t = time.localtime()
@@ -195,10 +197,9 @@ class Clock(StoppableThread):
 				# Odd seconds, concatenate the strings with a semicolon(blank) in the middle
 				time_str = hour_str + ':' + min_str
 			
-			if not settings.debug:
-				# Write the actual drawing to the canvas and then display
-				draw_text(offscreen_canvas, self.position['x'], self.position['y'], self.font, time_str)
-				self.offscreen_canvas = matrix.SwapOnVSync(offscreen_canvas)
+			# Write the actual drawing to the canvas and then display
+			draw_text(offscreen_canvas, self.position['x'], self.position['y'], self.font, time_str)
+			self.offscreen_canvas = update_screen(self.offscreen_canvas)
 			
 			settings.update_canvas_bool = True
 			time.sleep(0.05)	# Time buffer added so as to not overload the system
@@ -220,14 +221,15 @@ class TextClock(StoppableThread):
 		while True:
 			# Check to see if we have stopped
 			if self.stopped():
-				matrix.Clear()
+				clear_screen()
 				return
 
 			# Check for a settings change that needs fto be loaded
 			if settings.update_settings_bool:
 				self.loadSettings()
 
-			offscreen_canvas.Clear()
+			clear_screen()
+
 			# Grab the latest time
 			t = time.localtime()
 			hours = t.tm_hour
@@ -248,10 +250,10 @@ class TextClock(StoppableThread):
 			# Write the actual drawing to the canvas and then display
 			hour_x = int(cent_x - (len(hour_str) * 4 / 2))
 			min_x = int(cent_x - (len(min_str) * 4 / 2))
-			draw_text(offscreen_canvas, hour_x, self.position['y'] - 3, self.font, hour_str)
-			draw_text(offscreen_canvas, min_x, self.position['y'] + 3, self.font, min_str)
+			draw_text(self.offscreen_canvas, hour_x, self.position['y'] - 3, self.font, hour_str)
+			draw_text(self.offscreen_canvas, min_x, self.position['y'] + 3, self.font, min_str)
+			self.offscreen_canvas = update_screen(self.offscreen_canvas)
 			time.sleep(0.05)	# Time buffer added so as to not overload the system
-			offscreen_canvas = matrix.SwapOnVSync(offscreen_canvas)
 
 class Picture(StoppableThread):
 	def __init__(self, *args, **kwargs):
@@ -262,9 +264,9 @@ class Picture(StoppableThread):
 		self.image = Image.open('./images/lancesig.png').convert('RGB')
 		# self.image.resize((settings.width, settings.height), Image.ANTIALIAS)
 
-		offscreen_canvas.SetImage(self.image, 0)
+		self.offscreen_canvas.SetImage(self.image, 0)
 
-		matrix.SwapOnVSync(offscreen_canvas)
+		update_screen(self.offscreen_canvas)
 
 class Solid(StoppableThread):
 	def __init__(self, *args, **kwargs):
@@ -277,21 +279,21 @@ class Solid(StoppableThread):
 		while True:
 			# Check to see if we have stopped
 			if self.stopped():
-				matrix.Clear()
+				clear_screen()
 				return
 
 			# Check for a settings change that needs fto be loaded
 			if settings.update_settings_bool:
 				self.loadSettings()
 
-			offscreen_canvas.Clear()
+			clear_screen()
 
 			for x in range(settings.width):
 				for y in range(settings.height):
-					offscreen_canvas.SetPixel(x, y, cm[x, y, 0], cm[x, y, 1], cm[x, y, 2])
+					self.offscreen_canvas.SetPixel(x, y, cm[x, y, 0], cm[x, y, 1], cm[x, y, 2])
 
 			time.sleep(0.05)	# Time buffer added so as to not overload the system
-			offscreen_canvas = matrix.SwapOnVSync(offscreen_canvas)
+			self.offscreen_canvas = update_screen(self.offscreen_canvas)
 
 class Ticker(StoppableThread):
 	def __init__(self, *args, **kwargs):
@@ -320,14 +322,14 @@ class Ticker(StoppableThread):
 			self.t_vals = list(self.df['t'])
 		
 	def draw_screen(self):
-		offscreen_canvas.Clear()
+		clear_screen()
 		display_symbol = settings.ticker['symbol']
 
-		draw_text(offscreen_canvas, 2, 1, self.font, display_symbol, [255, 255, 255])
+		draw_text(self.offscreen_canvas, 2, 1, self.font, display_symbol, [255, 255, 255])
 
 		if len(self.df) > 0:
 			price = '${:.2f}'.format(self.c_vals[0])
-			draw_text(offscreen_canvas, 2, 7, self.font, price, [255, 255, 255])
+			draw_text(self.offscreen_canvas, 2, 7, self.font, price, [255, 255, 255])
 			price_diff = self.c_vals[0] - self.c_vals[-1]
 			if price_diff > 0:
 				self.graph_color = [0, 255, 0]
@@ -337,7 +339,7 @@ class Ticker(StoppableThread):
 				price_diff = '{:.2f}'.format(price_diff)
 
 			price_diff_location = len(price) * 4 + 2
-			draw_text(offscreen_canvas, price_diff_location, 7, self.font, '{}'.format(price_diff), self.graph_color)
+			draw_text(self.offscreen_canvas, price_diff_location, 7, self.font, '{}'.format(price_diff), self.graph_color)
 
 			c_y = [settings.height - int((self.c_vals[i] - min(self.c_vals)) / (max(self.c_vals) - min(self.c_vals)) * self.graph_height) - 1 for i in range(len(self.c_vals))]
 			h_y = [settings.height - int((self.h_vals[i] - min(self.l_vals)) / (max(self.h_vals) - min(self.l_vals)) * self.graph_height) - 1 for i in range(len(self.h_vals))]
@@ -348,55 +350,55 @@ class Ticker(StoppableThread):
 				for i, y in enumerate(c_y):
 					if self.c_vals[i] < self.c_vals[-1]:
 						for j in range(c_y[-1], y + 1):
-							offscreen_canvas.SetPixel(settings.width - (i + 1), j, 50, 0, 0)
-						offscreen_canvas.SetPixel(settings.width - (i + 1), y, 250, 0, 0)
+							set_pixel(self.offscreen_canvas, settings.width - (i + 1), j, 50, 0, 0)
+						set_pixel(self.offscreen_canvas, settings.width - (i + 1), y, 250, 0, 0)
 						if i != (len(c_y)-1) and y > c_y[i + 1]:
 							for j in range(max(c_y[i+1], c_y[-1]), y):
-								offscreen_canvas.SetPixel(settings.width - (i + 1), j, 250, 0, 0)
+								set_pixel(self.offscreen_canvas, settings.width - (i + 1), j, 250, 0, 0)
 						if i != 0 and y > c_y[i - 1]:
 							for j in range(max(c_y[i-1], c_y[-1]), y):
-								offscreen_canvas.SetPixel(settings.width - (i + 1), j, 250, 0, 0)
+								set_pixel(self.offscreen_canvas, settings.width - (i + 1), j, 250, 0, 0)
 					else:
 						for j in range(y, c_y[-1] + 1):
-							offscreen_canvas.SetPixel(settings.width - (i + 1), j, 0, 50, 0)
-						offscreen_canvas.SetPixel(settings.width - (i + 1), y, 0, 250, 0)
+							set_pixel(self.offscreen_canvas, settings.width - (i + 1), j, 0, 50, 0)
+						set_pixel(self.offscreen_canvas, settings.width - (i + 1), y, 0, 250, 0)
 						if i != (len(c_y)-1) and y < c_y[i + 1]:
 							for j in range(y, min(c_y[i+1], c_y[-1])):
-								offscreen_canvas.SetPixel(settings.width - (i + 1), j, 0, 250, 0)
+								set_pixel(self.offscreen_canvas, settings.width - (i + 1), j, 0, 250, 0)
 						if i != 0 and y < c_y[i - 1]:
 							for j in range(y, min(c_y[i-1], c_y[-1])):
-								offscreen_canvas.SetPixel(settings.width - (i + 1), j, 0, 250, 0)
+								set_pixel(self.offscreen_canvas, settings.width - (i + 1), j, 0, 250, 0)
 
 			elif settings.ticker['graph_type'] == 'filled':
 				for i, y in enumerate(c_y):
 					for j in range(y, settings.height):
-						offscreen_canvas.SetPixel(settings.width - (i + 1), j, self.graph_color[0] * 0.2, self.graph_color[1] * 0.2, self.graph_color[2] * 0.2)
-					offscreen_canvas.SetPixel(settings.width - (i + 1), y, self.graph_color[0], self.graph_color[1], self.graph_color[2])
+						set_pixel(self.offscreen_canvas, settings.width - (i + 1), j, self.graph_color[0] * 0.2, self.graph_color[1] * 0.2, self.graph_color[2] * 0.2)
+					set_pixel(self.offscreen_canvas, settings.width - (i + 1), y, self.graph_color[0], self.graph_color[1], self.graph_color[2])
 					if i != 0 and y < c_y[i-1]:
 						for j in range(y, c_y[i-1]):
-							offscreen_canvas.SetPixel(settings.width - (i + 1), j, self.graph_color[0], self.graph_color[1], self.graph_color[2])
+							set_pixel(self.offscreen_canvas, settings.width - (i + 1), j, self.graph_color[0], self.graph_color[1], self.graph_color[2])
 					elif i != len(c_y) and y > c_y[i-1]:
 						for j in range(c_y[i-1], y):
-							offscreen_canvas.SetPixel(settings.width - (i), j, self.graph_color[0], self.graph_color[1], self.graph_color[2])
+							set_pixel(self.offscreen_canvas, settings.width - (i), j, self.graph_color[0], self.graph_color[1], self.graph_color[2])
 					
 			elif settings.ticker['graph_type'] == 'bar':
 				for i, c_val in enumerate(self.c_vals):
 					if c_val - self.o_vals[i] > 0:
 						if h_y[i] != l_y[i]:
 							for j in range(h_y[i], l_y[i]):
-								offscreen_canvas.SetPixel(settings.width - (i + 1), j, 0, 255, 0)
+								set_pixel(self.offscreen_canvas, settings.width - (i + 1), j, 0, 255, 0)
 						else:
-							offscreen_canvas.SetPixel(settings.width - (i + 1), h_y[i], 0, 255, 0)
+							set_pixel(self.offscreen_canvas, settings.width - (i + 1), h_y[i], 0, 255, 0)
 					else:
 						if h_y[i] != l_y[i]:
 							for j in range(h_y[i], l_y[i]):
-								offscreen_canvas.SetPixel(settings.width - (i + 1), j, 255, 0, 0)
+								set_pixel(self.offscreen_canvas, settings.width - (i + 1), j, 255, 0, 0)
 						else:
-							offscreen_canvas.SetPixel(settings.width - (i + 1), h_y[i], 255, 0, 0)
+							set_pixel(self.offscreen_canvas, settings.width - (i + 1), h_y[i], 255, 0, 0)
 		else:
-			draw_text(offscreen_canvas, 19, 20, self.font, 'NO DATA', [255, 255, 255])
+			draw_text(self.offscreen_canvas, 19, 20, self.font, 'NO DATA', [255, 255, 255])
 
-		offscreen_canvas = matrix.SwapOnVSync(offscreen_canvas)
+		self.offscreen_canvas = update_screen(self.offscreen_canvas)
 
 	def run(self):
 		logging.debug('starting ticker')
@@ -409,7 +411,7 @@ class Ticker(StoppableThread):
 		while True:
 			# Check to see if we have stopped
 			if self.stopped():
-				matrix.Clear()
+				clear_screen()
 				return
 
 			# Check for a settings change that needs to be loaded
