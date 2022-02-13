@@ -116,6 +116,8 @@ class Settings():
 		self.height = 32
 		self.color_matrix = np.ndarray((self.width, self.height, 3), dtype=int)
 		self.color_matrix.fill(255)
+		self.web_canvas = np.ndarray((self.width, self.height, 3), dtype=int)
+		self.web_canvas.fill(0)
 		self.apikeys = {}
 		self.debug = args.debug
 

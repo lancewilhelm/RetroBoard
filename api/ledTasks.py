@@ -9,6 +9,7 @@ import threading
 import numpy as np
 import yfinance as yf
 import math
+import json
 
 # If we are not in debug mode then import the led matrix
 if not settings.debug:
@@ -44,14 +45,18 @@ def set_pixel(canvas, x, y, r, g, b):
 
 def clear_screen(canvas):
 	if settings.debug:
-		canvas.fill(0)
+		temp_canvas = np.ndarray((settings.width, settings.height, 3), dtype=int)
+		temp_canvas.fill(0)
+		return temp_canvas
 	else:
 		matrix.Clear()
-	return
+		return canvas
 	
 def update_screen(canvas):
 	if settings.debug:
+		settings.web_canvas = canvas
 		settings.update_canvas_bool = True
+		return canvas
 	else:
 		return matrix.SwapOnVSync(canvas)
 
@@ -99,7 +104,7 @@ def draw_text(canvas, x, y, font, text, color=None):
 def send_data(sock):
 	while True:
 		if settings.update_canvas_bool:
-			sock.send('updating screen')
+			sock.send(json.dumps(settings.web_canvas.tolist()))
 			settings.update_canvas_bool = False
 
 cent_x = int(settings.width / 2)
@@ -115,7 +120,7 @@ class StoppableThread(threading.Thread):
 		self._stop_event = threading.Event()
 		self.loadSettings()
 		if settings.debug:
-			self.offscreen_canvas = np.ndarray((self.width, self.height, 3), dtype=int)
+			self.offscreen_canvas = np.ndarray((settings.width, settings.height, 3), dtype=int)
 			self.offscreen_canvas.fill(0)
 		else:
 			self.offscreen_canvas = matrix.CreateFrameCanvas()
@@ -123,7 +128,7 @@ class StoppableThread(threading.Thread):
 	def stop(self):
 		logging.debug('stopping thread for {}'.format(type(self).__name__))
 		self._stop_event.set()
-		clear_screen(self.offscreen_canvas)
+		self.offscreen_canvas = clear_screen(self.offscreen_canvas)
 
 	def stopped(self):
 		return self._stop_event.is_set()
@@ -165,14 +170,14 @@ class Clock(StoppableThread):
 		while True:
 			# Check to see if we have stopped
 			if self.stopped():
-				clear_screen(self.offscreen_canvas)
+				self.offscreen_canvas = clear_screen(self.offscreen_canvas)
 				return
 
 			# Check for a settings change that needs fto be loaded
 			if settings.update_settings_bool:
 				self.loadSettings()
 
-			clear_screen(self.offscreen_canvas)
+			self.offscreen_canvas = clear_screen(self.offscreen_canvas)
 			
 			# Grab the latest time
 			t = time.localtime()
@@ -201,7 +206,7 @@ class Clock(StoppableThread):
 				time_str = hour_str + ':' + min_str
 			
 			# Write the actual drawing to the canvas and then display
-			draw_text(offscreen_canvas, self.position['x'], self.position['y'], self.font, time_str)
+			draw_text(self.offscreen_canvas, self.position['x'], self.position['y'], self.font, time_str)
 			self.offscreen_canvas = update_screen(self.offscreen_canvas)
 
 			time.sleep(0.05)	# Time buffer added so as to not overload the system
@@ -223,14 +228,14 @@ class TextClock(StoppableThread):
 		while True:
 			# Check to see if we have stopped
 			if self.stopped():
-				clear_screen(self.offscreen_canvas)
+				self.offscreen_canvas = clear_screen(self.offscreen_canvas)
 				return
 
 			# Check for a settings change that needs fto be loaded
 			if settings.update_settings_bool:
 				self.loadSettings()
 
-			clear_screen(self.offscreen_canvas)
+			self.offscreen_canvas = clear_screen(self.offscreen_canvas)
 
 			# Grab the latest time
 			t = time.localtime()
@@ -281,14 +286,14 @@ class Solid(StoppableThread):
 		while True:
 			# Check to see if we have stopped
 			if self.stopped():
-				clear_screen(self.offscreen_canvas)
+				self.offscreen_canvas = clear_screen(self.offscreen_canvas)
 				return
 
 			# Check for a settings change that needs fto be loaded
 			if settings.update_settings_bool:
 				self.loadSettings()
 
-			clear_screen(self.offscreen_canvas)
+			self.offscreen_canvas = clear_screen(self.offscreen_canvas)
 
 			for x in range(settings.width):
 				for y in range(settings.height):
@@ -324,7 +329,7 @@ class Ticker(StoppableThread):
 			self.t_vals = list(self.df['t'])
 		
 	def draw_screen(self):
-		clear_screen(self.offscreen_canvas)
+		self.offscreen_canvas = clear_screen(self.offscreen_canvas)
 		display_symbol = settings.ticker['symbol']
 
 		draw_text(self.offscreen_canvas, 2, 1, self.font, display_symbol, [255, 255, 255])
@@ -413,7 +418,7 @@ class Ticker(StoppableThread):
 		while True:
 			# Check to see if we have stopped
 			if self.stopped():
-				clear_screen(self.offscreen_canvas)
+				self.offscreen_canvas = clear_screen(self.offscreen_canvas)
 				return
 
 			# Check for a settings change that needs to be loaded
