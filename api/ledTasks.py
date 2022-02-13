@@ -396,9 +396,9 @@ class Ticker(StoppableThread):
 						else:
 							set_pixel(self.offscreen_canvas, settings.width - (i + 1), h_y[i], 255, 0, 0)
 		else:
-			draw_text(self.offscreen_canvas, 19, 20, self.font, 'NO DATA', [255, 255, 255])
+			draw_text(offscreen_canvas, 19, 20, self.font, 'NO DATA', [255, 255, 255])
 
-		self.offscreen_canvas = update_screen(self.offscreen_canvas)
+		offscreen_canvas = update_screen(offscreen_canvas)
 
 	def run(self):
 		logging.debug('starting ticker')
