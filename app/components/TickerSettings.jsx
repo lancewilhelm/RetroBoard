@@ -38,12 +38,12 @@ export default function TickerSettings(props) {
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(props.settings),
 		};
-		fetch('http://' + localIP + ':5000/api/settings', requestOptions);
+		fetch('http://' + localIP + '/api/settings', requestOptions);
 		props.handleTickerSettingsClose();
 	}
 
 	useEffect(() => {
-		fetch('http://' + localIP + ':5000/api/settings')
+		fetch('http://' + localIP + '/api/settings')
 			.then((res) => res.json())
 			.then((data) => {
 				props.setSettings(data);
