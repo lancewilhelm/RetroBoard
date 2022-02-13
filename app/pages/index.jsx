@@ -13,6 +13,7 @@ export default function Home() {
 	const [resetSettings, setResetSettings] = useState(false);
 	const [mainSettingsOpen, setMainSettingsOpen] = useState(false);
 	const [tickerSettingsOpen, setTickerSettingsOpen] = useState(false);
+    const [localSettingsIP, setLocalSettingsIP]= useState(localIP);
 
 	const handleTickerSettingsOpen = () => setTickerSettingsOpen(true);
 	const handleTickerSettingsClose = () => setTickerSettingsOpen(false);
@@ -26,7 +27,7 @@ export default function Home() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({app: command})
         };
-        fetch('http://' + localIP + ':5000/api/app', requestOptions);
+        fetch('http://' + localSettingsIP + '/api/app', requestOptions);
     }
 
 	return (
@@ -117,6 +118,8 @@ export default function Home() {
 				setSettings={setSettings}
 				resetSettings={resetSettings}
 				setResetSettings={setResetSettings}
+				localSettingsIP={localSettingsIP}
+				setLocalSettingsIP={setLocalSettingsIP}
 			/>
 		</div>
 	);

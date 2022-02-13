@@ -80,18 +80,24 @@ export default function SettingsDialog(props) {
         parseGradPalette(grad);
     }
 
+    function updateLocalIP(e) {
+        const ip = e.target.value;
+        props.setLocalSettingsIP(ip);
+        props.setResetSettings(!props.resetSettings)
+    }
+    
     function sendSettings() {
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(props.settings),
         };
-        fetch('http://' + localIP + ':5000/api/settings', requestOptions);
+        fetch('http://' + props.localSettingsIP + '/api/settings', requestOptions);
         props.handleMainSettingsClose();
     }
 
     useEffect(() => {
-        fetch('http://' + localIP + ':5000/api/settings')
+        fetch('http://' + props.localSettingsIP + '/api/settings')
             .then((res) => res.json())
             .then((data) => {
                 props.setSettings(data);
@@ -183,6 +189,10 @@ export default function SettingsDialog(props) {
                             );
                         }
                     })()}
+                    <div className={styles.settingsContainer}>
+						<TextField className={styles.textBox} sx={{ width: 200 }} id='local-ip' label='Local-IP' onChange={(e) => updateLocalIP(e)}/>
+						<Chip label={props.localSettingsIP} variant='outlined' />
+					</div>
                 </DialogContent>
                 <DialogActions>
                     <Button
