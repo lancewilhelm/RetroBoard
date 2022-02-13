@@ -74,10 +74,13 @@ if not args.debug:
 	matrix = RGBMatrix(options = options)
 	offscreen_canvas = matrix.CreateFrameCanvas()
 
+# Get the base path
+base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 # Grab the list of fonts in the font folder
 logging.debug('forming font dictionary')
 font_dict = defaultdict(str)
-path = 'fonts/'
+path = base_path + '/api/fonts/'
 dir = os.fsencode(path)
 dir_list = os.listdir(dir)
 
@@ -107,7 +110,7 @@ class Settings():
 		self.ticker['graph_type'] = 'bar'
 		self.ticker['graph_resolution'] = '15m'
 		self.ticker['graph_period'] = '2d'
- 
+
 		# Non stored settings
 		self.current_thread = None
 		self.update_settings_bool = True
@@ -126,13 +129,13 @@ class Settings():
 		if settings == None:
 			settings = {'main': self.main, 'ticker': self.ticker}
 
-		with open('../settings.json', 'w') as filehandle:
+		with open(base_path + '/settings.json', 'w') as filehandle:
 			json.dump(settings, filehandle)
 
 	def import_settings(self):
 		logging.debug('loading settings from settings.json')
 		try:
-			with open('../settings.json', 'r') as filehandle:
+			with open(base_path + '/settings.json', 'r') as filehandle:
 				settings = json.load(filehandle)
 
 				self.main = settings['main']
@@ -155,7 +158,6 @@ class Settings():
 
 #  Create the settings object and then loads the settings from the stored file.
 settings = Settings()
-# settings.dump_settings()
 settings.import_settings()
 
 logging.debug('utils complete')

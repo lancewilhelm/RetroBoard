@@ -1,6 +1,6 @@
 # Render index.html from templates if the user navigates to /
 from flask import render_template, request
-from setup import api, settings, sock
+from setup import api, settings, sock, base_path
 import ledTasks
 import logging
 
@@ -37,7 +37,7 @@ def settings_route():
 	logging.debug('settings request received')
 	if request.method == 'GET':
 		# Get the settings from the settings task
-		with open('../settings.json', 'r') as filehandle:
+		with open(base_path + '/settings.json', 'r') as filehandle:
 			return filehandle.read()
 	
 	elif request.method == 'POST':
