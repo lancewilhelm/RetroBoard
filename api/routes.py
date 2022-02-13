@@ -1,6 +1,6 @@
 # Render index.html from templates if the user navigates to /
 from flask import render_template, request
-from setup import api, settings
+from setup import api, settings, sock
 import ledTasks
 import logging
 
@@ -10,7 +10,8 @@ import logging
 # Index route for api
 @api.route('/', methods=['GET'])
 def index_route():
-	return render_template('index.html')
+	data = {'foo': 'bar'}
+	return render_template('index.html', data=data)
 
 # App route for api
 @api.route('/api/app', methods=['POST'])
@@ -36,7 +37,7 @@ def settings_route():
 	logging.debug('settings request received')
 	if request.method == 'GET':
 		# Get the settings from the settings task
-		with open('/home/pi/RetroBoard/settings.json', 'r') as filehandle:
+		with open('../settings.json', 'r') as filehandle:
 			return filehandle.read()
 	
 	elif request.method == 'POST':
