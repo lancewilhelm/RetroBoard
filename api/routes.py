@@ -37,7 +37,7 @@ def settings_route():
 	logging.debug('settings request received')
 	if request.method == 'GET':
 		# Get the settings from the settings task
-		with open('/home/pi/RetroBoard/settings.json', 'r') as filehandle:
+		with open('../settings.json', 'r') as filehandle:
 			return filehandle.read()
 	
 	elif request.method == 'POST':
