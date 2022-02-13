@@ -35,6 +35,9 @@ def clamp(n, minn, maxn):
 	return max(min(maxn, n), minn)
 
 def set_pixel(canvas, x, y, r, g, b):
+	if x >= settings.width or y >= settings.height:
+		return
+
 	if settings.debug:
 		canvas[x, y, 0] = r
 		canvas[x, y, 1] = g
@@ -84,7 +87,7 @@ def draw_glyph(canvas, x, y, glyph, color=None):
 		for j, pixel, in enumerate(row):
 			pixel_x = x + j
 			pixel_y = y + i
-			if pixel:
+			if pixel and (pixel_x < settings.width and pixel_y < settings.height):
 				if color == None:
 					set_pixel(canvas, pixel_x, pixel_y, cm[pixel_x, pixel_y, 0], cm[pixel_x, pixel_y, 1], cm[pixel_x, pixel_y, 2])
 				else:
@@ -297,7 +300,7 @@ class Solid(StoppableThread):
 
 			for x in range(settings.width):
 				for y in range(settings.height):
-					self.offscreen_canvas.SetPixel(x, y, cm[x, y, 0], cm[x, y, 1], cm[x, y, 2])
+					set_pixel(self.offscreen_canvas, x, y, cm[x, y, 0], cm[x, y, 1], cm[x, y, 2])
 
 			time.sleep(0.05)	# Time buffer added so as to not overload the system
 			self.offscreen_canvas = update_screen(self.offscreen_canvas)
