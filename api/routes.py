@@ -2,7 +2,9 @@
 from flask import render_template, request
 from setup import api, settings, sock, base_path
 import ledTasks
+from apps import *
 import logging
+import json
 
 #-------------------------------------------------------------------------
 # Routes:
@@ -46,3 +48,11 @@ def settings_route():
 		settings.dump_settings(settings_from_web)
 		settings.import_settings()
 		return "OK"
+
+# Websocket
+@sock.route('/data')
+def send_data(sock):
+	while True:
+		if settings.update_canvas_bool:
+			sock.send(json.dumps(settings.web_canvas.tolist()))
+			settings.update_canvas_bool = False

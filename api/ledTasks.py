@@ -102,14 +102,6 @@ def draw_text(canvas, x, y, font, text, color=None):
 		draw_glyph(canvas, char_x, char_y, glyph, color)
 		char_x += (glyph.advance - glyph.bbX)
 
-# Websocket test
-@sock.route('/data')
-def send_data(sock):
-	while True:
-		if settings.update_canvas_bool:
-			sock.send(json.dumps(settings.web_canvas.tolist()))
-			settings.update_canvas_bool = False
-
 cent_x = int(settings.width / 2)
 cent_y = int(settings.height / 2)
 
