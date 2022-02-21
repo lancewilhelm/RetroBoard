@@ -57,6 +57,6 @@ class Clock(StoppableThread):
 				self.offscreen_canvas = clear_screen(self.offscreen_canvas)
 				draw_text(self.offscreen_canvas, self.position['x'], self.position['y'], self.font, time_str)
 				self.offscreen_canvas = update_screen(self.offscreen_canvas)
-				prev_time_str = times_str
+				prev_time_str = time_str
 
 			time.sleep(0.05)	# Time buffer a
