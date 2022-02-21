@@ -25,8 +25,6 @@ class Clock(StoppableThread):
 			# Check for a settings change that needs fto be loaded
 			if settings.update_settings_bool:
 				self.loadSettings()
-
-			self.offscreen_canvas = clear_screen(self.offscreen_canvas)
 			
 			# Grab the latest time
 			t = time.localtime()
@@ -56,6 +54,7 @@ class Clock(StoppableThread):
 			
 			if prev_time_str != time_str:
 				# Write the actual drawing to the canvas and then display
+				self.offscreen_canvas = clear_screen(self.offscreen_canvas)
 				draw_text(self.offscreen_canvas, self.position['x'], self.position['y'], self.font, time_str)
 				self.offscreen_canvas = update_screen(self.offscreen_canvas)
 				prev_time_str = times_str

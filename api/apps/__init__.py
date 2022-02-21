@@ -19,7 +19,6 @@ def _get_apps_list():
 			settings.app_dict[app[0]] = app[1]
 
 	settings.main['apps_list'] = apps
-	print(settings.app_dict)
 
 	return apps
 if __name__ != '__main__':

@@ -29,8 +29,6 @@ class TextClock(StoppableThread):
 			if settings.update_settings_bool:
 				self.loadSettings()
 
-			self.offscreen_canvas = clear_screen(self.offscreen_canvas)
-
 			# Grab the latest time
 			t = time.localtime()
 			hours = t.tm_hour
@@ -53,6 +51,7 @@ class TextClock(StoppableThread):
 			min_x = int(cent_x - (len(min_str) * 4 / 2))
 
 			if prev_hour_str != hour_str or prev_min_str != min_str:
+				self.offscreen_canvas = clear_screen(self.offscreen_canvas)
 				draw_text(self.offscreen_canvas, hour_x, self.position['y'] - 3, self.font, hour_str)
 				draw_text(self.offscreen_canvas, min_x, self.position['y'] + 3, self.font, min_str)
 				self.offscreen_canvas = update_screen(self.offscreen_canvas)
