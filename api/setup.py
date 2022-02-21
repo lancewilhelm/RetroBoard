@@ -101,9 +101,10 @@ class Settings():
 		self.main['active_font'] = 'tom-thumb'
 		self.main['static_color'] = {'r': 255, 'g': 255, 'b': 255, 'a': 1}
 		self.main['gradient'] = [{'offset': 0.0, 'r': 0, 'g': 0, 'b': 255, 'a': 1}, {'offset': 1.0, 'r': 255, 'g': 0, 'b': 255, 'a': 1}]
-		self.main['running_apps'] = ['clock']
+		self.main['running_apps'] = ['Clock']
 		self.main['color_mode'] = 'gradient'
 		self.main['brightness'] = 100
+		self.main['apps_list'] = []
 
 		self.ticker = {}
 		self.ticker['symbol'] = 'ETH-USD'
@@ -123,6 +124,7 @@ class Settings():
 		self.web_canvas.fill(0)
 		self.apikeys = {}
 		self.debug = args.debug
+		self.app_dict = {}
 
 	def dump_settings(self, settings=None):
 		logging.debug('dumping settings to settings.json')

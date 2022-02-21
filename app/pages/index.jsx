@@ -51,27 +51,27 @@ export default function Home() {
 					<Button
 						className={styles.btn}
 						variant='outlined'
-						onClick={() => sendCommand('clock')}
+						onClick={() => sendCommand('Clock')}
 					>
 						Clock
 					</Button>
 					<Button
 						className={styles.btn}
 						variant='outlined'
-						onClick={() => sendCommand('text_clock')}
+						onClick={() => sendCommand('TextClock')}
 					>
 						Text Clock
 					</Button>
 					<Button
 						className={styles.btn}
 						variant='outlined'
-						onClick={() => sendCommand('picture')}
+						onClick={() => sendCommand('Picture')}
 					>
 						Picture
 					</Button>
 					<ButtonGroup variant='outlined' className={styles.btngrp}>
 						<Button
-							onClick={() => sendCommand('ticker')}
+							onClick={() => sendCommand('Ticker')}
 							className={styles.btngrpbtn}
 						>
 							Ticker
@@ -86,14 +86,14 @@ export default function Home() {
 					<Button
 						className={styles.btn}
 						variant='outlined'
-						onClick={() => sendCommand('solid')}
+						onClick={() => sendCommand('Solid')}
 					>
 						Solid
 					</Button>
 					<Button
 						className={styles.btn}
 						variant='outlined'
-						onClick={() => sendCommand('clear')}
+						onClick={() => sendCommand('Clear')}
 					>
 						Clear
 					</Button>

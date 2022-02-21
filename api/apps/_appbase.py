@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-from setup import settings, sock
+from setup import settings
 import logging
 import threading
 import numpy as np
-import json
 
 # If we are not in debug mode then import the led matrix
 if not settings.debug:
@@ -96,16 +95,24 @@ def draw_text(canvas, x, y, font, text, color=None):
 		draw_glyph(canvas, char_x, char_y, glyph, color)
 		char_x += (glyph.advance - glyph.bbX)
 
-# # Websocket test
-# @sock.route('/data')
-# def send_data(sock):
-# 	while True:
-# 		if settings.update_canvas_bool:
-# 			sock.send(json.dumps(settings.web_canvas.tolist()))
-# 			settings.update_canvas_bool = False
-
 cent_x = int(settings.width / 2)
 cent_y = int(settings.height / 2)
+
+#-------------------------------------------------------------------------
+# LED Driving functions that are dependent on the objects defined above
+#-------------------------------------------------------------------------
+def start_led_app(app):
+	settings.main['running_apps'] = []
+	task = settings.app_dict[app]()
+	task.start()
+	settings.current_thread = task
+	settings.main['running_apps'].append(app)
+	settings.dump_settings()
+
+def stop_current_led_app():
+	settings.current_thread.stop()
+	settings.current_thread = None
+	settings.main['running_apps'] = []
 
 #-------------------------------------------------------------------------
 # Stoppable Thread Class:

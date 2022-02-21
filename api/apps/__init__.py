@@ -1,6 +1,7 @@
-def _get_apps():
+def _get_apps_list():
 	import os
 	import sys, inspect
+	from setup import settings
 
 	apps = []
 	globals_, locals_ = globals(), locals()
@@ -14,9 +15,12 @@ def _get_apps():
 			# print(subpackage, globals_, locals_, modulename)
 			module = __import__(subpackage, globals_, locals_, [modulename])
 			app = [m for m in inspect.getmembers(sys.modules[module.__name__], inspect.isclass) if m[1].__module__ == subpackage][0]
-			apps.append(app)
+			apps.append(app[0])
+			settings.app_dict[app[0]] = app[1]
+
+	settings.main['apps_list'] = apps
+	print(settings.app_dict)
 
 	return apps
 if __name__ != '__main__':
-	apps = _get_apps()
-	print(apps)
+	_get_apps_list()
