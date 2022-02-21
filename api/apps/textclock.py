@@ -15,6 +15,9 @@ class TextClock(StoppableThread):
 	def run(self):
 		logging.debug('starting text clock')
 
+		prev_hour_str = ''
+		prev_min_str = ''
+
 		# Run the clock loop until stopped
 		while True:
 			# Check to see if we have stopped
@@ -48,7 +51,10 @@ class TextClock(StoppableThread):
 			# Write the actual drawing to the canvas and then display
 			hour_x = int(cent_x - (len(hour_str) * 4 / 2))
 			min_x = int(cent_x - (len(min_str) * 4 / 2))
-			draw_text(self.offscreen_canvas, hour_x, self.position['y'] - 3, self.font, hour_str)
-			draw_text(self.offscreen_canvas, min_x, self.position['y'] + 3, self.font, min_str)
-			self.offscreen_canvas = update_screen(self.offscreen_canvas)
+
+			if prev_hour_str != hour_str or prev_min_str != min_str:
+				draw_text(self.offscreen_canvas, hour_x, self.position['y'] - 3, self.font, hour_str)
+				draw_text(self.offscreen_canvas, min_x, self.position['y'] + 3, self.font, min_str)
+				self.offscreen_canvas = update_screen(self.offscreen_canvas)
+
 			time.sleep(0.05)	# Time buffer added so as to not overload the system

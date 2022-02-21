@@ -14,7 +14,7 @@ class Clock(StoppableThread):
 		logging.debug('starting clock')
 		# if not settings.debug:
 		# 	offscreen_canvas = matrix.CreateFrameCanvas()
-
+		prev_time_str = ''
 		# Run the clock loop until stopped
 		while True:
 			# Check to see if we have stopped
@@ -54,8 +54,9 @@ class Clock(StoppableThread):
 				# Odd seconds, concatenate the strings with a semicolon(blank) in the middle
 				time_str = hour_str + ':' + min_str
 			
-			# Write the actual drawing to the canvas and then display
-			draw_text(self.offscreen_canvas, self.position['x'], self.position['y'], self.font, time_str)
-			self.offscreen_canvas = update_screen(self.offscreen_canvas)
+			if prev_time_str != time_str:
+				# Write the actual drawing to the canvas and then display
+				draw_text(self.offscreen_canvas, self.position['x'], self.position['y'], self.font, time_str)
+				self.offscreen_canvas = update_screen(self.offscreen_canvas)
 
 			time.sleep(0.05)	# Time buffer a
