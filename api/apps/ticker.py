@@ -30,14 +30,13 @@ class Ticker(StoppableThread):
 			self.t_vals = list(self.df['t'])
 		
 	def draw_screen(self):
-		self.offscreen_canvas = clear_screen(self.offscreen_canvas)
 		display_symbol = settings.ticker['symbol']
 
-		draw_text(self.offscreen_canvas, 2, 1, self.font, display_symbol, [255, 255, 255])
+		draw_text(2, 1, self.font, display_symbol, [255, 255, 255])
 
 		if len(self.df) > 0:
 			price = '${:.2f}'.format(self.c_vals[0])
-			draw_text(self.offscreen_canvas, 2, 7, self.font, price, [255, 255, 255])
+			draw_text(2, 7, self.font, price, [255, 255, 255])
 			price_diff = self.c_vals[0] - self.c_vals[-1]
 			if price_diff > 0:
 				self.graph_color = [0, 255, 0]
@@ -47,7 +46,7 @@ class Ticker(StoppableThread):
 				price_diff = '{:.2f}'.format(price_diff)
 
 			price_diff_location = len(price) * 4 + 2
-			draw_text(self.offscreen_canvas, price_diff_location, 7, self.font, '{}'.format(price_diff), self.graph_color)
+			draw_text(price_diff_location, 7, self.font, '{}'.format(price_diff), self.graph_color)
 
 			c_y = [settings.height - int((self.c_vals[i] - min(self.c_vals)) / (max(self.c_vals) - min(self.c_vals)) * self.graph_height) - 1 for i in range(len(self.c_vals))]
 			h_y = [settings.height - int((self.h_vals[i] - min(self.l_vals)) / (max(self.h_vals) - min(self.l_vals)) * self.graph_height) - 1 for i in range(len(self.h_vals))]
@@ -58,55 +57,55 @@ class Ticker(StoppableThread):
 				for i, y in enumerate(c_y):
 					if self.c_vals[i] < self.c_vals[-1]:
 						for j in range(c_y[-1], y + 1):
-							set_pixel(self.offscreen_canvas, settings.width - (i + 1), j, 50, 0, 0)
-						set_pixel(self.offscreen_canvas, settings.width - (i + 1), y, 250, 0, 0)
+							set_pixel(settings.width - (i + 1), j, 50, 0, 0)
+						set_pixel(settings.width - (i + 1), y, 250, 0, 0)
 						if i != (len(c_y)-1) and y > c_y[i + 1]:
 							for j in range(max(c_y[i+1], c_y[-1]), y):
-								set_pixel(self.offscreen_canvas, settings.width - (i + 1), j, 250, 0, 0)
+								set_pixel(settings.width - (i + 1), j, 250, 0, 0)
 						if i != 0 and y > c_y[i - 1]:
 							for j in range(max(c_y[i-1], c_y[-1]), y):
-								set_pixel(self.offscreen_canvas, settings.width - (i + 1), j, 250, 0, 0)
+								set_pixel(settings.width - (i + 1), j, 250, 0, 0)
 					else:
 						for j in range(y, c_y[-1] + 1):
-							set_pixel(self.offscreen_canvas, settings.width - (i + 1), j, 0, 50, 0)
-						set_pixel(self.offscreen_canvas, settings.width - (i + 1), y, 0, 250, 0)
+							set_pixel(settings.width - (i + 1), j, 0, 50, 0)
+						set_pixel(settings.width - (i + 1), y, 0, 250, 0)
 						if i != (len(c_y)-1) and y < c_y[i + 1]:
 							for j in range(y, min(c_y[i+1], c_y[-1])):
-								set_pixel(self.offscreen_canvas, settings.width - (i + 1), j, 0, 250, 0)
+								set_pixel(settings.width - (i + 1), j, 0, 250, 0)
 						if i != 0 and y < c_y[i - 1]:
 							for j in range(y, min(c_y[i-1], c_y[-1])):
-								set_pixel(self.offscreen_canvas, settings.width - (i + 1), j, 0, 250, 0)
+								set_pixel(settings.width - (i + 1), j, 0, 250, 0)
 
 			elif settings.ticker['graph_type'] == 'filled':
 				for i, y in enumerate(c_y):
 					for j in range(y, settings.height):
-						set_pixel(self.offscreen_canvas, settings.width - (i + 1), j, self.graph_color[0] * 0.2, self.graph_color[1] * 0.2, self.graph_color[2] * 0.2)
-					set_pixel(self.offscreen_canvas, settings.width - (i + 1), y, self.graph_color[0], self.graph_color[1], self.graph_color[2])
+						set_pixel(settings.width - (i + 1), j, self.graph_color[0] * 0.2, self.graph_color[1] * 0.2, self.graph_color[2] * 0.2)
+					set_pixel(settings.width - (i + 1), y, self.graph_color[0], self.graph_color[1], self.graph_color[2])
 					if i != 0 and y < c_y[i-1]:
 						for j in range(y, c_y[i-1]):
-							set_pixel(self.offscreen_canvas, settings.width - (i + 1), j, self.graph_color[0], self.graph_color[1], self.graph_color[2])
+							set_pixel(settings.width - (i + 1), j, self.graph_color[0], self.graph_color[1], self.graph_color[2])
 					elif i != len(c_y) and y > c_y[i-1]:
 						for j in range(c_y[i-1], y):
-							set_pixel(self.offscreen_canvas, settings.width - (i), j, self.graph_color[0], self.graph_color[1], self.graph_color[2])
+							set_pixel(settings.width - (i), j, self.graph_color[0], self.graph_color[1], self.graph_color[2])
 					
 			elif settings.ticker['graph_type'] == 'bar':
 				for i, c_val in enumerate(self.c_vals):
 					if c_val - self.o_vals[i] > 0:
 						if h_y[i] != l_y[i]:
 							for j in range(h_y[i], l_y[i]):
-								set_pixel(self.offscreen_canvas, settings.width - (i + 1), j, 0, 255, 0)
+								set_pixel(settings.width - (i + 1), j, 0, 255, 0)
 						else:
-							set_pixel(self.offscreen_canvas, settings.width - (i + 1), h_y[i], 0, 255, 0)
+							set_pixel(settings.width - (i + 1), h_y[i], 0, 255, 0)
 					else:
 						if h_y[i] != l_y[i]:
 							for j in range(h_y[i], l_y[i]):
-								set_pixel(self.offscreen_canvas, settings.width - (i + 1), j, 255, 0, 0)
+								set_pixel(settings.width - (i + 1), j, 255, 0, 0)
 						else:
-							set_pixel(self.offscreen_canvas, settings.width - (i + 1), h_y[i], 255, 0, 0)
+							set_pixel(settings.width - (i + 1), h_y[i], 255, 0, 0)
 		else:
-			draw_text(self.offscreen_canvas, 19, 20, self.font, 'NO DATA', [255, 255, 255])
+			draw_text(19, 20, self.font, 'NO DATA', [255, 255, 255])
 
-		self.offscreen_canvas = update_screen(self.offscreen_canvas)
+		update_screen()
 
 	def run(self):
 		logging.debug('starting ticker')
@@ -119,7 +118,7 @@ class Ticker(StoppableThread):
 		while True:
 			# Check to see if we have stopped
 			if self.stopped():
-				self.offscreen_canvas = clear_screen(self.offscreen_canvas)
+				clear_screen()
 				return
 
 			# Check for a settings change that needs to be loaded

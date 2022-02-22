@@ -9,7 +9,6 @@ class Picture(StoppableThread):
 	def run(self):
 		self.image = Image.open('./images/lancesig.png').convert('RGB')
 		# self.image.resize((settings.width, settings.height), Image.ANTIALIAS)
+		draw_image(self.image)
 
-		self.offscreen_canvas.SetImage(self.image, 0)
-
-		update_screen(self.offscreen_canvas)
+		update_screen()

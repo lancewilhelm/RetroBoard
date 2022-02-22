@@ -1,13 +1,8 @@
 #!/usr/bin/env python3
-from setup import settings
+from setup import settings, matrix
 import logging
 import threading
 import numpy as np
-
-# If we are not in debug mode then import the led matrix
-if not settings.debug:
-	from setup import matrix
-	offscreen_canvas = matrix.CreateFrameCanvas()
 
 #-------------------------------------------------------------------------
 # Utility functions/variables:
@@ -27,34 +22,42 @@ def rotate(x, y, sin, cos):
 def clamp(n, minn, maxn):
 	return max(min(maxn, n), minn)
 
-def set_pixel(canvas, x, y, r, g, b):
+def set_pixel(x, y, r, g, b):
 	if x >= settings.width or y >= settings.height:
 		return
 
 	if settings.debug:
-		canvas[x, y, 0] = r
-		canvas[x, y, 1] = g
-		canvas[x, y, 2] = b
+		settings.web_canvas[x, y, 0] = r
+		settings.web_canvas[x, y, 1] = g
+		settings.web_canvas[x, y, 2] = b
 	else:
-		canvas.SetPixel(x, y, r, g, b)
+		settings.current_canvas[x, y, 0] = r
+		settings.current_canvas[x, y, 1] = g
+		settings.current_canvas[x, y, 2] = b
 	return
 
-def clear_screen(canvas):
+def clear_screen():
 	if settings.debug:
-		temp_canvas = np.ndarray((settings.width, settings.height, 3), dtype=int)
-		temp_canvas.fill(0)
-		return temp_canvas
+		settings.web_canvas.fill(0)
+		return
 	else:
+		settings.current_canvas.fill(0)
+		settings.prev_canvas.fill(0)
 		matrix.Clear()
-		return canvas
+		return
 	
-def update_screen(canvas):
+def update_screen():
 	if settings.debug:
-		settings.web_canvas = canvas
 		settings.update_canvas_bool = True
-		return canvas
+		return
 	else:
-		return matrix.SwapOnVSync(canvas)
+		diff = settings.current_canvas - settings.prev_canvas
+		diff_set = set([(x[0],x[1]) for x in np.argwhere(diff)])
+		for p in diff_set:
+			matrix.SetPixel(p[0], p[1], settings.current_canvas[p[0], p[1], 0], settings.current_canvas[p[0], p[1], 1], settings.current_canvas[p[0], p[1], 2])
+		settings.prev_canvas = settings.current_canvas.copy()
+		settings.current_canvas.fill(0)
+		return
 
 # Creates a linear color gradient
 def set_color_grad(start_color, end_color):
@@ -74,7 +77,7 @@ def set_static_color(color):
 	color_array = np.array([color['r'], color['g'], color['b']])
 	settings.color_matrix[:, :] = color_array
 
-def draw_glyph(canvas, x, y, glyph, color=None):
+def draw_glyph(x, y, glyph, color=None):
 	cm = settings.color_matrix
 	for i, row in enumerate(glyph.iter_pixels()):
 		for j, pixel, in enumerate(row):
@@ -82,18 +85,26 @@ def draw_glyph(canvas, x, y, glyph, color=None):
 			pixel_y = y + i
 			if pixel and (pixel_x < settings.width and pixel_y < settings.height):
 				if color == None:
-					set_pixel(canvas, pixel_x, pixel_y, cm[pixel_x, pixel_y, 0], cm[pixel_x, pixel_y, 1], cm[pixel_x, pixel_y, 2])
+					set_pixel(pixel_x, pixel_y, cm[pixel_x, pixel_y, 0], cm[pixel_x, pixel_y, 1], cm[pixel_x, pixel_y, 2])
 				else:
-					set_pixel(canvas, pixel_x, pixel_y, color[0], color[1], color[2])
+					set_pixel(pixel_x, pixel_y, color[0], color[1], color[2])
 
-def draw_text(canvas, x, y, font, text, color=None):
+def draw_text(x, y, font, text, color=None):
 	char_x = x
 	for char in text:
 		glyph = font[ord(char)]
 		char_y = y + (font.ptSize - glyph.bbH) - glyph.bbY
 		char_x += glyph.bbX
-		draw_glyph(canvas, char_x, char_y, glyph, color)
+		draw_glyph(char_x, char_y, glyph, color)
 		char_x += (glyph.advance - glyph.bbX)
+
+def draw_image(img):
+	# print(img.getpixel((0,0)))
+	for x in range(settings.width):
+		for y in range(settings.height):
+			p = img.getpixel((x,y))
+			set_pixel(x, y, p[0], p[1], p[2])
+	return
 
 cent_x = int(settings.width / 2)
 cent_y = int(settings.height / 2)
@@ -106,7 +117,7 @@ def start_led_app(app):
 	task = settings.app_dict[app]()
 	task.start()
 	settings.current_thread = task
-	settings.main['running_apps'].append(app)
+	settings.main['running_apps'] = [app]
 	settings.dump_settings()
 
 def stop_current_led_app():
@@ -123,16 +134,11 @@ class StoppableThread(threading.Thread):
 		super(StoppableThread, self).__init__(*args, **kwargs)
 		self._stop_event = threading.Event()
 		self.loadSettings()
-		if settings.debug:
-			self.offscreen_canvas = np.ndarray((settings.width, settings.height, 3), dtype=int)
-			self.offscreen_canvas.fill(0)
-		else:
-			self.offscreen_canvas = matrix.CreateFrameCanvas()
 
 	def stop(self):
 		logging.debug('stopping thread for {}'.format(type(self).__name__))
 		self._stop_event.set()
-		self.offscreen_canvas = clear_screen(self.offscreen_canvas)
+		clear_screen()
 
 	def stopped(self):
 		return self._stop_event.is_set()
