@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
-from setup import settings, matrix
+from setup import settings
 import logging
 import threading
 import numpy as np
+
+if not settings.debug:
+	from setup import matrix
 
 #-------------------------------------------------------------------------
 # Utility functions/variables:
@@ -26,38 +29,33 @@ def set_pixel(x, y, r, g, b):
 	if x >= settings.width or y >= settings.height:
 		return
 
-	if settings.debug:
-		settings.web_canvas[x, y, 0] = r
-		settings.web_canvas[x, y, 1] = g
-		settings.web_canvas[x, y, 2] = b
-	else:
-		settings.current_canvas[x, y, 0] = r
-		settings.current_canvas[x, y, 1] = g
-		settings.current_canvas[x, y, 2] = b
+	settings.current_canvas[x, y, 0] = r
+	settings.current_canvas[x, y, 1] = g
+	settings.current_canvas[x, y, 2] = b
 	return
 
 def clear_screen():
-	if settings.debug:
-		settings.web_canvas.fill(0)
-		return
-	else:
-		settings.current_canvas.fill(0)
-		settings.prev_canvas.fill(0)
+	settings.current_canvas.fill(0)
+	settings.prev_canvas.fill(0)
+	settings.web_canvas.fill(0)
+	settings.update_canvas_bool = True
+	if not settings.debug:
 		matrix.Clear()
-		return
+	return
 	
 def update_screen():
 	if settings.debug:
+		settings.web_canvas = settings.current_canvas.copy()
 		settings.update_canvas_bool = True
-		return
 	else:
 		diff = settings.current_canvas - settings.prev_canvas
 		diff_set = set([(x[0],x[1]) for x in np.argwhere(diff)])
 		for p in diff_set:
 			matrix.SetPixel(p[0], p[1], settings.current_canvas[p[0], p[1], 0], settings.current_canvas[p[0], p[1], 1], settings.current_canvas[p[0], p[1], 2])
-		settings.prev_canvas = settings.current_canvas.copy()
-		settings.current_canvas.fill(0)
-		return
+	
+	settings.prev_canvas = settings.current_canvas.copy()
+	settings.current_canvas.fill(0)
+	return
 
 # Creates a linear color gradient
 def set_color_grad(start_color, end_color):
@@ -134,6 +132,8 @@ class StoppableThread(threading.Thread):
 		super(StoppableThread, self).__init__(*args, **kwargs)
 		self._stop_event = threading.Event()
 		self.loadSettings()
+		settings.current_canvas.fill(0)
+		settings.prev_canvas.fill(0)
 
 	def stop(self):
 		logging.debug('stopping thread for {}'.format(type(self).__name__))
