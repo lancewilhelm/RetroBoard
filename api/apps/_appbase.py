@@ -145,7 +145,7 @@ class StoppableThread(threading.Thread):
 
 	def loadSettings(self):
 		logging.debug('loading settings for {}'.format(type(self).__name__))
-		self.font = settings.load_font(settings.main['font_dict'][settings.main['active_font']])
+		self.font = settings.load_font(settings.main['active_font'])
 		self.font_width = self.font[ord(' ')].advance
 		self.font_height = self.font.ptSize
 		settings.update_settings_bool = False
