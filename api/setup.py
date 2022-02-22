@@ -154,9 +154,9 @@ class Settings():
 			logging.debug('no settings.json file exists, creating one...')
 			self.dump_settings()
 
-	def load_font(self, path):
-		logging.debug('loading font {}'.format(path))
-		with open(path, 'rb') as filehandle:
+	def load_font(self, font_name):
+		logging.debug('loading font {}'.format(font_name))
+		with open(path + font_name + '.bdf', 'rb') as filehandle:
 			font = reader.read_bdf(filehandle)
 		return font
 
