@@ -97,7 +97,6 @@ def draw_text(x, y, font, text, color=None):
 		char_x += (glyph.advance - glyph.bbX)
 
 def draw_image(img):
-	# print(img.getpixel((0,0)))
 	for x in range(settings.width):
 		for y in range(settings.height):
 			p = img.getpixel((x,y))
