@@ -6,25 +6,7 @@ import { localIP } from './config';
 
 export default function AppSettings(props) {
 	const [scroll, setScroll] = useState('paper');
-	const [graphType, setGraphType] = useState();
-	const [symbol, setSymbol] = useState();
-
-	const graphTypeList = ['filled', 'bar', 'diff'];
-
-	function changeGraphType(e, val) {
-		setGraphType(val);
-		let settings_copy = Object.assign({}, props.settings);
-		settings_copy.ticker.graph_type = val;
-		props.setSettings(settings_copy);
-	}
-
-	function changeSymbol(e) {
-		const s = e.target.value
-		setSymbol(s);
-		let settings_copy = Object.assign({}, props.settings);
-		settings_copy.ticker.symbol = s;
-		props.setSettings(settings_copy);
-	}
+	const [appSettings, setAppSettings] = useState(null);
 
 	function sendSettings(e) {
 		e.preventDefault();
@@ -37,15 +19,54 @@ export default function AppSettings(props) {
 		props.handleAppSettingsClose();
 	}
 
+	function renderSettingsItems() {
+		if (appSettings !== null) {
+			let items = [];
+			for (const setting in appSettings) {
+				if (appSettings[setting].type === 'list') {
+					items.push(
+						<div className={styles.settingsContainer} key={setting}>
+							<Autocomplete
+								disablePortal
+								className={styles.textBox}
+								options={appSettings[setting].options}
+								sx={{ width: 200 }}
+								// onChange={(e, val) => changeGraphType(e, val)}
+								renderInput={(params) => (
+									<TextField {...params} label={setting} />
+								)}
+							/>
+							<Chip label={appSettings[setting].value} variant='outlined' />
+						</div>
+					)
+				} else if (appSettings[setting].type === 'field') {
+					items.push(
+						<div className={styles.settingsContainer} key={setting}>
+							<TextField
+								className={styles.textBox}
+								sx={{ width: 200 }}
+								label='Symbol'
+								// onChange={(e) => changeSymbol(e)}
+								/>
+							<Chip label={appSettings[setting].value} variant='outlined' />
+						</div>
+					)
+				}
+			}
+			return items;
+		}
+	}
+
 	useEffect(() => {
-		fetch('http://' + localIP + '/api/settings')
-			.then((res) => res.json())
-			.then((data) => {
-				props.setSettings(data);
-				setGraphType(data.ticker.graph_type);
-				setSymbol(data.ticker.symbol);
-			});
-	}, [props.resetSettings]);
+		if (props.app !== null) {
+			try {
+				const s = require('../../api/apps/' + props.app.toLowerCase() + '.json');
+				setAppSettings(s);
+			} catch {
+				setAppSettings(null);
+			}
+		};
+	}, [props.app]);
 
 	return (
 		<div className={styles.container}>
@@ -59,54 +80,37 @@ export default function AppSettings(props) {
 			>
 				<DialogTitle>{props.app} Settings</DialogTitle>
 				<form onSubmit={sendSettings}>
-				<DialogContent className={styles.settingsBody} >
-					<div className={styles.settingsContainer}>
-						<Autocomplete
-							disablePortal
-							className={styles.textBox}
-							id='color-mode-selector'
-							options={graphTypeList}
-							sx={{ width: 200 }}
-							onChange={(e, val) => changeGraphType(e, val)}
-							renderInput={(params) => (
-								<TextField {...params} label='Graph Type' />
-							)}
-						/>
-						<Chip label={graphType} variant='outlined' />
-					</div>
-					<div className={styles.settingsContainer}>
-						<TextField className={styles.textBox} sx={{ width: 200 }} id='symbol-text-field' label='Symbol' onChange={(e) => changeSymbol(e)}/>
-						<Chip label={symbol} variant='outlined' />
-					</div>
-				</DialogContent>
-				<DialogActions>
-					<Button
+					<DialogContent className={styles.settingsBody} >
+						{renderSettingsItems()}
+					</DialogContent>
+					<DialogActions>
+						<Button
+							className={styles.button}
+							variant='outlined'
+							color='error'
+							type='button'
+							onClick={() => props.setResetSettings(!props.resetSettings)}
+						>
+							Reset
+						</Button>
+						<Button
+							className={styles.button}
+							variant='outlined'
+							type='button'
+							onClick={props.handleAppSettingsClose}
+						>
+							Close
+						</Button>
+						<Button 
 						className={styles.button}
-						variant='outlined'
-						color='error'
-						type='button'
-						onClick={() => props.setResetSettings(!props.resetSettings)}
-					>
-						Reset
-					</Button>
-					<Button
-						className={styles.button}
-						variant='outlined'
-						type='button'
-						onClick={props.handleAppSettingsClose}
-					>
-						Close
-					</Button>
-					<Button 
-					className={styles.button}
-					variant='outlined' 
-					color='success'
-					onClick={sendSettings}
-					type='submit'
-					autoFocus>
-						Save Changes
-					</Button>
-				</DialogActions>
+						variant='outlined' 
+						color='success'
+						onClick={sendSettings}
+						type='submit'
+						autoFocus>
+							Save Changes
+						</Button>
+					</DialogActions>
 				</form>
 			</Dialog>
 		</div>
