@@ -2,6 +2,7 @@ from apps._appbase import *
 import time
 import yfinance as yf
 from datetime import datetime, timedelta
+import json
 
 class Ticker(StoppableThread):
 	def __init__(self, *args, **kwargs):

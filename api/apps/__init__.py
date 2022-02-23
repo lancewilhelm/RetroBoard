@@ -21,5 +21,6 @@ def _get_apps_list():
 	settings.main['apps_list'] = apps
 
 	return apps
+	
 if __name__ != '__main__':
 	_get_apps_list()
