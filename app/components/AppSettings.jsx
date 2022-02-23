@@ -1,19 +1,14 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import styles from '../styles/TickerSettings.module.css';
+import styles from '../styles/AppSettings.module.css';
 import { Dialog, DialogContent, DialogTitle, DialogActions, Button, Autocomplete, Chip, TextField, getRadioUtilityClass } from '@mui/material';
 import { localIP } from './config';
 
-export default function TickerSettings(props) {
-	const [settings, setSettings] = useState({});
+export default function AppSettings(props) {
 	const [scroll, setScroll] = useState('paper');
-	const [equityType, setEquityType] = useState();
 	const [graphType, setGraphType] = useState();
 	const [symbol, setSymbol] = useState();
-	const [symbolList, setSymbolList] = useState([]);
-	const [displaySymbolList, setDisplaySymbolList] = useState([]);
 
-	const equityTypeList = ['stock', 'crypto'];
 	const graphTypeList = ['filled', 'bar', 'diff'];
 
 	function changeGraphType(e, val) {
@@ -39,7 +34,7 @@ export default function TickerSettings(props) {
 			body: JSON.stringify(props.settings),
 		};
 		fetch('http://' + localIP + '/api/settings', requestOptions);
-		props.handleTickerSettingsClose();
+		props.handleAppSettingsClose();
 	}
 
 	useEffect(() => {
@@ -55,14 +50,14 @@ export default function TickerSettings(props) {
 	return (
 		<div className={styles.container}>
 			<Dialog
-				open={props.tickerSettingsOpen}
-				onClose={props.handleTickerSettingsClose}
+				open={props.appSettingsOpen}
+				onClose={props.handleAppSettingsClose}
 				scroll={scroll}
 				aria-labelledby="scroll-dialog-title"
 				aria-describedby="scroll-dialog-description"
 				className={styles.dialog}
 			>
-				<DialogTitle>Ticker Settings</DialogTitle>
+				<DialogTitle>{props.app} Settings</DialogTitle>
 				<form onSubmit={sendSettings}>
 				<DialogContent className={styles.settingsBody} >
 					<div className={styles.settingsContainer}>
@@ -98,7 +93,7 @@ export default function TickerSettings(props) {
 						className={styles.button}
 						variant='outlined'
 						type='button'
-						onClick={props.handleTickerSettingsClose}
+						onClick={props.handleAppSettingsClose}
 					>
 						Close
 					</Button>
