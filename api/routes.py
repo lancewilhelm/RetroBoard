@@ -1,8 +1,9 @@
 # Render index.html from templates if the user navigates to /
 from flask import render_template, request
 from setup import api, settings, sock, base_path
-import ledTasks
-import logging
+from apps import *
+from apps._appbase import *
+import json
 
 #-------------------------------------------------------------------------
 # Routes:
@@ -20,14 +21,14 @@ def pixel_route():
 	logging.debug('API request received for {}. Task currently running {}'.format(request_form['app'], settings.current_thread))
 
 	if settings.current_thread == None:
-		if request_form['app'] != 'clear':
-			ledTasks.start_led_app(request_form['app'])
+		if request_form['app'] != 'Clear':
+			start_led_app(request_form['app'])
 	else:
-		if request_form['app'] == 'clear':
-			ledTasks.stop_current_led_app()
+		if request_form['app'] == 'Clear':
+			stop_current_led_app()
 		elif request_form['app'] != settings.current_thread.name:
-			ledTasks.stop_current_led_app()
-			ledTasks.start_led_app(request_form['app'])
+			stop_current_led_app()
+			start_led_app(request_form['app'])
 
 	return 'OK'
 
@@ -46,3 +47,11 @@ def settings_route():
 		settings.dump_settings(settings_from_web)
 		settings.import_settings()
 		return "OK"
+
+# Websocket
+@sock.route('/data')
+def send_data(sock):
+	while True:
+		if settings.update_canvas_bool:
+			sock.send(json.dumps(settings.web_canvas.tolist()))
+			settings.update_canvas_bool = False
