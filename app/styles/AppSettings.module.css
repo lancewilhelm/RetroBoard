@@ -1,0 +1,29 @@
+.dialog {
+	margin: 20px;
+}
+.settingsBody {
+	flex-grow: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 20px;
+	padding-top: 2px;
+}
+
+.settingsContainer {
+	display: flex;
+	margin: 5px;
+	align-items: center;
+}
+
+.brightnessSlider {
+	margin-left: 10px;
+}
+
+.textBox {
+	margin-right: 10px;
+}
+
+.button {
+	font-family: inherit;
+}

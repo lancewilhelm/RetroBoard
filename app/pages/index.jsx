@@ -1,10 +1,10 @@
 import Head from 'next/head';
 import styles from '../styles/Index.module.css';
-import { Button, ButtonGroup } from '@mui/material';
-import { useState } from 'react';
+import { Button, Menu, MenuItem } from '@mui/material';
+import { useState, useEffect } from 'react';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import SettingsDialog from '../components/SettingsDialog';
-import TickerSettings from '../components/TickerSettings';
+import AppSettings from '../components/AppSettings';
 import { localIP } from '../components/config';
 
 export default function Home() {
@@ -12,11 +12,14 @@ export default function Home() {
 	const [settings, setSettings] = useState({});
 	const [resetSettings, setResetSettings] = useState(false);
 	const [mainSettingsOpen, setMainSettingsOpen] = useState(false);
-	const [tickerSettingsOpen, setTickerSettingsOpen] = useState(false);
+	const [appSettingsOpen, setAppSettingsOpen] = useState(false);
     const [localSettingsIP, setLocalSettingsIP]= useState(localIP);
+	const [appsList, setAppsList] = useState([]);
+	const [contextMenu, setContextMenu] = useState(null);
+	const [whichMenu, setWhichMenu] = useState(null);
 
-	const handleTickerSettingsOpen = () => setTickerSettingsOpen(true);
-	const handleTickerSettingsClose = () => setTickerSettingsOpen(false);
+	const handleAppSettingsOpen = () => setAppSettingsOpen(true);
+	const handleAppSettingsClose = () => setAppSettingsOpen(false);
 
 	const handleMainSettingsOpen = () => setMainSettingsOpen(true);
 	const handleMainSettingsClose = () => setMainSettingsOpen(false);
@@ -29,6 +32,41 @@ export default function Home() {
         };
         fetch('http://' + localSettingsIP + '/api/app', requestOptions);
     }
+
+	function renderAppButtons() {
+		return (
+			appsList.map((x,i) => <Button className={styles.btn} key={i} id={x} variant='outlined' onContextMenu={handleContextMenu} style={{cursor: 'context-menu'}}onClick={() => sendCommand(x)}>{x}</Button>)
+		)
+	}
+
+	function handleContextMenu(event) {
+		event.preventDefault();
+		setWhichMenu(event.target.id);
+		setContextMenu(
+			contextMenu === null 
+			? {
+				mouseX: event.clientX,
+				mouseY: event.clientY,
+			}
+			:
+			null,
+		);
+	};
+
+	function handleMenuSelect() {
+		handleAppSettingsOpen();
+		setContextMenu(null);
+		// setWhichMenu(null);
+	}
+
+	useEffect(() => {
+        fetch('http://' + localSettingsIP + '/api/settings')
+            .then((res) => res.json())
+            .then((data) => {
+                setSettings(data);
+				setAppsList(data.main.apps_list);
+            });
+    }, [resetSettings]);
 
 	return (
 		<div className={styles.pagecontainer}>
@@ -48,64 +86,28 @@ export default function Home() {
 				<h1 className={styles.title}>Magic Color Board</h1>
 				<div className={styles.subtitle}>A board of wonders</div>
 				<div className={styles.maincontainer}>
+					{renderAppButtons()}
 					<Button
 						className={styles.btn}
 						variant='outlined'
-						onClick={() => sendCommand('clock')}
-					>
-						Clock
-					</Button>
-					<Button
-						className={styles.btn}
-						variant='outlined'
-						onClick={() => sendCommand('text_clock')}
-					>
-						Text Clock
-					</Button>
-					<Button
-						className={styles.btn}
-						variant='outlined'
-						onClick={() => sendCommand('picture')}
-					>
-						Picture
-					</Button>
-					<ButtonGroup variant='outlined' className={styles.btngrp}>
-						<Button
-							onClick={() => sendCommand('ticker')}
-							className={styles.btngrpbtn}
-						>
-							Ticker
-						</Button>
-						<Button
-							className={styles.btngrpbtn}
-							onClick={handleTickerSettingsOpen}
-						>
-							<SettingsOutlinedIcon fontSize='small' />
-						</Button>
-					</ButtonGroup>
-					<Button
-						className={styles.btn}
-						variant='outlined'
-						onClick={() => sendCommand('solid')}
-					>
-						Solid
-					</Button>
-					<Button
-						className={styles.btn}
-						variant='outlined'
-						onClick={() => sendCommand('clear')}
+						onClick={() => sendCommand('Clear')}
 					>
 						Clear
 					</Button>
 
-					<TickerSettings
-						tickerSettingsOpen={tickerSettingsOpen}
-						handleTickerSettingsOpen={handleTickerSettingsOpen}
-						handleTickerSettingsClose={handleTickerSettingsClose}
+					<Menu open={contextMenu !== null} onClose={() => setContextMenu(null)} anchorReference='anchorPosition' anchorPosition={contextMenu !== null ? {top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined}>
+						<MenuItem onClick={handleMenuSelect}>Settings</MenuItem>
+					</Menu>
+
+					<AppSettings
+						appSettingsOpen={appSettingsOpen}
+						handleAppSettingsOpen={handleAppSettingsOpen}
+						handleAppSettingsClose={handleAppSettingsClose}
 						settings={settings}
 						setSettings={setSettings}
 						resetSettings={resetSettings}
 						setResetSettings={setResetSettings}
+						app={whichMenu}
 					/>
 				</div>
 			</div>
